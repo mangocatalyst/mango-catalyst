@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { bigShoulders, inter } from "./fonts";
 import { SITE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { graph, organizationLd, websiteLd } from "@/lib/jsonld";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 const TITLE = `${SITE.name} | Business Automation for Upper Midwest Shops`;
 
@@ -36,6 +38,10 @@ export const metadata: Metadata = {
   // inherit the home canonical.
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0e1729",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,10 +52,17 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${bigShoulders.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col bg-base">
         {/* Site-wide structured data: Organization + WebSite, server-rendered. */}
         <JsonLd data={graph(organizationLd(), websiteLd())} />
-        {children}
+        <a href="#content" className="skip-link">
+          Skip to content
+        </a>
+        <Navbar />
+        <div id="content" tabIndex={-1} className="flex flex-1 flex-col">
+          {children}
+        </div>
+        <Footer />
       </body>
     </html>
   );

@@ -99,6 +99,30 @@ export function faqPageLd(items: { question: string; answer: string }[]): Json {
   };
 }
 
+/** Article for evergreen guides. Dates go in schema (truthful), not on the visible page. */
+export function articleLd(opts: {
+  headline: string; // <= 110 chars
+  description: string;
+  url: string; // absolute
+  datePublished?: string; // ISO 8601; real first-publish date
+  dateModified?: string; // ISO 8601; real last-edit date
+  image?: string; // absolute URL; omit until a real OG/guide image exists
+}): Json {
+  const node: Json = {
+    "@type": "Article",
+    headline: opts.headline,
+    description: opts.description,
+    url: opts.url,
+    mainEntityOfPage: opts.url,
+    author: { "@type": "Person", name: "Bryan Koop", url: `${SITE.url}/about` },
+    publisher: { "@id": ORG_ID },
+  };
+  if (opts.datePublished) node.datePublished = opts.datePublished;
+  if (opts.dateModified) node.dateModified = opts.dateModified;
+  if (opts.image) node.image = opts.image;
+  return node;
+}
+
 /** BreadcrumbList for sub-pages (Home > Section > Page). */
 export function breadcrumbLd(items: { name: string; url: string }[]): Json {
   return {

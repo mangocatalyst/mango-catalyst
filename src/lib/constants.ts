@@ -26,14 +26,21 @@ export const SITE = {
 } as const;
 
 /**
- * Static routes for the sitemap. A route is only emitted if its page.tsx exists
- * and is non-empty (see sitemap.ts), so unbuilt scaffold stubs are never listed.
- * Add industry/service slugs here as those pages are built.
+ * Static routes for the sitemap: the seo-spec section-1 URL map (11 pages,
+ * guide prefix /guides, no /blog). A route is only emitted if its page.tsx
+ * exists and is non-empty (see sitemap.ts), so unbuilt scaffold stubs are
+ * never listed.
  */
 export const STATIC_ROUTES = [
   "/",
   "/about",
   "/services",
   "/industries/hvac",
+  "/faq",
   "/contact",
+  "/guides",
+  "/guides/hvac-tasks-to-automate",
+  "/guides/manual-data-entry-cost",
+  "/guides/what-is-automation-consultant",
+  "/privacy",
 ] as const;

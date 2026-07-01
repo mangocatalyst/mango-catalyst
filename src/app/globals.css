@@ -2,23 +2,34 @@
 
 /* ---------------------------------------------------------------------------
    Mango Catalyst design tokens.
-   Source of truth: branding-color-type-spec-2026-06-14 (vault).
+   Source of truth: branding-color-type-spec-2026-06-14 (vault), plus its
+   option-B light-band set (Bryan's locked section-palette pick, 2026-07-01).
    Deep matte navy ground, mango amber accent. Amber stays scarce on purpose:
    it marks the spark, the rule, and the one thing we want clicked.
 --------------------------------------------------------------------------- */
 @theme {
-  /* Backgrounds and surfaces */
+  /* Backgrounds and surfaces (dark bands) */
   --color-deep: #0a1120;
   --color-base: #0e1729;
   --color-surface: #16213a;
   --color-surface-hi: #1e2c4a;
   --color-hairline: #2a3a5c; /* decorative only, never a meaningful boundary */
 
-  /* Text */
+  /* Text (dark bands) */
   --color-ink: #f2f5fa;
   --color-body: #d5deec;
   --color-muted: #9daac2;
   --color-faint: #7e8ba6;
+
+  /* Light conversion bands (palette B). THE TRAP: amber as text or icon
+     fails AA on light backgrounds. On light bands amber is BUTTON FILL ONLY
+     (with navy text); links and accents go navy. */
+  --color-light: #f4f6fb;
+  --color-surface-lt: #ffffff;
+  --color-navy: #0e1729;
+  --color-navy-2: #1e2c4a;
+  --color-muted-lt: #516079;
+  --color-border-lt: #d5dcea;
 
   /* Accent and status */
   --color-amber: #f6a328;
@@ -35,24 +46,9 @@
     sans-serif;
 }
 
-/* Scaffold-template variables: the placeholder content below the hero still
-   reads these. Remove once the real sections replace the placeholder. */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
 
 body {
   background: var(--color-base);
@@ -60,11 +56,166 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Keyboard wayfinding: visible amber focus ring on every interactive element.
-   Elements on amber fills override this locally (navy ring, per brand spec). */
+::selection {
+  background: var(--color-amber);
+  color: var(--color-deep);
+}
+
+/* Jump targets (section ids) clear the sticky navbar. */
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Keyboard wayfinding: a visible amber focus ring on every interactive
+   element. Never removed. Amber fills and light bands override below so the
+   ring stays visible on every background. */
 :where(a, button, input, textarea, select, summary):focus-visible {
   outline: 2px solid var(--color-amber);
   outline-offset: 2px;
+}
+
+/* On light bands an amber ring is near-invisible; the ring goes navy. */
+[data-tone="light"]
+  :where(a, button, input, textarea, select, summary):focus-visible {
+  outline-color: var(--color-navy);
+}
+
+/* Skip link for keyboard users: hidden until focused. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-250%);
+  background: var(--color-deep);
+  color: var(--color-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 1.1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-hairline);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Buttons. One primary look everywhere: amber fill with deep navy text.
+   Never white text on amber (1.89:1, hard fail); navy clears 9:1.
+--------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.006em;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.btn-sm {
+  padding: 0.55rem 1.05rem;
+  font-size: 0.925rem;
+}
+
+.btn-primary {
+  background: var(--color-amber);
+  color: var(--color-deep);
+}
+
+.btn-primary:hover {
+  background: var(--color-amber-hi);
+  color: var(--color-deep);
+}
+
+.btn-primary:active {
+  background: var(--color-amber-deep);
+  color: var(--color-ink);
+  transform: translateY(1px);
+}
+
+/* On the amber fill the focus ring flips to deep navy, drawn inside the
+   button so it reads on any band. */
+.btn.btn-primary:focus-visible {
+  outline: 2px solid var(--color-deep);
+  outline-offset: -6px;
+}
+
+.btn.btn-sm.btn-primary:focus-visible {
+  outline-offset: -4px;
+}
+
+.btn-primary svg {
+  transition: transform 150ms ease;
+}
+
+.btn-primary:hover svg {
+  transform: translateX(3px);
+}
+
+/* Ghost button: the ONE secondary action on dark bands only. */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--color-amber);
+  color: var(--color-amber);
+}
+
+.btn-ghost:hover {
+  background: rgb(246 163 40 / 0.1);
+  color: var(--color-amber-hi);
+}
+
+.btn-ghost:active {
+  background: rgb(246 163 40 / 0.16);
+}
+
+/* ---------------------------------------------------------------------------
+   Inline text links. Underlined so they are never color-only.
+   Dark bands: amber (8.68:1 on bg-base). Light bands: navy, amber banned.
+--------------------------------------------------------------------------- */
+
+.inline-link {
+  color: var(--color-amber);
+  text-decoration: underline;
+  text-decoration-color: rgb(246 163 40 / 0.45);
+  text-underline-offset: 0.22em;
+  transition:
+    color 120ms ease,
+    text-decoration-color 120ms ease;
+}
+
+.inline-link:hover {
+  color: var(--color-amber-hi);
+  text-decoration-color: currentColor;
+}
+
+.inline-link-light {
+  color: var(--color-navy);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgb(14 23 41 / 0.35);
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color 120ms ease;
+}
+
+.inline-link-light:hover {
+  text-decoration-color: var(--color-amber-deep);
 }
 
 /* ---------------------------------------------------------------------------
@@ -119,11 +270,12 @@ body {
 }
 
 /* The headline. Big Shoulders, huge, stacked three lines, uppercase. The
-   svh term caps it on short wide screens so the CTA stays above the fold. */
+   svh term caps it on short wide screens so the CTA stays above the fold
+   under the 4rem navbar. */
 .hero-headline {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: min(clamp(3.75rem, 1.5rem + 8.5vw, 10.5rem), 14.5svh);
+  font-size: min(clamp(3.75rem, 1.5rem + 8.5vw, 10.5rem), 13.5svh);
   line-height: 0.94;
   letter-spacing: 0.012em;
   text-transform: uppercase;
@@ -170,47 +322,6 @@ body {
   width: 6.5rem;
   background: var(--color-amber);
   transform-origin: 0 50%;
-}
-
-/* The one CTA. Amber fill with deep navy text, never white on amber. */
-.hero-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--color-amber);
-  color: var(--color-deep);
-  font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: -0.006em;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  transition:
-    background-color 150ms ease,
-    transform 150ms ease;
-}
-
-.hero-cta:hover {
-  background: var(--color-amber-hi);
-}
-
-.hero-cta:active {
-  background: var(--color-amber-deep);
-  color: var(--color-ink);
-  transform: translateY(1px);
-}
-
-.hero-cta svg {
-  transition: transform 150ms ease;
-}
-
-.hero-cta:hover svg {
-  transform: translateX(3px);
-}
-
-/* On the amber fill the focus ring flips to deep navy so it stays visible. */
-.hero-cta:focus-visible {
-  outline: 2px solid var(--color-deep);
-  outline-offset: -6px;
 }
 
 /* ---------------------------------------------------------------------------
