@@ -32,7 +32,7 @@ export function Button({
     .join(" ");
 
   return (
-    <Link href={href} className={classes}>
+    <Link href={href} className={classes} data-cta={variant}>
       {children}
       {arrow && <ArrowIcon />}
     </Link>

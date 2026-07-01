@@ -77,6 +77,7 @@ export function MobileNav({
           href={cta.href}
           onClick={() => setOpen(false)}
           className="btn btn-primary mt-5 w-full"
+          data-cta="primary"
         >
           {cta.label}
         </Link>

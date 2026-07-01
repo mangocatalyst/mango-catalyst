@@ -78,6 +78,9 @@ export default function DataEntryCostGuidePage() {
             description: DESCRIPTION,
             url: PAGE_URL,
             datePublished: "2026-07-01",
+            ...(SITE.ogImage
+              ? { image: `${SITE.url}${SITE.ogImage}` }
+              : {}),
           }),
           breadcrumbLd([
             { name: "Home", url: SITE.url },

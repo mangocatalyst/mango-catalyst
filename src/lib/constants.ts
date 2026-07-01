@@ -21,8 +21,8 @@ export const SITE = {
   // --- VERIFY before launch (left "" => omitted from schema/metadata) ---
   email: "", // public contact email, once decided
   telephone: "", // leave "" to omit; never publish the personal cell (phone-routing rule)
-  ogImage: "", // add public/og.png (1200x630), then set "/og.png"
-  logo: "", // add public/logo.png, then set "/logo.png"
+  ogImage: "/og.png", // 1200x630, shipped from the logo-assets branch
+  logo: "/icon.png", // 512x512 spark mark (logo-assets); full wordmark: /logo.svg
 } as const;
 
 /**

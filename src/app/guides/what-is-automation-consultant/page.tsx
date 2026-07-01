@@ -179,6 +179,9 @@ export default function WhatIsConsultantGuidePage() {
             url: PAGE_URL,
             datePublished: "2026-07-01",
             dateModified: "2026-07-01",
+            ...(SITE.ogImage
+              ? { image: `${SITE.url}${SITE.ogImage}` }
+              : {}),
           }),
           breadcrumbLd([
             { name: "Home", url: `${SITE.url}/` },

@@ -1,4 +1,7 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { CtaTracker } from "@/components/analytics/CtaTracker";
 import "./globals.css";
 import { bigShoulders, inter } from "./fonts";
 import { SITE } from "@/lib/constants";
@@ -33,6 +36,13 @@ export const metadata: Metadata = {
     ...(SITE.ogImage ? { images: [SITE.ogImage] } : {}),
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   // Per-page canonical: each page/segment sets its own
   // `alternates: { canonical: "<path>" }`. Not set here so sub-pages do not all
   // inherit the home canonical.
@@ -63,6 +73,9 @@ export default function RootLayout({
           {children}
         </div>
         <Footer />
+        <CtaTracker />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
