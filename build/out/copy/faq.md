@@ -46,7 +46,7 @@ This isn't another tool to log into. I work with the tools you already pay for a
 
 ### How long until the first automation is working?
 
-Usually weeks, not months, because we start with one small task instead of a big rollout. The honest answer is that it depends on the task and the tools it touches, which is exactly why the first build is deliberately small: you see it working before we build the next piece. We set the timeline together when we scope it, so you're never guessing.
+We start with one small task instead of a big rollout, and the honest answer is that timing depends on the task and the tools it touches, which is exactly why the first build is deliberately small: you see it working before we build the next piece. We set the timeline together when we scope it, so you're never guessing.
 
 ### What kind of businesses do you work with?
 

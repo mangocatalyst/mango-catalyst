@@ -18,6 +18,8 @@ Book a 15-minute fit call
 
 Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing eating your week can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day.
 
+**Intro (fallback variant, REQUIRED when the booking env var is empty):** Tell me what's eating your week in the form below. I reply within one business day and we set up a 15-minute call with a video link. No pitch either way.
+
 ## Booking block (Cal.com embed; URL from env var)
 
 **Heading above the embed (H2):** Grab a slot
