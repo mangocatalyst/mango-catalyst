@@ -38,6 +38,11 @@ Keep page content in **server components** (App Router default). Do not move cop
 headings, or JSON-LD into `"use client"` components, or non-rendering AI crawlers will
 not see it. Then:
 
+> **STALE EXAMPLE (noted 2026-07-01):** the Home example below imports `faqPageLd`. Per
+> `build/01-seo.md` and redteam-consensus #6, FAQPage JSON-LD ships on the FAQ page ONLY;
+> Home emits LocalBusiness only. Use the pattern, not this literal import. Guides need an
+> `articleLd` builder added to `src/lib/jsonld.ts` (none exists yet).
+
 ```tsx
 // Home (src/app/page.tsx): LocalBusiness + the FAQ you actually render on the page
 import { JsonLd } from "@/components/seo/JsonLd";
