@@ -35,6 +35,5 @@ export const STATIC_ROUTES = [
   "/about",
   "/services",
   "/industries/hvac",
-  "/blog",
   "/contact",
 ] as const;
