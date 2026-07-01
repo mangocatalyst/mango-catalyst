@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Mango Catalyst design tokens.
+   Source of truth: branding-color-type-spec-2026-06-14 (vault).
+   Deep matte navy ground, mango amber accent. Amber stays scarce on purpose:
+   it marks the spark, the rule, and the one thing we want clicked.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Backgrounds and surfaces */
+  --color-deep: #0a1120;
+  --color-base: #0e1729;
+  --color-surface: #16213a;
+  --color-surface-hi: #1e2c4a;
+  --color-hairline: #2a3a5c; /* decorative only, never a meaningful boundary */
+
+  /* Text */
+  --color-ink: #f2f5fa;
+  --color-body: #d5deec;
+  --color-muted: #9daac2;
+  --color-faint: #7e8ba6;
+
+  /* Accent and status */
+  --color-amber: #f6a328;
+  --color-amber-hi: #ffb84d;
+  --color-amber-deep: #c97e12;
+  --color-success: #37c99a;
+  --color-error: #ff6b6b;
+  --color-link: #5ba8ff;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-big-shoulders), var(--font-inter), ui-sans-serif,
+    sans-serif;
+}
+
+/* Scaffold-template variables: the placeholder content below the hero still
+   reads these. Remove once the real sections replace the placeholder. */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -8,8 +45,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +55,230 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-base);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+}
+
+/* Keyboard wayfinding: visible amber focus ring on every interactive element.
+   Elements on amber fills override this locally (navy ring, per brand spec). */
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Hero, direction A: type-led + one CSS spark.
+   The H1 is the art. A faint blueprint grid with registration crosses, one
+   matte navy radial glow behind the headline, one amber spark on the last
+   word, and one amber rule that draws on at load. Motion is a single
+   orchestrated page-load reveal: desktop only, skipped entirely when the
+   visitor prefers reduced motion. Everything is server-rendered text.
+--------------------------------------------------------------------------- */
+
+/* Backdrop layer 1: sanctioned subtle navy radial glow, low opacity, matte. */
+.hero-glow {
+  position: absolute;
+  left: -12%;
+  top: -14%;
+  width: 78%;
+  height: 96%;
+  background: radial-gradient(
+    closest-side,
+    rgb(30 44 74 / 0.7),
+    rgb(30 44 74 / 0) 72%
+  );
+  pointer-events: none;
+}
+
+/* Backdrop layer 2: faint blueprint grid. Minor lines every 48px, major lines
+   every 240px, a registration cross at the center of each major cell. Masked
+   so it concentrates behind the headline and dissolves toward the edges. */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cpath d='M120 112v16M112 120h16' stroke='%239DAAC2' stroke-opacity='0.16' stroke-width='1'/%3E%3C/svg%3E"),
+    linear-gradient(to right, rgb(157 170 194 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(157 170 194 / 0.07) 1px, transparent 1px),
+    linear-gradient(to right, rgb(157 170 194 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(157 170 194 / 0.04) 1px, transparent 1px);
+  background-size:
+    240px 240px,
+    240px 240px,
+    240px 240px,
+    48px 48px,
+    48px 48px;
+  -webkit-mask-image: radial-gradient(
+    150% 130% at 36% 38%,
+    black 30%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(150% 130% at 36% 38%, black 30%, transparent 78%);
+  pointer-events: none;
+}
+
+/* The headline. Big Shoulders, huge, stacked three lines, uppercase. The
+   svh term caps it on short wide screens so the CTA stays above the fold. */
+.hero-headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: min(clamp(3.75rem, 1.5rem + 8.5vw, 10.5rem), 14.5svh);
+  line-height: 0.94;
+  letter-spacing: 0.012em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+/* Each line is masked so the reveal can slide type up out of its own box. */
+.hero-line {
+  display: block;
+  overflow: clip;
+  padding-block: 0.05em;
+  margin-block: -0.05em;
+}
+
+.hero-line-inner {
+  display: block;
+}
+
+/* The amber spark: the brand mark landing on the last word. Reads as an
+   oversized full stop. Flat fill, no glow, matte. */
+.hero-spark {
+  display: inline-block;
+  width: 0.15em;
+  height: 0.15em;
+  margin-left: 0.1em;
+  border-radius: 50%;
+  background: var(--color-amber);
+}
+
+/* The measured rule: a faint hairline track with one amber segment that
+   draws on once at load. */
+.hero-rule {
+  position: relative;
+  height: 1px;
+  max-width: 36rem;
+  background: rgb(42 58 92 / 0.65);
+}
+
+.hero-rule-amber {
+  position: absolute;
+  left: 0;
+  top: -1.5px;
+  height: 4px;
+  width: 6.5rem;
+  background: var(--color-amber);
+  transform-origin: 0 50%;
+}
+
+/* The one CTA. Amber fill with deep navy text, never white on amber. */
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--color-amber);
+  color: var(--color-deep);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.006em;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.hero-cta:hover {
+  background: var(--color-amber-hi);
+}
+
+.hero-cta:active {
+  background: var(--color-amber-deep);
+  color: var(--color-ink);
+  transform: translateY(1px);
+}
+
+.hero-cta svg {
+  transition: transform 150ms ease;
+}
+
+.hero-cta:hover svg {
+  transform: translateX(3px);
+}
+
+/* On the amber fill the focus ring flips to deep navy so it stays visible. */
+.hero-cta:focus-visible {
+  outline: 2px solid var(--color-deep);
+  outline-offset: -6px;
+}
+
+/* ---------------------------------------------------------------------------
+   The one orchestrated page-load reveal. Runs only on wider screens and only
+   when motion is allowed; otherwise the hero simply renders in place.
+--------------------------------------------------------------------------- */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-line-up {
+  from {
+    transform: translateY(118%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
+  .hero-reveal [data-reveal="rise"] {
+    animation: hero-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--reveal-delay, 0s);
+  }
+
+  .hero-reveal .hero-line-inner {
+    animation: hero-line-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--reveal-delay, 0s);
+  }
+
+  .hero-reveal .hero-spark {
+    animation: hero-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 1.1s;
+  }
+
+  .hero-reveal .hero-rule-amber {
+    animation: hero-draw 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 1.25s;
+  }
 }

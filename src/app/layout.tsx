@@ -1,19 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { bigShoulders, inter } from "./fonts";
 import { SITE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { graph, organizationLd, websiteLd } from "@/lib/jsonld";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const TITLE = `${SITE.name} | Business Automation for Upper Midwest Shops`;
 
@@ -54,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${bigShoulders.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Site-wide structured data: Organization + WebSite, server-rendered. */}
