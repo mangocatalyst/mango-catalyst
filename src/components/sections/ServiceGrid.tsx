@@ -42,7 +42,7 @@ export function ServiceGrid() {
       <SectionHeading
         title="What we actually build"
         lead={
-          "The busywork that can actually be automated is the repetitive kind: invoicing, lead follow-up, scheduling, reporting, data entry. We don't sell you software. We connect the tools you already pay for and make that work run on its own. Plain English, real results, no jargon."
+          "The busywork that can actually be automated is the repetitive kind: invoicing, lead follow-up, scheduling, reporting, data entry. We don't sell you software. We connect the tools you already pay for and make that work run on its own. Plain English, working systems, no jargon."
         }
       />
 

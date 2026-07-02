@@ -175,7 +175,8 @@ export default async function ContactPage({
                 />
               </div>
               {/* Server-stamped per request (dynamic page); the route handler
-                  drops submits that arrive faster than a human can type. */}
+                  flags (but still delivers) submits that arrive faster than a
+                  human can type, so autofill users are never dropped. */}
               <input type="hidden" name="formLoadedAt" value={formLoadedAt} />
 
               <div>

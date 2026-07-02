@@ -18,23 +18,34 @@ import { SITE } from "@/lib/constants";
  * Launch gate: "contact delivery key + provider verified" is on the manual
  * checklist in build/out/verification-report.md.
  *
- * Spam protection (both silent, per the build plan):
+ * Spam protection:
  * 1. Honeypot: a visually hidden "website" field humans never see. Filled
  *    means bot; we drop the submission but still answer success so the bot
- *    learns nothing.
+ *    learns nothing. This is the ONLY silent drop.
  * 2. Minimum fill time: the page (dynamically rendered) stamps formLoadedAt
  *    at request time. A submit arriving faster than a human can type, or with
- *    a missing/garbled/future stamp, is dropped the same way.
+ *    a missing/garbled/future stamp, is NOT dropped (autofill makes fast
+ *    legitimate submits real); it is processed normally with a "fast-fill"
+ *    flag in the delivery payload and logs, so a human can triage it.
  */
 
-/** Faster than this between page render and submit reads as a bot. */
+/** Faster than this between page render and submit reads as autofill or a bot. */
 const MIN_FILL_MS = 4000;
 
 /** Tolerated clock skew before a future formLoadedAt reads as forged. */
 const MAX_FUTURE_SKEW_MS = 60_000;
 
-function isLikelyBot(honeypot: string, loadedAtRaw: string): boolean {
-  if (honeypot.trim() !== "") return true;
+/** Filled honeypot: the one signal that silently drops the submission. */
+function isHoneypotHit(honeypot: string): boolean {
+  return honeypot.trim() !== "";
+}
+
+/**
+ * True when the timing check trips: submitted faster than MIN_FILL_MS, or
+ * the formLoadedAt stamp is missing, garbled, or implausibly in the future.
+ * Advisory only; the submission is still delivered, flagged as fast-fill.
+ */
+function isFastFill(loadedAtRaw: string): boolean {
   const loadedAt = Number(loadedAtRaw);
   if (!Number.isFinite(loadedAt) || loadedAt <= 0) return true;
   const elapsed = Date.now() - loadedAt;
@@ -76,10 +87,16 @@ export async function POST(request: NextRequest) {
   const business = field("business");
   const message = field("message");
 
-  if (isLikelyBot(field("website"), field("formLoadedAt"))) {
-    console.log("[contact] dropped likely-bot submission");
+  if (isHoneypotHit(field("website"))) {
+    console.log("[contact] dropped honeypot submission");
     // Silent drop: bots get the success path, nothing is delivered.
     return respond(request, true);
+  }
+
+  // Advisory: fast submits (autofill or bots) are delivered, just flagged.
+  const fastFill = isFastFill(field("formLoadedAt"));
+  if (fastFill) {
+    console.log("[contact] fast-fill submission (under minimum fill time)");
   }
 
   // Server-side mirror of the form's required fields.
@@ -101,6 +118,7 @@ export async function POST(request: NextRequest) {
       email,
       business,
       message,
+      fastFill,
     });
     return respond(request, true);
   }
@@ -110,6 +128,7 @@ export async function POST(request: NextRequest) {
     email,
     business,
     message,
+    fastFill,
   });
   if (!delivered) {
     // Keep the lead recoverable from Vercel logs, and be honest with the
@@ -119,6 +138,7 @@ export async function POST(request: NextRequest) {
       email,
       business,
       message,
+      fastFill,
     });
     return respond(request, false);
   }
@@ -133,7 +153,13 @@ export async function POST(request: NextRequest) {
 async function deliverByEmail(
   apiKey: string,
   to: string,
-  fields: { name: string; email: string; business: string; message: string },
+  fields: {
+    name: string;
+    email: string;
+    business: string;
+    message: string;
+    fastFill: boolean;
+  },
 ): Promise<boolean> {
   const from =
     process.env.CONTACT_FROM || "Mango Catalyst <onboarding@resend.dev>";
@@ -141,6 +167,9 @@ async function deliverByEmail(
     `Name: ${fields.name}`,
     `Email: ${fields.email}`,
     `Business: ${fields.business || "(not given)"}`,
+    ...(fields.fastFill
+      ? ["Flag: fast-fill (submitted under the minimum fill time; autofill or bot)"]
+      : []),
     "",
     fields.message,
   ].join("\n");

@@ -94,7 +94,7 @@ export function Pricing() {
               The break-even, in plain numbers:
             </strong>{" "}
             {
-              "if this saves your team 10 to 15 office hours a month, it's already paying for itself. Most shops are losing a lot more than that to busywork."
+              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
             }
           </p>
           <p className="leading-[1.65] text-navy-2">

@@ -2,6 +2,13 @@
 
 Date: 2026-07-01. Verifier: role 06 (Fable 5, Claude Code). All curl/SSR/schema/honesty checks ran against a LOCAL production server (`npm run build && PORT=3900 npm start`), per process; Vercel previews are SSO-protected and were not curled. Loop closed in 4 passes (cap 5).
 
+## Reconciliation pass (2026-07-01, final)
+
+- `origin/seo-foundation` merged: the corrected copy sources (about, contact, faq, home, industry-hvac) now live in `build/out/copy/`, and every built component was re-synced to match them verbatim (Pricing break-even math paragraph, ServiceGrid "working systems" intro, About bio "twenty years behind a camera" / "exited them", FAQ timing answer already matched).
+- Contact intro now switches server-side on the same `NEXT_PUBLIC_CAL_URL` condition as the embed: booking intro when set, the required fallback intro ("Tell me what's eating your week in the form below...") when empty.
+- OG/logo assets are merged from `logo-assets` and wired: og.png (1200x630), favicon.ico, icon.png (512), apple-touch-icon.png (180), logo.svg, logo-mark.svg all in `public/`; `SITE.ogImage`/`SITE.logo` set; explicit `icons` metadata in layout; Next's default `src/app/favicon.ico` deleted, so no double-favicon conflict. The og.png + favicon checklist items are DONE.
+- Spam-check change (red-team note 5): the honeypot remains the only silent drop. A clean-honeypot submission under the 4-second minimum fill time is now delivered normally with a "fast-fill" flag in the delivery payload and logs (autofill users are no longer silently lost). The earlier pass records below describing too-fast submissions as dropped predate this change.
+
 ## Re-verify pass after red-team fixes (2026-07-01, commit a184c9c): GREEN
 
 Full 06 auto-check battery re-run against a fresh local production build (`npm run build && PORT=3901 npm start`) after the red-team fixes (/services heading order h3 to h2; /api/contact real Resend delivery path). Results:
@@ -53,7 +60,7 @@ Into `oneshot-build`, in order, all clean (no conflicts): `page-0` (about), `pag
 - **Public email: confirm with Bryan.** `hello@mangocatalyst.com` ships on /privacy because the locked privacy copy contains it verbatim; `SITE.email` stays "" (schema + CTA fallback omit it) until Bryan confirms the inbox exists.
 - **Human-judged sign-offs** (per 06 checklist): hero clears the designer bar, voice is SOUL, 80-90% grounded-industrial. Bryan's picks were NOT defaulted: hero A + palette B + Big Shoulders recorded in design-notes.md.
 - **PSI/CrUX field data:** not measurable pre-launch (no key, no public traffic). Coverage gap, not a failure.
-- **Contact delivery key + provider verified: MANUAL, launch-gating.** The route sends via Resend when `CONTACT_DELIVERY_KEY` (+ `CONTACT_TO` or `SITE.email`) is set; without them it is log-only, and Vercel console logs are ephemeral, so a launch without a verified key silently loses leads while /privacy promises email delivery. Before launch: set the key + destination on Vercel, submit the form on the deployed site, and confirm the email lands in the business inbox.
+- **Contact delivery: Resend send path implemented behind CONTACT_DELIVERY_KEY + CONTACT_TO; verify a real delivery once the key exists (launch gate).** Without the key (+ `CONTACT_TO` or `SITE.email`) the route is log-only, and Vercel console logs are ephemeral, so a launch without a verified key silently loses leads while /privacy promises email delivery. Before launch: set the key + destination on Vercel, submit the form on the deployed site, and confirm the email lands in the business inbox.
 
 ## Escalations
 
