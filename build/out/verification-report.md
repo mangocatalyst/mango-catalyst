@@ -36,6 +36,7 @@ Into `oneshot-build`, in order, all clean (no conflicts): `page-0` (about), `pag
 - **Public email: confirm with Bryan.** `hello@mangocatalyst.com` ships on /privacy because the locked privacy copy contains it verbatim; `SITE.email` stays "" (schema + CTA fallback omit it) until Bryan confirms the inbox exists.
 - **Human-judged sign-offs** (per 06 checklist): hero clears the designer bar, voice is SOUL, 80-90% grounded-industrial. Bryan's picks were NOT defaulted: hero A + palette B + Big Shoulders recorded in design-notes.md.
 - **PSI/CrUX field data:** not measurable pre-launch (no key, no public traffic). Coverage gap, not a failure.
+- **Contact delivery key + provider verified: MANUAL, launch-gating.** The route sends via Resend when `CONTACT_DELIVERY_KEY` (+ `CONTACT_TO` or `SITE.email`) is set; without them it is log-only, and Vercel console logs are ephemeral, so a launch without a verified key silently loses leads while /privacy promises email delivery. Before launch: set the key + destination on Vercel, submit the form on the deployed site, and confirm the email lands in the business inbox.
 
 ## Escalations
 

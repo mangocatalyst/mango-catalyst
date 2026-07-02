@@ -18,7 +18,7 @@ import {
 /**
  * Services: the service-intent page, one level deeper per offering than Home.
  * Copy verbatim from build/out/copy/services.md; metadata + schema per
- * seo-spec 2.2. ONE Service node for the page (cards are <h3> content, never
+ * seo-spec 2.2. ONE Service node for the page (cards are <h2> content, never
  * separate Service entities) + a two-item breadcrumb. No geo term in title or
  * H1 (that is Home's keyword).
  */
@@ -156,9 +156,13 @@ export default function ServicesPage() {
                 <span className="flex size-10 items-center justify-center rounded-lg border border-hairline bg-surface-hi text-muted">
                   {card.icon}
                 </span>
-                <h3 className="mt-5 text-[1.15rem] font-semibold text-ink">
+                {/* h2, not h3: the page has no other h2, so h3 here would
+                    skip a heading level after the H1 (seo-spec 9.5, axe
+                    heading-order). The card-scale visual style lives in the
+                    classes, not the tag. */}
+                <h2 className="mt-5 text-[1.15rem] font-semibold text-ink">
                   {card.title}
-                </h3>
+                </h2>
                 <p className="mt-3 leading-relaxed text-body">{card.body}</p>
               </Card>
             ))}

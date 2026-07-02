@@ -1,12 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { SITE } from "@/lib/constants";
 
 /**
  * Contact form handler for /contact.
  *
- * Delivery: no email provider is wired up yet. When CONTACT_DELIVERY_KEY is
- * absent the handler logs the submission to the server console and reports
- * success, so the form works honestly end to end today and the real delivery
- * integration can land later without touching the page.
+ * Delivery (Resend, per the brief's Open config: email to the business inbox
+ * via a transactional service, key + destination as one-line env config):
+ * - CONTACT_DELIVERY_KEY: Resend API key. Absent => log-only mode (dev /
+ *   preview without secrets); the submission is logged and success reported.
+ * - CONTACT_TO: destination inbox. Falls back to SITE.email; if both are
+ *   empty the handler stays in log-only mode rather than sending nowhere.
+ * - CONTACT_FROM (optional): verified sender, defaults to Resend's onboarding
+ *   sender so the key works before the domain is verified.
+ * When the key is set and the send fails, the handler logs the full
+ * submission (so the lead is recoverable from Vercel logs) and returns the
+ * error state; it never tells the visitor "sent" when nothing was delivered.
+ * Launch gate: "contact delivery key + provider verified" is on the manual
+ * checklist in build/out/verification-report.md.
  *
  * Spam protection (both silent, per the build plan):
  * 1. Honeypot: a visually hidden "website" field humans never see. Filled
@@ -78,8 +88,15 @@ export async function POST(request: NextRequest) {
   }
 
   const deliveryKey = process.env.CONTACT_DELIVERY_KEY;
-  if (!deliveryKey) {
-    console.log("[contact] submission (no delivery key configured, log only)", {
+  const to = process.env.CONTACT_TO || SITE.email;
+  if (!deliveryKey || !to) {
+    if (deliveryKey && !to) {
+      // Key without a destination is a config gap: say so loudly.
+      console.warn(
+        "[contact] CONTACT_DELIVERY_KEY set but no CONTACT_TO/SITE.email; log only",
+      );
+    }
+    console.log("[contact] submission (delivery not configured, log only)", {
       name,
       email,
       business,
@@ -88,11 +105,72 @@ export async function POST(request: NextRequest) {
     return respond(request, true);
   }
 
-  // CONTACT_DELIVERY_KEY is set but no provider is integrated yet. Log loudly
-  // so the gap is visible in Vercel logs, and still confirm to the visitor.
-  console.warn(
-    "[contact] delivery key present but no provider integrated; submission logged only",
-    { name, email, business, message },
-  );
+  const delivered = await deliverByEmail(deliveryKey, to, {
+    name,
+    email,
+    business,
+    message,
+  });
+  if (!delivered) {
+    // Keep the lead recoverable from Vercel logs, and be honest with the
+    // visitor: the error notice asks them to retry or email directly.
+    console.error("[contact] delivery failed; submission follows", {
+      name,
+      email,
+      business,
+      message,
+    });
+    return respond(request, false);
+  }
   return respond(request, true);
+}
+
+/**
+ * Sends the submission to the business inbox via Resend's REST API.
+ * Plain fetch, no SDK: one endpoint, one JSON body. Returns true only when
+ * Resend accepts the message.
+ */
+async function deliverByEmail(
+  apiKey: string,
+  to: string,
+  fields: { name: string; email: string; business: string; message: string },
+): Promise<boolean> {
+  const from =
+    process.env.CONTACT_FROM || "Mango Catalyst <onboarding@resend.dev>";
+  const text = [
+    `Name: ${fields.name}`,
+    `Email: ${fields.email}`,
+    `Business: ${fields.business || "(not given)"}`,
+    "",
+    fields.message,
+  ].join("\n");
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        reply_to: fields.email,
+        subject: `Contact form: ${fields.name}`,
+        text,
+      }),
+    });
+    if (!res.ok) {
+      console.error(
+        `[contact] Resend rejected the send: ${res.status} ${await res
+          .text()
+          .catch(() => "")}`,
+      );
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[contact] Resend request threw", error);
+    return false;
+  }
 }
