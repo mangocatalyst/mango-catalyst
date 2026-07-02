@@ -45,7 +45,7 @@ Most shops your size are stuck in the middle: too small to have someone whose wh
 
 **H2:** What we actually build
 
-**Intro (answer-first):** The busywork that can actually be automated is the repetitive kind: invoicing, lead follow-up, scheduling, reporting, data entry. We don't sell you software. We connect the tools you already pay for and make that work run on its own. Plain English, real results, no jargon.
+**Intro (answer-first):** The busywork that can actually be automated is the repetitive kind: invoicing, lead follow-up, scheduling, reporting, data entry. We don't sell you software. We connect the tools you already pay for and make that work run on its own. Plain English, working systems, no jargon.
 
 **Service cards (4 on Home; the full grid lives on /services):**
 
@@ -124,7 +124,7 @@ Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews 
 - A monthly queue of tweaks and improvements. Small changes (under about 2 hours of work) come out of the queue, no extra charge per tweak.
 - Bigger new builds (a whole new workflow from scratch) get scoped and agreed first, so you always know what you're getting. No surprise bills, and no "unlimited" promise I can't keep.
 
-**The break-even, in plain numbers:** if this saves your team 10 to 15 office hours a month, it's already paying for itself. Most shops are losing a lot more than that to busywork.
+**The break-even, in plain numbers:** count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk.
 
 **Why it's a retainer, not a project (one line):** Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers.
 

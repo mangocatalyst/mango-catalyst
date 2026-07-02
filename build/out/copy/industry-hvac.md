@@ -6,7 +6,7 @@
 - **Meta description:** `Stop doing invoicing, dispatch updates, and follow-up by hand. Office automation for Minnesota HVAC and home-service shops. Book a 15-minute fit call.`
 - **Canonical:** `/industries/hvac`
 - **Schema:** `serviceLd({ name: "HVAC Business Automation", areaServed: "Minnesota", url: SITE.url + "/industries/hvac", ... })` + two-item breadcrumb `breadcrumbLd([Home, HVAC Business Automation])` (no `/industries` index exists; do not mint one).
-- **Do not** reuse the Home H1 pun anywhere on this page.
+- **Do not** reuse the Home H1 pun in this page's headings or body copy. (The global footer tagline is site chrome and exempt.)
 
 ---
 
