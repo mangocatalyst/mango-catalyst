@@ -2,6 +2,23 @@
 
 Date: 2026-07-01. Verifier: role 06 (Fable 5, Claude Code). All curl/SSR/schema/honesty checks ran against a LOCAL production server (`npm run build && PORT=3900 npm start`), per process; Vercel previews are SSO-protected and were not curled. Loop closed in 4 passes (cap 5).
 
+## Re-verify pass after red-team fixes (2026-07-01, commit a184c9c): GREEN
+
+Full 06 auto-check battery re-run against a fresh local production build (`npm run build && PORT=3901 npm start`) after the red-team fixes (/services heading order h3 to h2; /api/contact real Resend delivery path). Results:
+
+- `npm run build` green (16 routes incl. not-found), `npx tsc --noEmit` clean, `npm run lint` clean.
+- All 13 routes 200; unknown route 404s to the branded not-found.
+- SSR (curl, JS off): home H1 "The Other Tools of the Trade" in raw HTML; /services outline is now h1 then six h2s (heading-order fix confirmed rendered); 10 FAQ h2s incl. all 9 questions; every guide H1 present.
+- JSON-LD parse-valid on all 11 pages with the exact expected type sets (Home = Organization + WebSite + ProfessionalService, no FAQPage; FAQ = the only FAQPage; services + industries/hvac = Service + BreadcrumbList; guides = Article + BreadcrumbList).
+- Honesty greps (src/, content/, public/, and rendered text of all pages): zero NorthStar, zero "1,000 hours" / "14.5" / "30%" in copy (only hits remain CSS gradient stops in globals.css), zero em/en dashes (raw + entity forms), no phone number, no "I saved" / "we grew" claims, no #F97316, zero img tags / canvas / WebGL. "same day" appears only in locked copy describing the client's lead-reply automation outcome (not a service-speed promise); "medical" appears only in the MN-ITS owned-build description (not the fit sentence).
+- Speed promises limited to reply-within-1-business-day and fixes-within-2-to-3-business-days; no hosting/monitoring/backup/offboarding claims; no capacity count; no revenue band in FAQ; $795 and $1,000/month visible on Home.
+- Contact route re-exercised in log-only mode: legit JSON POST 200 and logged; honeypot-filled and too-fast submissions return success but are dropped ("dropped likely-bot submission" x2 in server log, nothing delivered); invalid email and missing fields 400; native form POST 303s to /contact?sent=1#note. Resend key-set path unchanged since a184c9c verification (401 path returns ok:false and logs the lead).
+- Canonicals correct on all 11 pages; sitemap exactly 11 URLs; robots allows all and points at the sitemap; every internal href resolves 200; favicon.ico / icon.png / apple-touch-icon.png / og.png all served; /privacy footer-linked with hello@mangocatalyst.com.
+- Hero motion gates intact: CSS-only behind `prefers-reduced-motion: no-preference` and `min-width: 48rem`.
+- Lighthouse mobile (LOCAL, headless CLI): home 99/100/100 (perf/a11y/seo), faq 97/100/100, contact 97/100/100, guides/manual-data-entry-cost 97/100/100, industries/hvac 97/100/100, services 97/100/100. All 95+; /services accessibility 100 confirms the heading-order fix cleared axe.
+
+No fixes were needed on this pass; the MANUAL/BLOCKED list below is unchanged.
+
 ## What was merged
 
 Into `oneshot-build`, in order, all clean (no conflicts): `page-0` (about), `page-1` (services), `page-2` (industries/hvac), `page-3` (faq), `page-4` (contact + /api/contact), `page-5` (privacy), `page-6`, `page-7`, `page-8` (the three guides), then `logo-assets` (favicon set, og.png, logo SVGs; default Next favicon deleted).
