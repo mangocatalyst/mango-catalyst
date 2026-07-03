@@ -54,7 +54,7 @@ export function Footer() {
     .join(" · ");
 
   return (
-    <footer className="relative overflow-hidden bg-deep">
+    <footer className="relative overflow-hidden border-t border-hairline/60 bg-deep">
       {/* The Chart Sheet backdrop: aria-hidden decoration behind the links. */}
       <FooterBackdrop />
       <div className="relative mx-auto w-full max-w-6xl px-6 py-14 sm:px-10 sm:py-16">
