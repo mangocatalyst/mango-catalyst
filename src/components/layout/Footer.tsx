@@ -54,7 +54,7 @@ export function Footer() {
     .join(" · ");
 
   return (
-    <footer className="relative overflow-hidden border-t border-hairline/60 bg-deep">
+    <footer className="relative overflow-hidden bg-deep">
       {/* The Chart Sheet backdrop: aria-hidden decoration behind the links. */}
       <FooterBackdrop />
       <div className="relative mx-auto w-full max-w-6xl px-6 py-14 sm:px-10 sm:py-16">
@@ -89,7 +89,7 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-hairline/50 pt-6 sm:flex-row sm:items-baseline sm:justify-between">
+        <div className="mt-12 flex flex-col gap-3 pt-6 sm:flex-row sm:items-baseline sm:justify-between">
           <p className="text-sm text-faint">{nap}</p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-6">
             <p className="text-[0.8rem] text-faint">

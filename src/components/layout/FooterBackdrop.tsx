@@ -14,14 +14,16 @@
  * read as noise. The lake keeps its right-two-thirds bias and Duluth sits in
  * the left third, near where the NAP line renders.
  *
- * Motion (CSS scroll-driven, desktop + motion-ok + @supports
- * (animation-timeline: view()) only): as the footer scrolls into view the
- * chart scales 1.0 to 1.3 with transform-origin exactly on the Duluth point
- * (469.4 419.4 in viewBox units), drifting slightly so Duluth heads toward
- * the NAP corner, and the amber period emits one soft expanding ring as the
- * footer fully enters. Non-supporting browsers get the static artwork with a
- * very slow amber-period opacity breath. Mobile and reduced motion get the
- * fully static composition.
+ * Motion (desktop + motion-ok only, 2026-07-03 rework): a tiny inline
+ * IntersectionObserver adds .footer-live when the chart is ~35% in view,
+ * playing the entrance ONCE: the chart leans toward Duluth (scale 1.0 to
+ * 1.3, transform-origin exactly on the Duluth point, 469.4 419.4 in
+ * viewBox units) and the amber period emits one sonar ring, then breathes
+ * slowly forever. This replaced the scroll-scrubbed view() timeline, which
+ * had no scroll runway at the bottom of the page (the whole effect played
+ * inside the final inertial flick, so nobody ever saw it) and was a no-op
+ * in Firefox. Mobile and reduced motion get the fully static composition;
+ * the observer script skips itself there, matching the CSS gate.
  */
 export function FooterBackdrop() {
   return (
@@ -79,6 +81,25 @@ export function FooterBackdrop() {
           </text>
         </g>
       </svg>
+      {/* Play-once trigger: same inline-script pattern as the hero tilt,
+          no client component. Adds .footer-live when the chart enters. */}
+      <script
+        id="footer-live"
+        dangerouslySetInnerHTML={{
+          __html: `(function(){
+var art=document.querySelector('.footer-art');
+if(!art||!('IntersectionObserver' in window))return;
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+if(!matchMedia('(min-width: 48rem)').matches)return;
+var io=new IntersectionObserver(function(es){
+for(var i=0;i<es.length;i++){
+if(es[i].isIntersecting){art.classList.add('footer-live');io.disconnect();return;}
+}
+},{threshold:.35});
+io.observe(art);
+})();`,
+        }}
+      />
     </div>
   );
 }
