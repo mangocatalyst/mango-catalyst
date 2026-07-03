@@ -25,8 +25,8 @@ export function Hero() {
       id="top"
       className="hero-reveal relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-base"
     >
-      {/* Backdrop: matte navy glow plus the Top Sheet Dispatch artwork
-          right-of-center (see HeroBackdrop). */}
+      {/* Backdrop: matte navy glow plus the Missing Link light-table
+          artwork right-of-center (see HeroBackdrop). */}
       <div aria-hidden className="hero-glow" />
       <HeroBackdrop />
 

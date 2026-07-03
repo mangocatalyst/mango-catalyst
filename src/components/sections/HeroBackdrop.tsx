@@ -1,251 +1,255 @@
 /**
- * Hero backdrop: "Top Sheet Dispatch" (Bryan's pick, winner H1).
+ * Hero backdrop: "The Missing Link" (Bryan's pick, round 5 F1/V1 merge,
+ * 2026-07-03). Supersedes "Top Sheet Dispatch".
  *
- * A dispatch-board acetate sheet with a job-ticket sheet and an invoice sheet.
- * Server component, zero client JS, pure SVG as JSX. Rendered as an
- * aria-hidden absolute layer at 25% opacity, composed right-of-center so the
- * H1/subhead/CTA column (left ~55%) stays quiet.
+ * A CSS-3D light table: four translucent acetate sheets telling one job's
+ * story (call log, dispatch board, job ticket, invoice) layered in depth
+ * under a gentle perspective, plus a single amber link line that draws
+ * itself through the real-world flow: call comes in, job hits the dispatch
+ * board, crew gets the ticket, invoice goes out. The link (line + junction
+ * nodes + tracer) is the ONE amber element; the dispatch now-line is navy.
  *
- * Motion ("the desk clears itself", CSS only, desktop + motion-ok only):
- * the two support sheets start stacked ON TOP of the dispatch board, then
- * each slides and rotates to its final peeking position underneath. The
- * over-to-under restack is done by crossfading duplicated layers: each sheet
- * exists twice, once below the board (the final artwork) and once above it
- * (the animated pile copy). Both copies ride identical transform keyframes,
- * so during the late-flight crossfade they are perfectly registered and the
- * sheet reads as tucking under the translucent board edge. After the
- * entrance, only two ambient details move: the now-line breathes (~14s) and
- * the amber chip outline redraws (~20s with long rests).
+ * Motion (desktop + motion-ok only):
+ * sheets slide into registration and settle within ~1.6s of load, then the
+ * amber link draws slowly (2.2s to 5.6s) with a small ring flash as it
+ * reaches each document. Ambient after that: the whole plane floats, chips
+ * and the call waveform pulse, the navy now-line creeps, and an amber tracer
+ * rides the link every 16s (the job moving through the system). An inline
+ * pointer script (no client component, no hydration) tilts the plane a few
+ * degrees toward the cursor anywhere over the hero.
  *
- * Mobile and prefers-reduced-motion get the finished static composition:
- * the under copies carry the final pose as attribute transforms and the top
- * copies are opacity 0 by default, so with no animation applied the render
- * is exactly the approved static artwork.
+ * Static rule (mobile, prefers-reduced-motion, no-JS): every animated
+ * property's base value is the settled composition with the link fully
+ * drawn, so with the motion media gate closed this renders as the finished
+ * still. The 25%-in-context dimming is a solid bg-base veil ON TOP of the
+ * art instead of opacity on the wrapper, because CSS opacity on an ancestor
+ * flattens transform-style: preserve-3d.
  *
- * Coordinates are the approved 1440x560 artwork rebased by (-770, -70) into
- * a tight 650x500 viewBox, so the layer can be sized and anchored without
- * slice-cropping surprises. Relative geometry is unchanged.
+ * Plane is a fixed 660x430 design space, scaled per breakpoint in CSS.
  */
 
-/** Job-ticket sheet, 300x310, drawn at local origin. */
-function TicketSheet() {
+/** Call log sheet, 190x130 design space (rendered 220x150). */
+function CallLogSheet() {
   return (
-    <>
-      <rect
-        x="0"
-        y="0"
-        width="300"
-        height="310"
-        rx="2"
-        fill="#16213A"
-        fillOpacity=".5"
-        stroke="#2A3B5E"
-        strokeOpacity=".9"
+    <svg className="hb-sheet hb-e1" width="220" height="150" viewBox="0 0 190 130">
+      <rect x="10" y="12" width="176" height="114" rx="6" fill="#0A1120" opacity=".8" />
+      <rect x="4" y="4" width="176" height="114" rx="6" fill="#16213A" fillOpacity=".8" stroke="#2A3B5E" strokeWidth="1" />
+      <text className="hb-t9" x="15" y="22" fill="#5E7BAE">
+        CALL LOG
+      </text>
+      <text className="hb-t" x="120" y="22" fill="#46608F">
+        08:02
+      </text>
+      <path
+        transform="translate(15,34) scale(1.1)"
+        d="M3 1 C2 1 1 2 1 3 c0 9 6 15 15 15 1 0 2 -1 2 -2 v-3 l-4 -2 -2 2 c-3 -1 -5 -3 -6 -6 l2 -2 -2 -4 z"
+        fill="#46608F"
       />
-      <line x1="0" y1="0" x2="0" y2="310" stroke="#5E7BAE" strokeOpacity=".3" />
-      <rect x="16" y="18" width="96" height="8" rx="2" fill="#35496F" fillOpacity=".9" />
-      <g stroke="#2A3B5E" strokeOpacity=".8">
-        <line x1="16" y1="48" x2="284" y2="48" />
-        <line x1="16" y1="72" x2="284" y2="72" />
-        <line x1="16" y1="96" x2="284" y2="96" />
-        <line x1="16" y1="120" x2="284" y2="120" />
-        <line x1="16" y1="144" x2="284" y2="144" />
-        <line x1="16" y1="168" x2="284" y2="168" />
-        <line x1="16" y1="192" x2="284" y2="192" />
-        <line x1="16" y1="216" x2="284" y2="216" />
-        <line x1="16" y1="240" x2="284" y2="240" />
-        <line x1="16" y1="264" x2="284" y2="264" />
-        <line x1="16" y1="288" x2="180" y2="288" />
+      <g fill="#35496F" className="hb-wave">
+        <rect x="52" y="42" width="3" height="8" />
+        <rect x="59" y="38" width="3" height="16" />
+        <rect x="66" y="34" width="3" height="24" />
+        <rect x="73" y="40" width="3" height="12" />
+        <rect x="80" y="36" width="3" height="20" />
+        <rect x="87" y="42" width="3" height="8" />
+        <rect x="94" y="38" width="3" height="16" />
+        <rect x="101" y="43" width="3" height="6" />
       </g>
-    </>
+      <rect x="15" y="70" width="110" height="5" rx="2" fill="#2A3B5E" />
+      <rect x="15" y="82" width="84" height="5" rx="2" fill="#22314F" />
+      <text className="hb-t" x="15" y="106" fill="#35496F">
+        INBOUND : NEW REQUEST
+      </text>
+    </svg>
   );
 }
 
-/** Invoice sheet, 320x330, drawn at local origin. */
+/** Invoice summary sheet, 280x210. */
 function InvoiceSheet() {
   return (
-    <>
-      <rect
-        x="0"
-        y="0"
-        width="320"
-        height="330"
-        rx="2"
-        fill="#16213A"
-        fillOpacity=".5"
-        stroke="#2A3B5E"
-        strokeOpacity=".9"
-      />
-      <line x1="0" y1="330" x2="320" y2="330" stroke="#5E7BAE" strokeOpacity=".22" />
-      <g stroke="#2A3B5E" strokeOpacity=".7">
-        <line x1="20" y1="44" x2="300" y2="44" />
-        <line x1="20" y1="70" x2="300" y2="70" />
-        <line x1="20" y1="96" x2="300" y2="96" />
-        <line x1="20" y1="122" x2="300" y2="122" />
-        <line x1="20" y1="148" x2="300" y2="148" />
-        <line x1="20" y1="174" x2="300" y2="174" />
-        <line x1="20" y1="200" x2="300" y2="200" />
+    <svg className="hb-sheet hb-e2" width="280" height="210" viewBox="0 0 280 210">
+      <rect x="13" y="15" width="258" height="182" rx="6" fill="#0A1120" opacity=".85" />
+      <rect x="5" y="5" width="258" height="182" rx="6" fill="#0E1729" fillOpacity=".92" stroke="#35496F" strokeWidth="1" />
+      <text className="hb-t9" x="16" y="24" fill="#46608F">
+        INV 2209 SUMMARY
+      </text>
+      <path d="M24 168h224M24 44v124" stroke="#35496F" strokeWidth="1" />
+      <g stroke="#46608F" strokeOpacity=".4" strokeWidth="1">
+        <rect x="36" y="112" width="18" height="56" fill="#22314F" fillOpacity=".9" />
+        <rect x="64" y="84" width="18" height="84" fill="#2A3B5E" fillOpacity=".9" />
+        <rect x="92" y="128" width="18" height="40" fill="#22314F" fillOpacity=".9" />
+        <rect x="120" y="68" width="18" height="100" fill="#35496F" fillOpacity=".9" />
+        <rect x="148" y="100" width="18" height="68" fill="#2A3B5E" fillOpacity=".9" />
+        <rect x="176" y="120" width="18" height="48" fill="#22314F" fillOpacity=".9" />
+        <rect x="204" y="80" width="18" height="88" fill="#2A3B5E" fillOpacity=".9" />
       </g>
-      <line x1="160" y1="252" x2="300" y2="252" stroke="#35496F" strokeOpacity=".9" />
-      <g fill="#2A3B5E">
-        <rect x="170" y="266" width="36" height="5" rx="2.5" />
-        <rect x="250" y="266" width="50" height="5" rx="2.5" />
-        <rect x="170" y="280" width="44" height="5" rx="2.5" />
-        <rect x="244" y="280" width="56" height="5" rx="2.5" />
-      </g>
-      <line x1="160" y1="294" x2="300" y2="294" stroke="#35496F" />
-      <rect x="170" y="302" width="32" height="7" rx="2" fill="#35496F" />
-      <rect x="230" y="302" width="70" height="7" rx="2" fill="#46608F" />
-    </>
+      <path d="M24 92h224" stroke="#46608F" strokeWidth="1" strokeDasharray="3 4" opacity=".55" />
+      <text className="hb-t" x="16" y="184" fill="#35496F">
+        SENT : PAID
+      </text>
+    </svg>
   );
 }
+
+/** Job ticket sheet, 210x150. */
+function TicketSheet() {
+  return (
+    <svg className="hb-sheet hb-e3" width="210" height="150" viewBox="0 0 210 150">
+      <rect x="11" y="13" width="192" height="126" rx="6" fill="#0A1120" opacity=".85" />
+      <rect x="4" y="4" width="192" height="126" rx="6" fill="#16213A" fillOpacity=".88" stroke="#46608F" strokeWidth="1" strokeOpacity=".8" />
+      <rect x="4" y="4" width="192" height="22" rx="6" fill="#2A3B5E" fillOpacity=".78" />
+      <text className="hb-t" x="14" y="18" fill="#5E7BAE">
+        JOB TICKET 4418
+      </text>
+      <rect x="14" y="38" width="118" height="5" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+      <rect x="14" y="50" width="88" height="5" rx="2" fill="#22314F" fillOpacity=".95" />
+      <rect x="14" y="62" width="104" height="5" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+      <path d="M14 80h172" stroke="#35496F" strokeWidth="1" strokeDasharray="4 3" />
+      <rect x="14" y="92" width="70" height="5" rx="2" fill="#22314F" fillOpacity=".95" />
+      <rect x="14" y="104" width="54" height="5" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+      <circle cx="162" cy="104" r="19" fill="none" stroke="#46608F" strokeWidth="1.2" opacity=".85" />
+      <circle cx="162" cy="104" r="13" fill="none" stroke="#35496F" strokeWidth="1" opacity=".8" />
+    </svg>
+  );
+}
+
+/** Dispatch board sheet, 430x280. Front of the stack, sized per Bryan. */
+function DispatchSheet() {
+  return (
+    <svg className="hb-sheet hb-e4" width="430" height="280" viewBox="0 0 430 280">
+      <rect x="16" y="18" width="404" height="252" rx="7" fill="#0A1120" opacity=".85" />
+      <rect x="6" y="6" width="404" height="252" rx="7" fill="#16213A" fillOpacity=".9" stroke="#46608F" strokeWidth="1.2" />
+      <rect x="6" y="6" width="404" height="28" rx="7" fill="#22314F" fillOpacity=".92" />
+      <text className="hb-t9" x="18" y="24" fill="#5E7BAE">
+        DISPATCH BOARD 07
+      </text>
+      <text className="hb-t" x="356" y="23" fill="#46608F">
+        WK 27
+      </text>
+      <path d="M92 40v5M126 40v5M160 40v5M194 40v5M228 40v5M262 40v5M296 40v5M330 40v5M364 40v5M398 40v5" stroke="#35496F" strokeWidth="1" />
+      <text className="hb-t" x="87" y="57" fill="#35496F">
+        08
+      </text>
+      <text className="hb-t" x="223" y="57" fill="#35496F">
+        12
+      </text>
+      <text className="hb-t" x="359" y="57" fill="#35496F">
+        16
+      </text>
+      <path d="M12 106h392M12 152h392M12 198h392" stroke="#22314F" strokeWidth="1" />
+      <path d="M80 62v186" stroke="#2A3B5E" strokeWidth="1" opacity=".8" />
+      <text className="hb-t" x="20" y="88" fill="#46608F">
+        T1
+      </text>
+      <text className="hb-t" x="20" y="134" fill="#46608F">
+        T2
+      </text>
+      <text className="hb-t" x="20" y="180" fill="#46608F">
+        T3
+      </text>
+      <text className="hb-t" x="20" y="226" fill="#46608F">
+        T4
+      </text>
+      <g stroke="#46608F" strokeOpacity=".45" strokeWidth="1">
+        <rect x="95" y="74" width="72" height="20" rx="4" fill="#2A3B5E" fillOpacity=".92" />
+        <rect x="185" y="74" width="46" height="20" rx="4" fill="#35496F" fillOpacity=".92" />
+        <rect x="300" y="74" width="60" height="20" rx="4" fill="#22314F" fillOpacity=".92" />
+        <rect className="hb-blip1" x="112" y="120" width="88" height="20" rx="4" fill="#22314F" fillOpacity=".92" />
+        <rect x="240" y="120" width="42" height="20" rx="4" fill="#2A3B5E" fillOpacity=".92" />
+        <rect x="95" y="166" width="44" height="20" rx="4" fill="#2A3B5E" fillOpacity=".92" />
+        <rect x="156" y="166" width="84" height="20" rx="4" fill="#35496F" fillOpacity=".92" />
+        <rect x="272" y="166" width="52" height="20" rx="4" fill="#22314F" fillOpacity=".92" />
+        <rect x="128" y="212" width="66" height="20" rx="4" fill="#2A3B5E" fillOpacity=".92" />
+        <rect className="hb-blip2" x="216" y="212" width="46" height="20" rx="4" fill="#35496F" fillOpacity=".92" />
+      </g>
+      <path className="hb-now" d="M250 44v208M244 35l6 9 6-9z" fill="#5E7BAE" stroke="#5E7BAE" strokeWidth="1.3" />
+      <text className="hb-t" x="18" y="250" fill="#35496F">
+        CAP 82
+      </text>
+    </svg>
+  );
+}
+
+/* The link route in plane coordinates. Flow order: call -> dispatch ->
+   ticket -> invoice. Node arrival fractions of total path length (721px):
+   0, .255, .563, 1.0; the flash delays in CSS are derived from these. */
+const LINK_ROUTE =
+  "M208 96 L208 182 L306 182 L306 310 L258 310 L258 356 L420 356 L420 264 L481 264";
 
 export function HeroBackdrop() {
   return (
-    <div aria-hidden className="hero-art">
-      <svg viewBox="0 0 650 500" preserveAspectRatio="xMidYMid meet">
-        {/* Final artwork copies: peek from under the dispatch board. */}
-        <g
-          className="hero-sheet hero-sheet-a-under"
-          transform="translate(30 14) rotate(2.2)"
-        >
-          <TicketSheet />
-        </g>
-        <g
-          className="hero-sheet hero-sheet-b-under"
-          transform="translate(310 140) rotate(2.5)"
-        >
-          <InvoiceSheet />
-        </g>
-
-        {/* Dispatch board acetate. Static except the two ambient details. */}
-        <g transform="translate(60 48) rotate(-1.6)">
-          <rect
-            x="0"
-            y="0"
-            width="560"
-            height="352"
-            rx="2"
-            fill="#22314F"
-            fillOpacity=".55"
-            stroke="#2A3B5E"
-            strokeOpacity=".9"
-          />
-          <line x1="0" y1="0" x2="0" y2="352" stroke="#5E7BAE" strokeOpacity=".35" />
-          <line x1="118" y1="0" x2="118" y2="352" stroke="#2A3B5E" />
-          <line x1="0" y1="44" x2="560" y2="44" stroke="#2A3B5E" />
-          <g stroke="#35496F" strokeOpacity=".9">
-            <line x1="122" y1="34" x2="122" y2="44" />
-            <line x1="170" y1="34" x2="170" y2="44" />
-            <line x1="218" y1="34" x2="218" y2="44" />
-            <line x1="266" y1="34" x2="266" y2="44" />
-            <line x1="314" y1="34" x2="314" y2="44" />
-            <line x1="362" y1="34" x2="362" y2="44" />
-            <line x1="410" y1="34" x2="410" y2="44" />
-            <line x1="458" y1="34" x2="458" y2="44" />
-            <line x1="506" y1="34" x2="506" y2="44" />
-            <line x1="554" y1="34" x2="554" y2="44" />
-          </g>
-          <text className="hero-art-lbl" x="122" y="28" textAnchor="middle">
-            8a
-          </text>
-          <text className="hero-art-lbl" x="218" y="28" textAnchor="middle">
-            10a
-          </text>
-          <text className="hero-art-lbl" x="314" y="28" textAnchor="middle">
-            12p
-          </text>
-          <text className="hero-art-lbl" x="410" y="28" textAnchor="middle">
-            2p
-          </text>
-          <text className="hero-art-lbl" x="506" y="28" textAnchor="middle">
-            4p
-          </text>
-          <g stroke="#2A3B5E" strokeOpacity=".3">
-            <line x1="170" y1="44" x2="170" y2="344" />
-            <line x1="218" y1="44" x2="218" y2="344" />
-            <line x1="266" y1="44" x2="266" y2="344" />
-            <line x1="314" y1="44" x2="314" y2="344" />
-            <line x1="362" y1="44" x2="362" y2="344" />
-            <line x1="410" y1="44" x2="410" y2="344" />
-            <line x1="458" y1="44" x2="458" y2="344" />
-            <line x1="506" y1="44" x2="506" y2="344" />
-          </g>
-          <g stroke="#2A3B5E" strokeOpacity=".8">
-            <line x1="0" y1="104" x2="560" y2="104" />
-            <line x1="0" y1="164" x2="560" y2="164" />
-            <line x1="0" y1="224" x2="560" y2="224" />
-            <line x1="0" y1="284" x2="560" y2="284" />
-          </g>
-          <g fill="none" stroke="#35496F" strokeOpacity=".9">
-            <circle cx="26" cy="74" r="8" />
-            <circle cx="26" cy="134" r="8" />
-            <circle cx="26" cy="194" r="8" />
-            <circle cx="26" cy="254" r="8" />
-            <circle cx="26" cy="314" r="8" />
-          </g>
-          <g fill="#2A3B5E">
-            <rect x="44" y="70.5" width="58" height="7" rx="3.5" />
-            <rect x="44" y="130.5" width="50" height="7" rx="3.5" />
-            <rect x="44" y="190.5" width="62" height="7" rx="3.5" />
-            <rect x="44" y="250.5" width="46" height="7" rx="3.5" />
-            <rect x="44" y="310.5" width="54" height="7" rx="3.5" />
-          </g>
-          <g fill="#2A3B5E" fillOpacity=".45" stroke="#35496F" strokeOpacity=".85">
-            <rect x="134" y="57" width="88" height="34" rx="5" />
-            <rect x="262" y="57" width="120" height="34" rx="5" />
-            <rect x="426" y="57" width="76" height="34" rx="5" />
-            <rect x="146" y="117" width="104" height="34" rx="5" />
-            <rect x="306" y="117" width="64" height="34" rx="5" />
-            <rect x="126" y="177" width="72" height="34" rx="5" />
-            <rect x="238" y="177" width="152" height="34" rx="5" />
-            <rect x="416" y="177" width="92" height="34" rx="5" />
-            <rect x="158" y="237" width="116" height="34" rx="5" />
-            <rect x="356" y="237" width="72" height="34" rx="5" />
-            <rect x="486" y="237" width="58" height="34" rx="5" />
-            <rect x="132" y="297" width="92" height="34" rx="5" />
-            <rect x="300" y="297" width="60" height="34" rx="5" />
-            <rect x="398" y="297" width="132" height="34" rx="5" />
-          </g>
-          <rect
-            className="hero-art-chip"
-            x="452"
-            y="117"
-            width="64"
-            height="34"
-            rx="5"
-            fill="#F6A328"
-            fillOpacity=".1"
-            stroke="#F6A328"
-            strokeOpacity=".85"
-          />
-          <line
-            className="hero-art-nowline"
-            x1="386"
-            y1="30"
-            x2="386"
-            y2="346"
-            stroke="#5E7BAE"
-            strokeOpacity=".6"
-            strokeWidth="1.2"
-          />
-        </g>
-
-        {/* Pile copies: stacked on the board at load, opacity 0 whenever the
-            entrance animation is not running. */}
-        <g
-          className="hero-sheet hero-sheet-top hero-sheet-a-top"
-          transform="translate(150 84) rotate(-3)"
-        >
-          <TicketSheet />
-        </g>
-        <g
-          className="hero-sheet hero-sheet-top hero-sheet-b-top"
-          transform="translate(235 60) rotate(-1.2)"
-        >
-          <InvoiceSheet />
-        </g>
-      </svg>
-    </div>
+    <>
+      <div aria-hidden className="hero-art">
+        <div className="hb-persp">
+          <div className="hb-float">
+            <div className="hb-plane">
+              <div className="hb-layer hb-l1">
+                <CallLogSheet />
+              </div>
+              <div className="hb-layer hb-l2">
+                <InvoiceSheet />
+              </div>
+              <div className="hb-layer hb-l3">
+                <TicketSheet />
+              </div>
+              <div className="hb-layer hb-l4">
+                <DispatchSheet />
+              </div>
+              <div className="hb-layer hb-l5">
+                <svg className="hb-link" width="660" height="430" viewBox="0 0 660 430">
+                  <path className="hb-link-path" d={LINK_ROUTE} pathLength="100" />
+                  <circle className="hb-ring hb-ring1" cx="208" cy="96" r="5" />
+                  <circle className="hb-ring hb-ring2" cx="306" cy="182" r="5" />
+                  <circle className="hb-ring hb-ring3" cx="258" cy="356" r="5" />
+                  <circle className="hb-ring hb-ring4" cx="481" cy="264" r="5" />
+                  <circle className="hb-node hb-n1" cx="208" cy="96" r="4" />
+                  <circle className="hb-node hb-n2" cx="306" cy="182" r="4" />
+                  <circle className="hb-node hb-n3" cx="258" cy="356" r="4" />
+                  <circle className="hb-node hb-n4" cx="481" cy="264" r="4" />
+                </svg>
+                <div className="hb-tracer" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="hb-veil" />
+      </div>
+      {/* Pointer tilt enhancer: plain inline script per the Next JSON-LD
+          pattern, so the hero stays a server component with zero hydration.
+          Writes two custom properties + a rotate onto .hb-plane; every
+          consumer is CSS. Skips itself on touch, small screens, and
+          reduced motion. */}
+      <script
+        id="hero-tilt"
+        dangerouslySetInnerHTML={{
+          __html: `(function(){
+var sec=document.getElementById('top');
+var plane=sec&&sec.querySelector('.hb-plane');
+if(!plane)return;
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+if(!matchMedia('(hover: hover) and (pointer: fine) and (min-width: 48rem)').matches)return;
+var px=null,py=null,home=true,cx=0,cy=0,raf=null;
+function frame(){
+raf=null;
+var tx=0,ty=0;
+if(!home&&px!==null){
+var r=sec.getBoundingClientRect();
+tx=((px-r.left)/r.width-.5)*8;
+ty=(.5-(py-r.top)/r.height)*8;
+}
+cx+=(tx-cx)*.09;
+cy+=(ty-cy)*.09;
+plane.style.transform='rotateX('+(26+cy).toFixed(2)+'deg) rotateY('+cx.toFixed(2)+'deg) rotateZ(-4deg)';
+plane.style.setProperty('--hb-px',(cx*6).toFixed(1)+'px');
+plane.style.setProperty('--hb-py',(cy*-4).toFixed(1)+'px');
+if(Math.abs(tx-cx)>.004||Math.abs(ty-cy)>.004)raf=requestAnimationFrame(frame);
+}
+function kick(){if(!raf)raf=requestAnimationFrame(frame);}
+sec.addEventListener('pointermove',function(e){px=e.clientX;py=e.clientY;home=false;kick();});
+sec.addEventListener('pointerleave',function(){home=true;kick();});
+})();`,
+        }}
+      />
+    </>
   );
 }

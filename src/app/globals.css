@@ -369,164 +369,420 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Hero backdrop artwork: "Top Sheet Dispatch" (winner H1).
-   A dispatch-board acetate with a job-ticket and an invoice sheet, rendered
-   by HeroBackdrop as an aria-hidden layer at 25% opacity, anchored right so
-   the left ~55% (H1, subhead, CTA) stays quiet. The artwork viewBox is a
-   tight 650x500 crop of the approved composition.
+   Hero backdrop artwork: "The Missing Link" (Bryan's round-5 pick).
+   A CSS-3D light table: call log, dispatch board, job ticket, and invoice
+   acetates layered in depth, threaded by ONE amber link line that draws
+   itself through the job's real-world flow (call, dispatch, ticket,
+   invoice) with a ring flash at each stop. Rendered by HeroBackdrop as an
+   aria-hidden layer anchored right; dimming to hero strength is a solid
+   bg-base veil on top because opacity on a 3D ancestor flattens
+   preserve-3d.
 
-   Static rule (mobile, reduced motion, and any no-animation context): the
-   under copies carry the final pose as SVG attribute transforms and the pile
-   copies sit at opacity 0, so the finished composition renders with no CSS
-   motion at all.
+   Static rule (mobile, reduced motion, no-JS): every animated property's
+   base value below is the settled composition with the link fully drawn;
+   all motion and all "start hidden" values live inside the media gate.
+   The plane is a fixed 660x430 design space, scaled per breakpoint.
 --------------------------------------------------------------------------- */
 
 .hero-art {
   position: absolute;
-  top: 53%;
-  right: -7rem;
-  width: 34rem;
+  top: 55%;
+  right: -8rem;
+  width: 660px;
+  height: 430px;
   translate: 0 -50%;
-  opacity: 0.25;
+  scale: 0.8;
+  transform-origin: center right;
   pointer-events: none;
 }
 
 @media (min-width: 48rem) {
   .hero-art {
-    right: 0;
-    width: min(44vw, 42rem);
+    top: 53%;
+    right: -1rem;
+    scale: 0.78;
   }
 }
 
-.hero-art svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 650 / 500;
+@media (min-width: 64rem) {
+  .hero-art {
+    scale: 0.88;
+    right: 0;
+  }
 }
 
-.hero-art-lbl {
+@media (min-width: 80rem) {
+  .hero-art {
+    scale: 1;
+  }
+}
+
+.hb-persp {
+  position: absolute;
+  inset: 0;
+  perspective: 1200px;
+  perspective-origin: 64% 42%;
+}
+
+.hb-float {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* Base transform must match what the tilt script writes (26deg / -4deg). */
+.hb-plane {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(26deg) rotateY(0deg) rotateZ(-4deg);
+  will-change: transform;
+}
+
+.hb-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Depth stack, back to front. --hb-px/--hb-py come from the tilt script;
+   each layer rides them at its own rate for parallax between sheets. */
+.hb-l1 {
+  left: 12px;
+  top: 24px;
+  transform: translate3d(calc(var(--hb-px, 0px) * 0.12), calc(var(--hb-py, 0px) * 0.12), -44px) rotate(-2.5deg);
+}
+.hb-l2 {
+  left: 352px;
+  top: 196px;
+  transform: translate3d(calc(var(--hb-px, 0px) * 0.34), calc(var(--hb-py, 0px) * 0.34), -12px) rotate(2.5deg);
+}
+.hb-l3 {
+  left: 96px;
+  top: 252px;
+  transform: translate3d(calc(var(--hb-px, 0px) * 0.58), calc(var(--hb-py, 0px) * 0.58), 22px) rotate(-2deg);
+}
+.hb-l4 {
+  left: 150px;
+  top: 52px;
+  transform: translate3d(calc(var(--hb-px, 0px) * 0.85), calc(var(--hb-py, 0px) * 0.85), 60px) rotate(1.2deg);
+}
+.hb-l5 {
+  width: 660px;
+  height: 430px;
+  transform: translate3d(calc(var(--hb-px, 0px) * 0.5), calc(var(--hb-py, 0px) * 0.5), 70px);
+}
+
+.hb-sheet {
+  display: block;
+  overflow: visible;
+}
+
+.hb-link {
+  display: block;
+  overflow: visible;
+}
+
+/* The one amber element: link line + junction nodes + tracer. Base state is
+   fully drawn and visible (the static composition). */
+.hb-link-path {
+  fill: none;
+  stroke: #f6a328;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.hb-node {
+  fill: none;
+  stroke: #f6a328;
+  stroke-width: 1.2;
+  opacity: 0.95;
+}
+
+.hb-ring {
+  fill: none;
+  stroke: #f6a328;
+  stroke-width: 1.2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.hb-tracer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  background: #f6a328;
+  transform: rotate(45deg);
+  display: none;
+  opacity: 0;
+  offset-path: path("M208 96 L208 182 L306 182 L306 310 L258 310 L258 356 L420 356 L420 264 L481 264");
+  offset-rotate: 0deg;
+}
+
+.hb-veil {
+  position: absolute;
+  inset: -40px;
+  background: var(--color-base);
+  opacity: 0.75;
+}
+
+.hb-t {
   font: 8px ui-monospace, SFMono-Regular, Menlo, monospace;
-  fill: #35496f;
   letter-spacing: 0.05em;
 }
 
-/* view-box + origin 0 0 makes the CSS transforms below compose exactly like
-   the SVG attribute transforms (translate then rotate about the sheet's own
-   top-left corner), so the animated end pose matches the static artwork. */
-.hero-sheet {
-  transform-box: view-box;
-  transform-origin: 0 0;
+.hb-t9 {
+  font: 9px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.08em;
 }
 
-.hero-sheet-top {
-  opacity: 0;
-}
-
-/* The desk clears itself: each support sheet flies from the pile on the
-   board to its final peeking pose. Both copies of a sheet ride the same
-   move keyframes; the fade pair swaps which side of the board renders during
-   the last stretch of the flight, when the sheet is nearly settled. */
-@keyframes hero-sheet-a-move {
-  from {
-    transform: translate(150px, 84px) rotate(-3deg);
-  }
-  to {
-    transform: translate(30px, 14px) rotate(2.2deg);
-  }
-}
-
-@keyframes hero-sheet-b-move {
-  from {
-    transform: translate(235px, 60px) rotate(-1.2deg);
-  }
-  to {
-    transform: translate(310px, 140px) rotate(2.5deg);
-  }
-}
-
-@keyframes hero-sheet-fade-out {
-  0%,
-  72% {
-    opacity: 1;
-  }
-  90%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes hero-sheet-fade-in {
-  0%,
-  72% {
-    opacity: 0;
-  }
-  90%,
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Ambient details. Only these two things move after the entrance. */
-@keyframes hero-nowline-breathe {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@keyframes hero-chip-redraw {
+/* Sheet entrances: 10s timeline played ONCE, staggered inside the keyframes,
+   all settled by 1.6s (16%). fill both pulls the 0% offsets at load. */
+@keyframes hb-in1 {
   0% {
-    stroke-dashoffset: 188;
+    opacity: 0;
+    transform: translate(-120px, 34px) rotate(-6deg);
+  }
+  5% {
+    opacity: 1;
   }
   11% {
+    transform: translate(5px, -3px) rotate(0.5deg);
+  }
+  14%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes hb-in2 {
+  0%,
+  1% {
+    opacity: 0;
+    transform: translate(130px, 44px) rotate(5deg);
+  }
+  6% {
+    opacity: 1;
+  }
+  12% {
+    transform: translate(-4px, 2px) rotate(-0.4deg);
+  }
+  15%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes hb-in3 {
+  0%,
+  2% {
+    opacity: 0;
+    transform: translate(-36px, 120px) rotate(-4deg);
+  }
+  7% {
+    opacity: 1;
+  }
+  13% {
+    transform: translate(3px, -4px) rotate(0.5deg);
+  }
+  16%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes hb-in4 {
+  0%,
+  3% {
+    opacity: 0;
+    transform: translate(96px, -110px) rotate(4deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  13% {
+    transform: translate(-5px, 4px) rotate(-0.5deg);
+  }
+  16%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes hb-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -7px, 0) rotate(0.4deg);
+  }
+}
+
+@keyframes hb-draw {
+  to {
     stroke-dashoffset: 0;
   }
+}
+
+@keyframes hb-nodein {
+  0% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
   100% {
-    stroke-dashoffset: 0;
+    opacity: 0.95;
+    transform: scale(1);
+  }
+}
+
+/* The subtle flash: a hard-edged ring expands and fades as the line lands
+   on a document. Fill-mode none returns to the opacity 0 base after. */
+@keyframes hb-ringflash {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+@keyframes hb-run {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  40% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  44%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes hb-nowd {
+  0%,
+  16% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(22px);
+  }
+}
+
+@keyframes hb-blip {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
-  /* Entrance starts about 300ms after the hero reveal's last element (the
-     amber rule) settles at 1.85s; the invoice follows the ticket by 250ms.
-     Whole entrance spans 2.15s to 3.35s, well under the 1.6s budget. */
-  .hero-sheet-a-top {
-    animation:
-      hero-sheet-a-move 0.95s cubic-bezier(0.22, 1, 0.36, 1) 2.15s both,
-      hero-sheet-fade-out 0.95s linear 2.15s both;
+  .hb-float {
+    animation: hb-float 9s ease-in-out infinite;
   }
 
-  .hero-sheet-a-under {
-    animation:
-      hero-sheet-a-move 0.95s cubic-bezier(0.22, 1, 0.36, 1) 2.15s both,
-      hero-sheet-fade-in 0.95s linear 2.15s both;
+  .hb-e1 {
+    animation: hb-in1 10s cubic-bezier(0.22, 0.85, 0.3, 1) 1 both;
+  }
+  .hb-e2 {
+    animation: hb-in2 10s cubic-bezier(0.22, 0.85, 0.3, 1) 1 both;
+  }
+  .hb-e3 {
+    animation: hb-in3 10s cubic-bezier(0.22, 0.85, 0.3, 1) 1 both;
+  }
+  .hb-e4 {
+    animation: hb-in4 10s cubic-bezier(0.22, 0.85, 0.3, 1) 1 both;
   }
 
-  .hero-sheet-b-top {
-    animation:
-      hero-sheet-b-move 0.95s cubic-bezier(0.22, 1, 0.36, 1) 2.4s both,
-      hero-sheet-fade-out 0.95s linear 2.4s both;
+  /* The link draws once, slowly: 2.2s to 5.6s, linear so the ring-flash
+     delays below stay in sync with the pen. Dasharray/offset live inside
+     the gate so static contexts keep the fully drawn line. */
+  .hb-link-path {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: hb-draw 3.4s linear 2.2s forwards;
   }
 
-  .hero-sheet-b-under {
-    animation:
-      hero-sheet-b-move 0.95s cubic-bezier(0.22, 1, 0.36, 1) 2.4s both,
-      hero-sheet-fade-in 0.95s linear 2.4s both;
+  /* Node pops + ring flashes at the pen's arrival at each stop. Path length
+     721px; fractions 0 / .255 / .563 / 1.0 of the 3.4s draw. */
+  .hb-node {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .hb-n1 {
+    animation: hb-nodein 0.35s ease-out 2.2s forwards;
+  }
+  .hb-n2 {
+    animation: hb-nodein 0.35s ease-out 3.07s forwards;
+  }
+  .hb-n3 {
+    animation: hb-nodein 0.35s ease-out 4.11s forwards;
+  }
+  .hb-n4 {
+    animation: hb-nodein 0.35s ease-out 5.6s forwards;
+  }
+  .hb-ring1 {
+    animation: hb-ringflash 0.7s ease-out 2.2s 1;
+  }
+  .hb-ring2 {
+    animation: hb-ringflash 0.7s ease-out 3.07s 1;
+  }
+  .hb-ring3 {
+    animation: hb-ringflash 0.7s ease-out 4.11s 1;
+  }
+  .hb-ring4 {
+    animation: hb-ringflash 0.7s ease-out 5.6s 1;
   }
 
-  .hero-art-nowline {
-    animation: hero-nowline-breathe 14s ease-in-out 3.6s infinite;
+  /* Ambient: the job rides the link every 16s, the navy now-line creeps,
+     two chips and the call waveform pulse. */
+  .hb-tracer {
+    display: block;
+    animation: hb-run 16s linear 7s infinite;
   }
+  .hb-now {
+    animation: hb-nowd 24s linear infinite alternate;
+  }
+  .hb-blip1 {
+    animation: hb-blip 3.4s ease-in-out infinite;
+  }
+  .hb-blip2 {
+    animation: hb-blip 3.4s ease-in-out 1.7s infinite;
+  }
+  .hb-wave rect {
+    animation: hb-blip 2.8s ease-in-out infinite;
+  }
+  .hb-wave rect:nth-child(2n) {
+    animation-delay: 0.7s;
+  }
+  .hb-wave rect:nth-child(3n) {
+    animation-delay: 1.4s;
+  }
+}
 
-  /* Dasharray lives inside the gate so every static context keeps a solid
-     outline. 188 is the chip perimeter (64x34, rx 5). */
-  .hero-art-chip {
-    stroke-dasharray: 188;
-    animation: hero-chip-redraw 20s linear 4.5s infinite;
+@supports not (offset-path: path("M0 0H8")) {
+  .hb-tracer {
+    display: none !important;
   }
 }
 
