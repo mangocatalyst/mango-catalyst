@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/Button";
+import { HeroBackdrop } from "@/components/sections/HeroBackdrop";
 
 /**
  * Home hero, direction A: type-led + one CSS spark (Bryan's locked pick).
@@ -24,9 +25,11 @@ export function Hero() {
       id="top"
       className="hero-reveal relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-base"
     >
-      {/* Backdrop: matte navy glow under a faint blueprint grid. */}
+      {/* Backdrop: matte navy glow under a faint blueprint grid, plus the
+          Top Sheet Dispatch artwork right-of-center (see HeroBackdrop). */}
       <div aria-hidden className="hero-glow" />
       <div aria-hidden className="hero-grid" />
+      <HeroBackdrop />
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 sm:px-10">
         <div className="my-auto pt-12 pb-14 sm:pt-12 sm:pb-16">

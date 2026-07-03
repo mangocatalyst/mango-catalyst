@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SITE } from "@/lib/constants";
 import { Wordmark } from "@/components/ui/Wordmark";
+import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 
 /**
  * Global footer: the crawl safety net (seo-spec section 5). All seven
@@ -53,8 +54,10 @@ export function Footer() {
     .join(" · ");
 
   return (
-    <footer className="border-t border-hairline/60 bg-deep">
-      <div className="mx-auto w-full max-w-6xl px-6 py-14 sm:px-10 sm:py-16">
+    <footer className="relative overflow-hidden border-t border-hairline/60 bg-deep">
+      {/* The Chart Sheet backdrop: aria-hidden decoration behind the links. */}
+      <FooterBackdrop />
+      <div className="relative mx-auto w-full max-w-6xl px-6 py-14 sm:px-10 sm:py-16">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1.4fr]">
           <div>
             <Wordmark />
