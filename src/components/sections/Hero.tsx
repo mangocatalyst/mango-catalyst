@@ -6,7 +6,7 @@ import { HeroBackdrop } from "@/components/sections/HeroBackdrop";
  * Home hero, direction A: type-led + one CSS spark (Bryan's locked pick).
  *
  * Server component, zero client JS. The H1 is the art: Big Shoulders stacked
- * three lines over a faint blueprint grid and one matte navy glow. Amber
+ * three lines over one matte navy glow. Amber
  * appears exactly three times: the spark on the last word, the rule that
  * draws on at load, and the CTA. The reveal is one orchestrated CSS moment,
  * gated to desktop widths and prefers-reduced-motion: no-preference; on
@@ -25,10 +25,9 @@ export function Hero() {
       id="top"
       className="hero-reveal relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-base"
     >
-      {/* Backdrop: matte navy glow under a faint blueprint grid, plus the
-          Top Sheet Dispatch artwork right-of-center (see HeroBackdrop). */}
+      {/* Backdrop: matte navy glow plus the Top Sheet Dispatch artwork
+          right-of-center (see HeroBackdrop). */}
       <div aria-hidden className="hero-glow" />
-      <div aria-hidden className="hero-grid" />
       <HeroBackdrop />
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 sm:px-10">

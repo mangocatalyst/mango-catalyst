@@ -220,14 +220,15 @@ body {
 
 /* ---------------------------------------------------------------------------
    Hero, direction A: type-led + one CSS spark.
-   The H1 is the art. A faint blueprint grid with registration crosses, one
-   matte navy radial glow behind the headline, one amber spark on the last
-   word, and one amber rule that draws on at load. Motion is a single
-   orchestrated page-load reveal: desktop only, skipped entirely when the
-   visitor prefers reduced motion. Everything is server-rendered text.
+   The H1 is the art. One matte navy radial glow behind the headline, one
+   amber spark on the last word, and one amber rule that draws on at load.
+   Motion is a single orchestrated page-load reveal: desktop only, skipped
+   entirely when the visitor prefers reduced motion. Everything is
+   server-rendered text. (Blueprint grid removed per Bryan, 2026-07-03: the
+   backdrop artwork carries the texture.)
 --------------------------------------------------------------------------- */
 
-/* Backdrop layer 1: sanctioned subtle navy radial glow, low opacity, matte. */
+/* Backdrop: sanctioned subtle navy radial glow, low opacity, matte. */
 .hero-glow {
   position: absolute;
   left: -12%;
@@ -239,35 +240,6 @@ body {
     rgb(30 44 74 / 0.7),
     rgb(30 44 74 / 0) 72%
   );
-  pointer-events: none;
-}
-
-/* Backdrop layer 2: faint blueprint grid. Minor lines every 48px, major lines
-   every 240px, a registration cross at the center of each major cell. Masked
-   so it concentrates behind the headline and dissolves toward the edges; the
-   mask is pulled in slightly so the grid clears the Top Sheet Dispatch
-   artwork composed on the right (the two layers should not stack). */
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cpath d='M120 112v16M112 120h16' stroke='%239DAAC2' stroke-opacity='0.16' stroke-width='1'/%3E%3C/svg%3E"),
-    linear-gradient(to right, rgb(157 170 194 / 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(157 170 194 / 0.07) 1px, transparent 1px),
-    linear-gradient(to right, rgb(157 170 194 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(157 170 194 / 0.04) 1px, transparent 1px);
-  background-size:
-    240px 240px,
-    240px 240px,
-    240px 240px,
-    48px 48px,
-    48px 48px;
-  -webkit-mask-image: radial-gradient(
-    120% 125% at 32% 38%,
-    black 28%,
-    transparent 70%
-  );
-  mask-image: radial-gradient(120% 125% at 32% 38%, black 28%, transparent 70%);
   pointer-events: none;
 }
 
