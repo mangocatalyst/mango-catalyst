@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Section } from "@/components/layout/Section";
 import { ArrowLink } from "@/components/ui/ArrowLink";
-import { Card } from "@/components/ui/Card";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
   CalendarIcon,
@@ -29,7 +28,7 @@ const CARDS: {
 }[] = [
   {
     icon: <InvoiceIcon className="size-5" />,
-    title: "Invoicing, billing, and the paper behind it",
+    title: "Invoicing, billing, and the paper trail",
     body: "Jobs close, invoices go out, payments get tracked. The repeatable part runs on its own, so the weekly catch-up on billing mostly disappears.",
     examples: [
       "Supply-house receipt emails matched line by line to the right purchase order in your CRM, for every vendor you buy from.",
@@ -48,10 +47,10 @@ const CARDS: {
   {
     icon: <CalendarIcon className="size-5" />,
     title: "Scheduling, dispatch, and job chatter",
-    body: "The right tech, the right job, the right route. Live availability so whoever answers the phone books against what's actually open, not a guess.",
+    body: "The coordination around a job, not just the calendar entry, kept together instead of scattered across texts, sticky notes, and inboxes.",
     examples: [
-      "A channel per job in your team chat, the right people added automatically, and the photos and messages in it archived back onto the job record.",
-      "An install form that prints itself into a clean truck load sheet for the crew.",
+      "A dedicated channel per job in your team chat, the right people added automatically, and the photos and messages in it archived back onto the job record when it closes.",
+      "Digital install and truck load sheets the crew fills from a phone, saving field time and still printing clean for the shop.",
     ],
   },
   {
@@ -74,7 +73,7 @@ const CARDS: {
   },
   {
     icon: <ClipboardIcon className="size-5" />,
-    title: "Forms, portals, and the clicks in between",
+    title: "Forms, portals, and the clicks between",
     body: "The fifty-times-a-week stuff that lives outside your main system: web portals, agency forms, the same six clicks to do one small thing.",
     examples: [
       "Portal forms pre-filled from saved presets, with your staff reviewing and clicking submit.",
@@ -103,17 +102,19 @@ export function ServiceGrid() {
         }
       />
 
-      <div className="mt-12 grid gap-5 sm:grid-cols-2">
+      <div className="mt-14 grid gap-x-14 gap-y-14 sm:grid-cols-2">
         {CARDS.map((card) => (
-          <Card key={card.title} className="p-7">
-            <span className="flex size-10 items-center justify-center rounded-lg border border-hairline bg-surface-hi text-muted">
-              {card.icon}
-            </span>
-            <h3 className="mt-5 text-[1.15rem] font-semibold text-ink">
-              {card.title}
-            </h3>
-            <p className="mt-3 text-card text-body">{card.body}</p>
-            <div className="mt-5 border-l-2 border-hairline pl-4">
+          <div key={card.title}>
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-hi text-muted">
+                {card.icon}
+              </span>
+              <h3 className="text-[1.15rem] font-semibold text-ink">
+                {card.title}
+              </h3>
+            </div>
+            <p className="mt-4 text-card text-body">{card.body}</p>
+            <div className="mt-6 border-l-2 border-amber pl-4">
               <p className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-faint">
                 For example
               </p>
@@ -128,11 +129,11 @@ export function ServiceGrid() {
                 ))}
               </ul>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
-      <p className="mt-8 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted">
+      <p className="mt-16 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted">
         {
           "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything we build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
         }
