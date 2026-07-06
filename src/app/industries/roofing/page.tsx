@@ -5,10 +5,10 @@ import { TrussArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/roofing";
 const DESCRIPTION =
-  "Storm-week lead pile, insurance paperwork, and job photos scattered across phones, handled automatically. Office automation for Minnesota roofing contractors. Book a 15-minute fit call.";
+  "Storm-week lead pile, insurance paperwork, and job photos scattered across phones, handled automatically. Office automation for Upper Midwest roofing contractors. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "Roofing Business Automation in Minnesota",
+  title: "Roofing Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -18,11 +18,11 @@ export default function RoofingIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "Roofing Business Automation",
-        h1: "Roofing business automation in Minnesota",
+        h1: "Roofing business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "Roofing runs in surges: a hail night fills the phone for a month, and the office drowns in the exact weeks the crews are busiest. Lead intake, photo filing, insurance paperwork, follow-up on open bids: most of it can run itself. Mango Catalyst builds that automation for Minnesota roofing contractors, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
+          "Roofing runs in surges: a hail night fills the phone for a month, and the office drowns in the exact weeks the crews are busiest. Lead intake, photo filing, insurance paperwork, follow-up on open bids: most of it can run itself. Mango Catalyst builds that automation for Upper Midwest roofing contractors, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
         painsTitle: "The office side of a roofing company runs on busywork",
         painsLead:
           "The roof has a spec: pitch, courses, flashing details. The office has habits. And the habits show up worst in storm season:",

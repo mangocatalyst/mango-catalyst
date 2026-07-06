@@ -5,10 +5,10 @@ import { PipeRunArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/plumbing";
 const DESCRIPTION =
-  "Stop chasing open estimates, warranty registrations, and permit paperwork by hand. Office automation for Minnesota plumbing shops. Book a 15-minute fit call.";
+  "Stop chasing open estimates, warranty registrations, and permit paperwork by hand. Office automation for Upper Midwest plumbing shops. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "Plumbing Business Automation in Minnesota",
+  title: "Plumbing Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -18,11 +18,11 @@ export default function PlumbingIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "Plumbing Business Automation",
-        h1: "Plumbing business automation in Minnesota",
+        h1: "Plumbing business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "Most of the office work in a plumbing shop can run itself: invoicing when the job closes, follow-up on open estimates, appointment reminders, and the water heater warranty registrations nobody remembers until the tank fails. Mango Catalyst builds that automation for Minnesota plumbing shops, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
+          "Most of the office work in a plumbing shop can run itself: invoicing when the job closes, follow-up on open estimates, appointment reminders, and the water heater warranty registrations nobody remembers until the tank fails. Mango Catalyst builds that automation for Upper Midwest plumbing shops, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
         painsTitle: "The office side of a plumbing shop runs on busywork",
         painsLead:
           "The field side of your business has code books and pressure tests. The office side has habits. And the habits are eating the day:",

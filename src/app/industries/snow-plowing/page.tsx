@@ -5,10 +5,10 @@ import { PlowTruckArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/snow-plowing";
 const DESCRIPTION =
-  "Per-push billing, proof-of-service logs, and 'is my lot done yet' calls, handled automatically. Office automation for Minnesota snow plowing contractors. Book a 15-minute fit call.";
+  "Per-push billing, proof-of-service logs, and 'is my lot done yet' calls, handled automatically. Office automation for Upper Midwest snow plowing contractors. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "Snow Plowing Business Automation in Minnesota",
+  title: "Snow Plowing Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -18,11 +18,11 @@ export default function SnowPlowingIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "Snow Plowing Business Automation",
-        h1: "Snow plowing business automation in Minnesota",
+        h1: "Snow plowing business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "Plowing is a 3 AM business with 9 AM paperwork. The service log, the per-push billing, the 'did you do my lot yet' calls, the fall contract renewals: most of it can run itself. Mango Catalyst builds that automation for Minnesota plow contractors, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
+          "Plowing is a 3 AM business with 9 AM paperwork. The service log, the per-push billing, the 'did you do my lot yet' calls, the fall contract renewals: most of it can run itself. Mango Catalyst builds that automation for Upper Midwest plow contractors, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
         painsTitle: "The office side of a plow operation runs on busywork",
         painsLead:
           "The storm has rules: trigger depth, route order, who gets opened first. The paperwork after the storm has habits. And the habits are eating the day after every event:",

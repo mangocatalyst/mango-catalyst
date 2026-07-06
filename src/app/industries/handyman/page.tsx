@@ -5,10 +5,10 @@ import { PunchListArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/handyman";
 const DESCRIPTION =
-  "Small jobs shouldn't carry big office overhead. Quote requests, booking, invoicing, and follow-up that run themselves, for Minnesota handyman businesses. Book a 15-minute fit call.";
+  "Small jobs shouldn't carry big office overhead. Quote requests, booking, invoicing, and follow-up that run themselves, for Upper Midwest handyman businesses. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "Handyman Business Automation in Minnesota",
+  title: "Handyman Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -18,7 +18,7 @@ export default function HandymanIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "Handyman Business Automation",
-        h1: "Handyman business automation in Minnesota",
+        h1: "Handyman business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:

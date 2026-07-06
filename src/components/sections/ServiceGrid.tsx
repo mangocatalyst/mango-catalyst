@@ -112,7 +112,7 @@ export function ServiceGrid() {
             <h3 className="mt-5 text-[1.15rem] font-semibold text-ink">
               {card.title}
             </h3>
-            <p className="mt-3 leading-relaxed text-body">{card.body}</p>
+            <p className="mt-3 text-card text-body">{card.body}</p>
             <div className="mt-5 border-l-2 border-hairline pl-4">
               <p className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-faint">
                 For example
@@ -121,7 +121,7 @@ export function ServiceGrid() {
                 {card.examples.map((example) => (
                   <li
                     key={example.slice(0, 24)}
-                    className="text-[0.95rem] leading-relaxed text-muted"
+                    className="text-card text-muted"
                   >
                     {example}
                   </li>
@@ -135,6 +135,12 @@ export function ServiceGrid() {
       <p className="mt-8 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted">
         {
           "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything we build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
+        }
+      </p>
+
+      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted">
+        {
+          "Some of that busywork lives inside a web page with no API to hook into. For those, we build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
         }
       </p>
 

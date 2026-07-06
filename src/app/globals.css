@@ -38,6 +38,10 @@
   --color-success: #37c99a;
   --color-error: #ff6b6b;
   --color-link: #5ba8ff;
+
+  /* In-box / dense body copy: one step below base for card content. */
+  --text-card: 0.9rem;
+  --text-card--line-height: 1.6;
 }
 
 @theme inline {

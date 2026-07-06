@@ -5,10 +5,10 @@ import { PlotPlanArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/landscaping";
 const DESCRIPTION =
-  "Spring rush intake, recurring maintenance billing, and weather reshuffles, handled automatically. Office automation for Minnesota landscaping and lawn care companies. Book a 15-minute fit call.";
+  "Spring rush intake, recurring maintenance billing, and weather reshuffles, handled automatically. Office automation for Upper Midwest landscaping and lawn care companies. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "Landscaping Business Automation in Minnesota",
+  title: "Landscaping Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -18,11 +18,11 @@ export default function LandscapingIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "Landscaping Business Automation",
-        h1: "Landscaping business automation in Minnesota",
+        h1: "Landscaping business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "A Minnesota landscaping season is short, and the office work lands in the same eight weeks as the actual work. Estimate requests, crew scheduling, recurring maintenance billing, the fall renewal push: most of it can run itself. Mango Catalyst builds that automation for Minnesota landscaping and lawn care companies, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
+          "An Upper Midwest landscaping season is short, and the office work lands in the same eight weeks as the actual work. Estimate requests, crew scheduling, recurring maintenance billing, the fall renewal push: most of it can run itself. Mango Catalyst builds that automation for Upper Midwest landscaping and lawn care companies, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
         painsTitle: "The office side of a landscaping company runs on busywork",
         painsLead:
           "The crews have a route and a plan for every property. The office has habits. And the habits hit hardest exactly when the season does:",
