@@ -42,6 +42,7 @@ export const STATIC_ROUTES = [
   "/industries/handyman",
   "/industries/snow-plowing",
   "/industries/landscaping",
+  "/mn-its",
   "/faq",
   "/contact",
   "/guides",

@@ -60,7 +60,9 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "Is my data safe?",
     answer: [
-      "Your data is yours: I never sell it, and I only wire it into the systems we agree to automate. Nothing gets connected without your say-so, and you'll know exactly which tools are talking to each other, because we'll have chosen them together. Privacy is a design habit for me: the one product I've built and shipped on my own, a browser extension that automates medical claim data entry, runs entirely on the user's own machine by design, so sensitive data never leaves the building. Where your data lives depends on the tools we connect (your CRM, your email, your forms), so you get the specifics for your exact setup on the fit call, not a blanket promise.",
+      "Your data is yours: I never sell it, and I only wire it into the systems we agree to automate. Nothing gets connected without your say-so, and you'll know exactly which tools are talking to each other, because we'll have chosen them together. Privacy is a design habit for me: the one product I've built and shipped on my own, ",
+      { text: "a browser extension that automates medical claim data entry", href: "/mn-its" },
+      ", runs entirely on the user's own machine by design, so sensitive data never leaves the building. Where your data lives depends on the tools we connect (your CRM, your email, your forms), so you get the specifics for your exact setup on the fit call, not a blanket promise.",
     ],
   },
   {
@@ -78,7 +80,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "Who is this NOT for?",
     answer: [
-      "Honest answer: if you've got fewer than a handful of repetitive tasks, or you already have someone in-house building your systems, you probably don't need me. If you want the cheapest possible option and don't care who's behind it, I'm not it. If you need enterprise-grade infrastructure with a 24-hour support desk, I'll point you elsewhere. And if the automation you need touches patient health records, I'm not taking that work right now. I'm the right fit for an owner who's drowning in office busywork and wants one person who'll build it, run it, and pick up the phone.",
+      "Honest answer: if you've got fewer than a handful of repetitive tasks, or you already have someone in-house building your systems, you probably don't need me. If you want the cheapest possible option and don't care who's behind it, I'm not it. If you need enterprise-grade infrastructure with a 24-hour support desk, I'll point you elsewhere. I'm the right fit for an owner who's drowning in office busywork and wants one person who'll build it, run it, and pick up the phone.",
     ],
   },
   {

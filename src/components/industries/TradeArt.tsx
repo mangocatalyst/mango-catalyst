@@ -284,3 +284,48 @@ export function PlotPlanArt(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+/** MN-ITS Helper: a claim form in a browser window whose data-flow arrows
+ *  loop entirely inside a dashed machine boundary (the credibility-strip
+ *  schematic from the imagery doc, promoted to the /mn-its page hero).
+ *  Amber marks the stays-local node. */
+export function LocalOnlyArt(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...frame(props)}>
+      <Registration />
+      {/* the machine boundary: everything lives inside this dashed line */}
+      <rect x="56" y="48" width="348" height="234" rx="12" stroke="#35496F" strokeWidth="1.2" strokeDasharray="7 5" />
+      <text x="72" y="272" fill="#46608F" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">YOUR MACHINE</text>
+      {/* browser window with a claim form */}
+      <rect x="92" y="76" width="184" height="150" rx="7" fill="#16213A" fillOpacity=".55" stroke="#46608F" strokeWidth="1.2" />
+      <path d="M92 100h184" stroke="#2A3B5E" strokeWidth="1" />
+      <circle cx="104" cy="88" r="3" stroke="#35496F" strokeWidth="1" />
+      <circle cx="116" cy="88" r="3" stroke="#35496F" strokeWidth="1" />
+      <text x="130" y="91" fill="#46608F" fontSize="8" fontFamily="var(--font-mono, monospace)" letterSpacing="1.5">MN-ITS CLAIM</text>
+      <g fill="#2A3B5E">
+        <rect x="106" y="114" width="100" height="5" rx="2" />
+        <rect x="106" y="132" width="140" height="5" rx="2" />
+        <rect x="106" y="150" width="84" height="5" rx="2" />
+        <rect x="106" y="168" width="120" height="5" rx="2" />
+      </g>
+      <rect x="106" y="192" width="64" height="18" rx="4" stroke="#46608F" strokeWidth="1" fill="#22314F" fillOpacity=".9" />
+      <text x="116" y="204" fill="#5E7BAE" fontSize="8" fontFamily="var(--font-mono, monospace)">REVIEW</text>
+      {/* preset store: a small card stack beside the window */}
+      <rect x="308" y="112" width="72" height="88" rx="6" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".5" />
+      <rect x="316" y="104" width="72" height="88" rx="6" stroke="#35496F" strokeWidth="1" fill="#0E1729" />
+      <g fill="#2A3B5E">
+        <rect x="328" y="120" width="48" height="5" rx="2" />
+        <rect x="328" y="136" width="36" height="5" rx="2" />
+        <rect x="328" y="152" width="44" height="5" rx="2" />
+      </g>
+      <text x="326" y="180" fill="#46608F" fontSize="8" fontFamily="var(--font-mono, monospace)" letterSpacing="1">PRESETS</text>
+      {/* data-flow arrows: presets to form and back, looping INSIDE the boundary */}
+      <path d="M316 148h-28M288 148l8-5M288 148l8 5" stroke="#5E7BAE" strokeWidth="1.2" />
+      <path d="M276 216c40 26 88 12 76-24" stroke="#35496F" strokeWidth="1" strokeDasharray="3 4" fill="none" />
+      <path d="M352 192l0 10M352 192l7 7" stroke="#35496F" strokeWidth="1" />
+      {/* the stays-local node: amber, ON the boundary loop, going nowhere */}
+      <circle cx="330" cy="234" r="4" fill="#F6A328" />
+      <text x="288" y="252" fill="#5E7BAE" fontSize="8" fontFamily="var(--font-mono, monospace)" letterSpacing="1">NO EGRESS</text>
+    </svg>
+  );
+}

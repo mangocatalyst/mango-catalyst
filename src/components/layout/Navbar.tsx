@@ -6,7 +6,6 @@ import { Wordmark } from "@/components/ui/Wordmark";
 /** Slim global nav per the seo-spec linking plan (section 5). */
 const NAV_LINKS = [
   { href: "/services", label: "Services" },
-  { href: "/industries/hvac", label: "HVAC" },
   { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },

@@ -13,6 +13,7 @@ import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 const PAGE_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/mn-its", label: "MN-ITS Helper" },
   { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },

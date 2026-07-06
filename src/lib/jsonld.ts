@@ -140,3 +140,20 @@ export function breadcrumbLd(items: { name: string; url: string }[]): Json {
 export function graph(...nodes: Json[]): Json {
   return { "@context": "https://schema.org", "@graph": nodes };
 }
+
+/** SoftwareApplication for the MN-ITS Helper product page. */
+export function softwareApplicationLd(opts: {
+  name: string;
+  description: string;
+  url: string;
+}): Json {
+  return {
+    "@type": "SoftwareApplication",
+    name: opts.name,
+    description: opts.description,
+    url: opts.url,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Chrome (desktop)",
+    author: { "@id": ORG_ID },
+  };
+}
