@@ -70,7 +70,7 @@ function PolicySection({
 export default function PrivacyPage() {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-20 sm:px-10 sm:py-28">
-      <div className="max-w-[44rem]">
+      <div className="max-w-[44rem] xl:max-w-[52rem] xl:text-[1.2rem]">
         <div aria-hidden className="h-[3px] w-10 bg-amber" />
         <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-ink">
           Privacy policy

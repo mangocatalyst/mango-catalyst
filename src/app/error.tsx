@@ -24,7 +24,7 @@ export default function ErrorPage({
           "Something broke on our end, which is a little embarrassing for an automation shop."
         }
       </h1>
-      <p className="mt-5 max-w-[40rem] text-[1.05rem] leading-[1.65] text-body">
+      <p className="mt-5 max-w-[40rem] text-[1.05rem] leading-[1.65] text-body xl:max-w-[48rem] xl:text-[1.2rem]">
         {"Head back home; I'm on it."}
       </p>
       <Button href="/" className="mt-9" arrow>

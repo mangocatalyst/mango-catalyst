@@ -144,7 +144,7 @@ export default function ServicesPage() {
           </h1>
 
           {/* Answer-first intro: the direct answer to "what services?" */}
-          <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+          <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
             {
               "Mango Catalyst builds automation for the office work that repeats: invoicing and billing, lead capture and follow-up, scheduling and dispatch, reporting, tool connections, and data entry. You're not buying new software; I connect the tools you already pay for so the repetitive work runs on its own. Every engagement starts with one task and a 15-minute fit call."
             }
@@ -168,7 +168,7 @@ export default function ServicesPage() {
             ))}
           </div>
 
-          <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body">
+          <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
             {
               "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
             }

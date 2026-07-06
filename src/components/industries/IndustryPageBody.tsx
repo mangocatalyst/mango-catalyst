@@ -88,7 +88,7 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
               </li>
             ))}
           </ul>
-          <p className="mt-10 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+          <p className="mt-10 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
             {data.outro}
           </p>
         </Section>
@@ -96,7 +96,7 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
         {/* Capability line: platforms I work in, never systems I built (00 rule). */}
         <Section id="tools" tone="deep">
           <SectionHeading title="Built in the tools your shop already runs" />
-          <p className="mt-8 max-w-[44rem] leading-[1.65] text-body">
+          <p className="mt-8 max-w-[44rem] leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
             {
               "I work in ServiceTitan, Zapier, and Google Workspace every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
             }
@@ -105,7 +105,7 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
 
         <Section id="where-to-start" tone="light">
           <SectionHeading tone="light" title="Not sure what to automate first?" />
-          <p className="mt-8 max-w-[44rem] leading-[1.65] text-navy-2">
+          <p className="mt-8 max-w-[44rem] leading-[1.65] text-navy-2 xl:max-w-[52rem] xl:text-[1.2rem]">
             {data.whereToStart}
           </p>
         </Section>

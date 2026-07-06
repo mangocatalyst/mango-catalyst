@@ -97,7 +97,7 @@ export default function DataEntryCostGuidePage() {
               The real cost of manual data entry
             </h1>
 
-            <div className="max-w-[44rem]">
+            <div className="max-w-[44rem] xl:max-w-[52rem] xl:text-[1.2rem]">
               {/* The extractable direct answer: first thing after the H1. */}
               <p className="mt-7 text-[1.1rem] leading-[1.7] text-body sm:text-[1.2rem]">
                 {
@@ -200,7 +200,7 @@ export default function DataEntryCostGuidePage() {
           <div className="bg-deep">
             <div className="mx-auto w-full max-w-6xl px-6 py-[clamp(4rem,8vw,6rem)] sm:px-10">
               <div aria-hidden className="h-[3px] w-10 bg-amber" />
-              <p className="mt-6 max-w-[42rem] text-[1.1rem] leading-[1.7] text-body sm:text-[1.2rem]">
+              <p className="mt-6 max-w-[42rem] text-[1.1rem] leading-[1.7] text-body sm:text-[1.2rem] xl:max-w-[50rem] xl:text-[1.25rem]">
                 {"Not sure what your number is? "}
                 <Link href="/contact" className="inline-link">
                   Book a 15-minute fit call

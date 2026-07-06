@@ -65,7 +65,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
           <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
             {data.h1}
           </h1>
-          <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+          <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
             {data.intro}
           </p>
         </Section>
@@ -83,7 +83,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
               </li>
             ))}
           </ul>
-          <p className="mt-10 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+          <p className="mt-10 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
             {data.outro}
           </p>
         </Section>
@@ -91,7 +91,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
         {data.differentiator ? (
           <Section id="how-different">
             <SectionHeading title={data.differentiator.title} />
-            <div className="mt-8 max-w-[44rem] space-y-6">
+            <div className="mt-8 max-w-[44rem] space-y-6 xl:max-w-[52rem] xl:text-[1.2rem]">
               {data.differentiator.paragraphs.map((paragraph) => (
                 <p
                   key={paragraph.slice(0, 24)}
@@ -106,7 +106,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
 
         <Section id="where-to-start" tone="light">
           <SectionHeading tone="light" title="Not sure what to automate first?" />
-          <p className="mt-8 max-w-[44rem] leading-[1.65] text-navy-2">
+          <p className="mt-8 max-w-[44rem] leading-[1.65] text-navy-2 xl:max-w-[52rem] xl:text-[1.2rem]">
             {data.whereToStart}
           </p>
         </Section>

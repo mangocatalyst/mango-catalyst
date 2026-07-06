@@ -77,13 +77,13 @@ export default function GuidesIndexPage() {
         <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
           Automation guides
         </h1>
-        <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.7] text-body sm:text-[1.125rem]">
+        <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.7] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
           {
             "Plain-English answers to the questions owners ask before they ever book a call: what to automate first, what the busywork is really costing you, and what an automation consultant actually does. No jargon, no fluff, no dates, because the answers don't expire."
           }
         </p>
 
-        <ul className="mt-12 grid max-w-[44rem] gap-6">
+        <ul className="mt-12 grid max-w-[44rem] gap-6 xl:max-w-[52rem]">
           {GUIDES.map((guide) => (
             <li key={guide.href}>
               <Card className="p-8 sm:p-9">

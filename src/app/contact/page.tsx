@@ -86,7 +86,7 @@ export default async function ContactPage({
         <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-ink">
           Book a 15-minute fit call
         </h1>
-        <p className="mt-5 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+        <p className="mt-5 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
           {calUrl
             ? "Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing eating your week can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day."
             : "Tell me what's eating your week in the form below. I reply within one business day and we set up a 15-minute call with a video link. No pitch either way."}
@@ -100,7 +100,7 @@ export default async function ContactPage({
           {booked ? (
             <Card
               tone="light"
-              className="mt-10 max-w-[44rem] border-l-4 border-l-success p-6 sm:p-8"
+              className="mt-10 max-w-[44rem] border-l-4 border-l-success p-6 sm:p-8 xl:max-w-[52rem]"
             >
               <p className="leading-[1.65] text-navy" role="status">
                 You&apos;re booked. A calendar invite with a video link is on
@@ -115,7 +115,7 @@ export default async function ContactPage({
               <CalInline className="min-h-[36rem] w-full" />
             </div>
           ) : (
-            <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8">
+            <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8 xl:max-w-[52rem]">
               <p className="leading-[1.65] text-navy-2">
                 The scheduler is being set up. Use the form below instead, and
                 I&apos;ll confirm a time within one business day.
@@ -135,7 +135,7 @@ export default async function ContactPage({
           {sent === "1" ? (
             <p
               role="status"
-              className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-success bg-surface-lt p-4 font-medium text-navy"
+              className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-success bg-surface-lt p-4 font-medium text-navy xl:max-w-[52rem] xl:text-[1.2rem]"
             >
               Got it. I&apos;ll get back to you within one business day.
             </p>
@@ -143,13 +143,13 @@ export default async function ContactPage({
           {sent === "0" ? (
             <p
               role="alert"
-              className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-error bg-surface-lt p-4 font-medium text-navy"
+              className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-error bg-surface-lt p-4 font-medium text-navy xl:max-w-[52rem] xl:text-[1.2rem]"
             >
               Something went wrong on our end. Try again, or email me directly.
             </p>
           ) : null}
 
-          <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8">
+          <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8 xl:max-w-[52rem]">
             <form
               action="/api/contact"
               method="post"

@@ -65,7 +65,7 @@ export default function AboutPage() {
           <h1 className="mt-6 max-w-[22ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4.25rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
             {"Who you're actually working with"}
           </h1>
-          <p className="mt-8 max-w-[46rem] text-[1.15rem] leading-[1.65] text-body sm:text-[1.3rem]">
+          <p className="mt-8 max-w-[46rem] text-[1.15rem] leading-[1.65] text-body sm:text-[1.3rem] xl:max-w-[54rem]">
             {
               "Mango Catalyst is me, Bryan: one person, based in Duluth, Minnesota, who ran service operations inside a real shop and now builds the automation that takes the office work off your hands. I build it, I run it, and when you call, I'm the one who answers. There's no sales team, and nobody hands you to a junior after you sign."
             }
@@ -78,7 +78,7 @@ export default function AboutPage() {
           tone="base"
           containerClassName="pt-0 pb-[clamp(3.5rem,7vw,5.5rem)]"
         >
-          <div className="max-w-[46rem] space-y-7 border-l border-hairline pl-6 sm:pl-10">
+          <div className="max-w-[46rem] space-y-7 border-l border-hairline pl-6 sm:pl-10 xl:max-w-[54rem] xl:text-[1.2rem]">
             {STORY.map((paragraph) => (
               <p
                 key={paragraph.slice(0, 24)}
