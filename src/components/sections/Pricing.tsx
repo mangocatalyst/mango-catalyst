@@ -90,45 +90,43 @@ export function Pricing() {
           </BookButton>
         </Card>
 
-        <div className="flex flex-col gap-6 lg:pt-2">
-          <p className="leading-[1.65] text-navy-2">
-            <strong className="font-semibold text-navy">
-              The break-even, in plain numbers:
-            </strong>{" "}
-            {
-              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
-            }
-          </p>
-          <p className="leading-[1.65] text-navy-2">
-            <strong className="font-semibold text-navy">
-              {"Why it's a retainer, not a project:"}
-            </strong>{" "}
-            {
-              "Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers."
-            }
-          </p>
-
-          {/* Booker sits in the right column under the value props. On lg the
-              pricing card dictates the row height: the booker box contributes
-              zero intrinsic height (absolute fill) and just takes whatever
-              space is left under the value props, scrolling the slot list
-              inside itself instead of stretching the section. On mobile it
-              keeps its natural height. Rendered only when the scheduler is
-              wired; otherwise the card's popup CTA + /contact fallback carry
-              it. */}
-          {calTarget() ? (
-            <div className="mt-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
-              <h3 className="font-display text-[1.6rem] font-bold leading-tight text-navy">
-                Grab a slot
-              </h3>
-              <div className="relative mt-5 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)] lg:min-h-0 lg:flex-1">
-                <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
-                  <CalInline className="min-h-[34rem] w-full lg:min-h-0" />
-                </div>
-              </div>
+        {/* Booker fills the whole right cell, top-aligned with the pricing
+            card. On lg the card dictates the row height: the booker's content
+            is an absolute fill with zero intrinsic height, so the slot list
+            scrolls inside the box instead of stretching the section. Mobile
+            keeps the natural stacked height. Rendered only when the scheduler
+            is wired; otherwise the card's popup CTA + /contact fallback carry
+            it. */}
+        {calTarget() ? (
+          <Card
+            tone="light"
+            accent
+            className="relative overflow-hidden lg:min-h-0"
+          >
+            <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
+              <CalInline className="min-h-[34rem] w-full lg:min-h-0" />
             </div>
-          ) : null}
-        </div>
+          </Card>
+        ) : null}
+      </div>
+
+      <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:gap-14">
+        <p className="leading-[1.65] text-navy-2">
+          <strong className="font-semibold text-navy">
+            The break-even, in plain numbers:
+          </strong>{" "}
+          {
+            "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
+          }
+        </p>
+        <p className="leading-[1.65] text-navy-2">
+          <strong className="font-semibold text-navy">
+            {"Why it's a retainer, not a project:"}
+          </strong>{" "}
+          {
+            "Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers."
+          }
+        </p>
       </div>
     </Section>
   );
