@@ -81,7 +81,7 @@ export function Hero() {
           </p>
 
           <div data-reveal="rise" style={delay(0.8)} className="mt-7 sm:mt-8">
-            <BookButton arrow>Book a 15-minute fit call</BookButton>
+            <BookButton arrow>Book a 15-Minute Fit Call</BookButton>
             <p className="mt-3 max-w-[34rem] text-sm text-faint">
               {
                 "No pitch deck. We look at one thing eating your week and figure out if it can run itself."

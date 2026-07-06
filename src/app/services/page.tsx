@@ -185,7 +185,7 @@ export default function ServicesPage() {
           </p>
           <div className="mt-8">
             <Button href="/contact" arrow>
-              Book a 15-minute fit call
+              Book a 15-Minute Fit Call
             </Button>
           </div>
         </Section>

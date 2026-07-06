@@ -205,7 +205,7 @@ export default function FaqPage() {
           <SectionHeading title={"Got a question that isn't here? Ask it on the call."} />
           <div className="mt-9">
             <Button href="/contact" arrow>
-              Book a 15-minute fit call
+              Book a 15-Minute Fit Call
             </Button>
           </div>
         </Section>

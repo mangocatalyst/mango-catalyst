@@ -109,7 +109,7 @@ export default function AboutPage() {
           </h2>
           <div className="mt-9">
             <Button href="/contact" arrow>
-              Book a 15-minute fit call
+              Book a 15-Minute Fit Call
             </Button>
           </div>
         </Section>

@@ -27,7 +27,7 @@ export function CTABlock() {
       </p>
 
       <div className="mt-9">
-        <BookButton arrow>Book a 15-minute fit call</BookButton>
+        <BookButton arrow>Book a 15-Minute Fit Call</BookButton>
         {SITE.email ? (
           <p className="mt-4 text-sm text-faint">
             {"Prefer email? Reach me at "}

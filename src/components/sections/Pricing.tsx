@@ -86,8 +86,27 @@ export function Pricing() {
           </ul>
 
           <BookButton href="/contact#book" className="mt-8 w-full" arrow>
-            Book a 15-minute fit call
+            Book a 15-Minute Fit Call
           </BookButton>
+
+          <hr className="my-7 border-border-lt" />
+
+          <p className="text-[0.95rem] leading-relaxed text-navy-2">
+            <strong className="font-semibold text-navy">
+              The break-even, in plain numbers:
+            </strong>{" "}
+            {
+              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
+            }
+          </p>
+          <p className="mt-4 text-[0.95rem] leading-relaxed text-navy-2">
+            <strong className="font-semibold text-navy">
+              {"Why it's a retainer, not a project:"}
+            </strong>{" "}
+            {
+              "Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers."
+            }
+          </p>
         </Card>
 
         {/* Booker fills the whole right cell, top-aligned with the pricing
@@ -108,25 +127,6 @@ export function Pricing() {
             </div>
           </Card>
         ) : null}
-      </div>
-
-      <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:gap-14">
-        <p className="leading-[1.65] text-navy-2">
-          <strong className="font-semibold text-navy">
-            The break-even, in plain numbers:
-          </strong>{" "}
-          {
-            "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
-          }
-        </p>
-        <p className="leading-[1.65] text-navy-2">
-          <strong className="font-semibold text-navy">
-            {"Why it's a retainer, not a project:"}
-          </strong>{" "}
-          {
-            "Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers."
-          }
-        </p>
       </div>
     </Section>
   );

@@ -119,7 +119,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
             }
           </p>
           <div className="mt-9">
-            <BookButton arrow>Book a 15-minute fit call</BookButton>
+            <BookButton arrow>Book a 15-Minute Fit Call</BookButton>
           </div>
         </Section>
       </main>

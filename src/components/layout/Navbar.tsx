@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { href: "/about", label: "About" },
 ];
 
-const CTA = { href: "/contact#book", label: "Book a 15-minute fit call" };
+const CTA = { href: "/contact#book", label: "Book a 15-Minute Fit Call" };
 
 export function Navbar() {
   return (
