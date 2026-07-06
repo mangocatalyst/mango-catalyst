@@ -25,7 +25,7 @@ const OG_DESCRIPTION =
 export const metadata: Metadata = {
   // The layout title template only applies to CHILD segments; Home shares the
   // root segment, so it sets the full rendered string itself (seo-spec 2.1).
-  title: { absolute: `Small Business Automation in Minnesota | ${SITE.name}` },
+  title: { absolute: `Small Business Automation in the Upper Midwest | ${SITE.name}` },
   description:
     "Automation that takes invoicing, scheduling, and follow-up off your plate. Built by someone who ran the operation inside a real shop. Book a 15-minute fit call.",
   alternates: { canonical: "/" },

@@ -12,10 +12,10 @@ import { DispatchArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/hvac";
 const DESCRIPTION =
-  "Stop doing invoicing, dispatch updates, and follow-up by hand. Office automation for Minnesota HVAC and home-service shops. Book a 15-minute fit call.";
+  "Stop doing invoicing, dispatch updates, and follow-up by hand. Office automation for Upper Midwest HVAC and home-service shops. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "HVAC Business Automation in Minnesota",
+  title: "HVAC Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -25,11 +25,11 @@ export default function HvacIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "HVAC Business Automation",
-        h1: "HVAC business automation in Minnesota",
+        h1: "HVAC business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "Most of the office work in an HVAC shop can run itself: invoicing after job close, lead follow-up, appointment confirmations and reminders, schedule updates, and the daily reporting you stitch together from five screens. Mango Catalyst builds that automation for Minnesota HVAC and home-service shops, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
+          "Most of the office work in an HVAC shop can run itself: invoicing after job close, lead follow-up, appointment confirmations and reminders, schedule updates, and the daily reporting you stitch together from five screens. Mango Catalyst builds that automation for Upper Midwest HVAC and home-service shops, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
         painsTitle: "The office side of an HVAC shop runs on busywork",
         painsLead:
           "The field side of your business has rules. The office side has habits. And the habits are eating the day:",

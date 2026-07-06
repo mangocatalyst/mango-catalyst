@@ -5,10 +5,10 @@ import { FramePlanArt } from "@/components/industries/TradeArt";
 
 const PATH = "/industries/construction";
 const DESCRIPTION =
-  "Receipt piles, sub scheduling changes, and job photos buried in texts, handled automatically. Office automation for Minnesota contractors and remodelers. Book a 15-minute fit call.";
+  "Receipt piles, sub scheduling changes, and job photos buried in texts, handled automatically. Office automation for Upper Midwest contractors and remodelers. Book a 15-minute fit call.";
 
 export const metadata = pageMetadata({
-  title: "Construction Business Automation in Minnesota",
+  title: "Construction Business Automation in the Upper Midwest",
   path: PATH,
   description: DESCRIPTION,
 });
@@ -18,11 +18,11 @@ export default function ConstructionIndustryPage() {
     <IndustryPageBody
       data={{
         serviceName: "Construction Business Automation",
-        h1: "Construction business automation in Minnesota",
+        h1: "Construction business automation in the Upper Midwest",
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "A build runs on paper as much as lumber: receipts, change orders, sub schedules, progress photos, draw paperwork. Most of the office half can run itself. Mango Catalyst builds that automation for Minnesota general contractors and remodelers, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
+          "A build runs on paper as much as lumber: receipts, change orders, sub schedules, progress photos, draw paperwork. Most of the office half can run itself. Mango Catalyst builds that automation for Upper Midwest general contractors and remodelers, wired into the tools you already pay for. It starts with one task and a 15-minute fit call, not a six-month rollout.",
         painsTitle: "The office side of a construction company runs on busywork",
         painsLead:
           "The job site has a schedule and a print. The office has habits. And the habits compound across every active job:",

@@ -43,7 +43,7 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
             name: data.serviceName,
             description: data.description,
             url: `${SITE.url}${data.path}`,
-            areaServed: "Minnesota",
+            areaServed: "Upper Midwest, USA",
           }),
           breadcrumbLd([
             { name: "Home", url: SITE.url },
