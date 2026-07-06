@@ -145,8 +145,8 @@ export function ServiceGrid() {
         ))}
       </div>
 
-      <div className="mt-14 flex flex-col gap-4">
-        <p className="max-w-[44rem] leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
+      <div className="mt-20 flex flex-col gap-5">
+        <p className="max-w-[44rem] font-display text-[1.35rem] font-semibold leading-[1.45] text-amber xl:max-w-[52rem] xl:text-[1.5rem]">
           {
             "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
           }
@@ -154,11 +154,14 @@ export function ServiceGrid() {
         <ArrowLink href="/services">Everything I build</ArrowLink>
       </div>
 
-      <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
+      <p className="mt-14 max-w-[44rem] border-l-2 border-hairline pl-5 leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
         {"Run a trade business? Start with the page written for yours: "}
         {INDUSTRY_LINKS.map((link, i) => (
           <span key={link.href}>
-            <Link href={link.href} className="inline-link">
+            <Link
+              href={link.href}
+              className="text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:decoration-ink"
+            >
               {link.label}
             </Link>
             {i < INDUSTRY_LINKS.length - 2
