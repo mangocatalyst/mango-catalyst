@@ -50,7 +50,9 @@ export function CalInline({ className }: { className?: string }) {
         aria-busy={!loaded}
         className={
           "min-h-[560px] w-full rounded-xl" +
-          (loaded ? "" : " animate-pulse bg-surface-hi")
+          // currentColor tint so the skeleton reads as neutral on both the
+          // light pricing band and any dark section, until the iframe paints.
+          (loaded ? "" : " animate-pulse bg-current/[0.06]")
         }
       />
     </div>
