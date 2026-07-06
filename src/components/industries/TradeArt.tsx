@@ -1,11 +1,14 @@
 import type { SVGProps } from "react";
 
 /**
- * Per-trade hero art for the /industries pages: static blueprint-language
- * line drawings in the navy ramp (imagery doc section 1: hairline technical
+ * Per-trade hero art for the /industries pages: blueprint-language line
+ * drawings in the navy ramp (imagery doc section 1: hairline technical
  * linework, registration marks, dimension ticks, drawn navy-on-navy, amber
  * on exactly ONE node per composition). Server-rendered inline SVG, zero JS,
- * zero animation, aria-hidden by the layout that places them.
+ * aria-hidden by the layout that places them. Ambient motion is pure CSS
+ * behind the hero's media gate (ta-* classes, see globals.css): the amber
+ * node breathes everywhere, plus one thematic touch per trade (now-line
+ * creep, snow drift, valve drip). Static contexts render as drawn.
  *
  * Shared design space: 460x330. Line ramp: #22314F faint, #2A3B5E base,
  * #35496F mid, #46608F loud, #5E7BAE text. Amber #F6A328 once.
@@ -54,9 +57,12 @@ export function DispatchArt(props: SVGProps<SVGSVGElement>) {
         <rect x="160" y="230" width="60" height="18" rx="4" fill="#2A3B5E" fillOpacity=".9" />
         <rect x="300" y="186" width="52" height="18" rx="4" fill="#22314F" fillOpacity=".9" />
       </g>
-      <path d="M272 88v190" stroke="#5E7BAE" strokeWidth="1.2" />
-      <path d="M266 82l6 8 6-8z" fill="#5E7BAE" />
-      <circle cx="272" cy="195" r="4" fill="#F6A328" />
+      {/* now-line creeps as a unit so the amber job marker rides along */}
+      <g className="ta-now">
+        <path d="M272 88v190" stroke="#5E7BAE" strokeWidth="1.2" />
+        <path d="M266 82l6 8 6-8z" fill="#5E7BAE" />
+        <circle className="ta-amber" cx="272" cy="195" r="4" fill="#F6A328" />
+      </g>
     </svg>
   );
 }
@@ -89,7 +95,7 @@ export function PipeRunArt(props: SVGProps<SVGSVGElement>) {
         <path d="M40 126v12M254 126v12" />
       </g>
       {/* drip: the one amber moment, at the valve outlet */}
-      <circle cx="142" cy="120" r="4" fill="#F6A328" />
+      <circle className="ta-drip" cx="142" cy="120" r="4" fill="#F6A328" />
     </svg>
   );
 }
@@ -120,7 +126,7 @@ export function FramePlanArt(props: SVGProps<SVGSVGElement>) {
       </g>
       <text x="200" y="312" fill="#46608F" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">28-0</text>
       {/* amber node: the junction being framed today */}
-      <circle cx="204" cy="196" r="4" fill="#F6A328" />
+      <circle className="ta-amber" cx="204" cy="196" r="4" fill="#F6A328" />
     </svg>
   );
 }
@@ -152,7 +158,7 @@ export function PunchListArt(props: SVGProps<SVGSVGElement>) {
       {/* two done marks in navy, one amber: the item that runs itself now */}
       <path d="M95 114l4 5 6-8" stroke="#46608F" strokeWidth="1.6" />
       <path d="M95 144l4 5 6-8" stroke="#46608F" strokeWidth="1.6" />
-      <path d="M95 174l4 5 6-8" stroke="#F6A328" strokeWidth="1.8" />
+      <path className="ta-amber" d="M95 174l4 5 6-8" stroke="#F6A328" strokeWidth="1.8" />
       {/* step ladder: open A-frame, front rails + rear leg */}
       <g stroke="#35496F" strokeWidth="1.4">
         <path d="M292 278L342 74h14l-24 204" />
@@ -195,7 +201,7 @@ export function TrussArt(props: SVGProps<SVGSVGElement>) {
         <path d="M64 276v12M396 276v12" />
       </g>
       {/* amber node at the ridge */}
-      <circle cx="230" cy="96" r="4" fill="#F6A328" />
+      <circle className="ta-amber" cx="230" cy="96" r="4" fill="#F6A328" />
     </svg>
   );
 }
@@ -211,7 +217,7 @@ export function PlowTruckArt(props: SVGProps<SVGSVGElement>) {
         <path d="M236 92l10 4-10 4M206 112l10 4-10 4" fill="none" />
       </g>
       {/* falling snow: sparse dots in the sky */}
-      <g fill="#35496F">
+      <g className="ta-snow" fill="#35496F">
         <circle cx="90" cy="66" r="1.6" />
         <circle cx="150" cy="52" r="1.6" />
         <circle cx="212" cy="70" r="1.6" />
@@ -242,7 +248,7 @@ export function PlowTruckArt(props: SVGProps<SVGSVGElement>) {
       <path d="M56 252h348" stroke="#35496F" strokeWidth="1.2" />
       <path d="M56 264h348" stroke="#22314F" strokeWidth="1" strokeDasharray="6 5" />
       {/* amber node: the beacon on the cab */}
-      <circle cx="244" cy="143" r="4" fill="#F6A328" />
+      <circle className="ta-amber" cx="244" cy="143" r="4" fill="#F6A328" />
     </svg>
   );
 }
@@ -280,7 +286,7 @@ export function PlotPlanArt(props: SVGProps<SVGSVGElement>) {
         <path d="M80 200l130 74M96 190l122 70M112 180l114 66" opacity=".85" />
       </g>
       {/* amber node: the bed getting planted this week */}
-      <circle cx="336" cy="234" r="4" fill="#F6A328" />
+      <circle className="ta-amber" cx="336" cy="234" r="4" fill="#F6A328" />
     </svg>
   );
 }
@@ -324,7 +330,7 @@ export function LocalOnlyArt(props: SVGProps<SVGSVGElement>) {
       <path d="M276 216c40 26 88 12 76-24" stroke="#35496F" strokeWidth="1" strokeDasharray="3 4" fill="none" />
       <path d="M352 192l0 10M352 192l7 7" stroke="#35496F" strokeWidth="1" />
       {/* the stays-local node: amber, ON the boundary loop, going nowhere */}
-      <circle cx="330" cy="234" r="4" fill="#F6A328" />
+      <circle className="ta-amber" cx="330" cy="234" r="4" fill="#F6A328" />
       <text x="288" y="252" fill="#5E7BAE" fontSize="8" fontFamily="var(--font-mono, monospace)" letterSpacing="1">NO EGRESS</text>
     </svg>
   );

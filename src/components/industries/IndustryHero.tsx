@@ -3,10 +3,13 @@ import { Section } from "@/components/layout/Section";
 
 /**
  * Shared opener for /industries pages: answer-first H1 + intro on the left,
- * the trade's blueprint line drawing on the right (see TradeArt.tsx). Art is
- * decorative (aria-hidden), stacks below the text on small screens, and
- * ships zero JS, matching the main hero's type-led language without its
- * motion system.
+ * the trade's blueprint line drawing behind it as a right-of-center backdrop
+ * with the home hero's treatment: same scale ladder, same 25%-in-context
+ * dimming, same ambient-motion gate (see .trade-art in globals.css). The
+ * dimming is plain opacity, not the hero's .hb-veil: the veil exists only
+ * because opacity would flatten the hero's preserve-3d stack, and over a
+ * glow-less flat section it composites as a visible box. Art is decorative
+ * (aria-hidden) and ships zero JS.
  */
 export function IndustryHero({
   title,
@@ -18,20 +21,20 @@ export function IndustryHero({
   art: ReactNode;
 }) {
   return (
-    <Section id="intro" containerClassName="pb-[clamp(3.5rem,7vw,5.5rem)]">
-      <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-14">
-        <div>
-          <div aria-hidden className="h-[3px] w-10 bg-amber" />
-          <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
-            {title}
-          </h1>
-          <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
-            {intro}
-          </p>
-        </div>
-        <div aria-hidden className="mx-auto w-full max-w-[26rem] lg:max-w-none">
-          {art}
-        </div>
+    <Section
+      id="intro"
+      className="relative isolate overflow-hidden"
+      containerClassName="pb-[clamp(3.5rem,7vw,5.5rem)]"
+    >
+      <div aria-hidden className="trade-art">{art}</div>
+      <div className="relative">
+        <div aria-hidden className="h-[3px] w-10 bg-amber" />
+        <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
+          {title}
+        </h1>
+        <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+          {intro}
+        </p>
       </div>
     </Section>
   );

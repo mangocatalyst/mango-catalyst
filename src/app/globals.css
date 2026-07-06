@@ -789,6 +789,113 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Trade-page hero art (/industries + /mn-its): the TradeArt blueprints given
+   the home hero-art treatment. Same right-of-center backdrop and scale
+   ladder, same 25%-in-context dimming, same motion gate. Dimming is plain
+   opacity (the art is flat; the hero needs its veil only for preserve-3d,
+   and over a glow-less section the veil composites as a visible box).
+   Static rule as the hero: every animated property's base value is the
+   settled composition, so mobile / reduced-motion / no-JS render the
+   finished still.
+--------------------------------------------------------------------------- */
+
+.trade-art {
+  position: absolute;
+  top: 50%;
+  right: -7rem;
+  width: 530px;
+  translate: 0 -50%;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+@media (min-width: 48rem) {
+  .trade-art {
+    right: -2rem;
+    width: 600px;
+  }
+}
+
+@media (min-width: 64rem) {
+  .trade-art {
+    right: 0;
+    width: 660px;
+  }
+}
+
+@media (min-width: 80rem) {
+  .trade-art {
+    width: 720px;
+  }
+}
+
+/* Snow drifts down one band, fading at the edges. */
+@keyframes ta-snow {
+  0% {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.9;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+/* One drop forms at the valve, sits, falls and fades; then the next. */
+@keyframes ta-drip {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  8%,
+  58% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateY(22px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
+  /* Ambient only, no entrance: the whole sheet floats like the hero plane,
+     the one amber node breathes, plus one thematic touch per trade. */
+  .trade-art {
+    animation: hb-float 11s ease-in-out infinite;
+  }
+
+  .ta-amber {
+    animation: hb-blip 4.6s ease-in-out infinite;
+  }
+
+  .ta-now {
+    animation: hb-nowd 24s linear infinite alternate;
+  }
+
+  .ta-snow circle {
+    animation: ta-snow 13s linear infinite;
+  }
+  .ta-snow circle:nth-child(2n) {
+    animation-delay: -4.3s;
+  }
+  .ta-snow circle:nth-child(3n) {
+    animation-delay: -8.6s;
+  }
+
+  .ta-drip {
+    animation: ta-drip 7s ease-in infinite;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Footer backdrop artwork: "The Chart Sheet" (winner F1).
    Lake Superior coastline with the amber period on Duluth, rendered by
    FooterBackdrop as an aria-hidden layer at 25% opacity behind the footer
