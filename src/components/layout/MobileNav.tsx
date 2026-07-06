@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { calTarget, CAL_CONFIG } from "@/lib/cal";
 
 /**
  * The one interactivity island in the site chrome: the mobile nav toggle.
@@ -73,14 +74,23 @@ export function MobileNav({
             </li>
           ))}
         </ul>
-        <Link
-          href={cta.href}
-          onClick={() => setOpen(false)}
-          className="btn btn-primary mt-5 w-full"
-          data-cta="primary"
-        >
-          {cta.label}
-        </Link>
+        {(() => {
+          const target = calTarget();
+          const calAttrs = target
+            ? { "data-cal-link": target.link, "data-cal-config": CAL_CONFIG }
+            : {};
+          return (
+            <a
+              href={cta.href}
+              onClick={() => setOpen(false)}
+              className="btn btn-primary mt-5 w-full"
+              data-cta="primary"
+              {...calAttrs}
+            >
+              {cta.label}
+            </a>
+          );
+        })()}
       </div>
     </div>
   );

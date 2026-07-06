@@ -2,6 +2,26 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowIcon } from "@/components/ui/icons";
 
+/** Shared .btn class builder, reused by BookButton (a plain <a> popup CTA). */
+export function buttonClasses({
+  variant = "primary",
+  size = "md",
+  className,
+}: {
+  variant?: "primary" | "ghost";
+  size?: "md" | "sm";
+  className?: string;
+} = {}) {
+  return [
+    "btn",
+    variant === "primary" ? "btn-primary" : "btn-ghost",
+    size === "sm" ? "btn-sm" : "",
+    className ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 /**
  * The site button. Primary is the amber CTA: amber fill with DEEP NAVY text,
  * never white on amber (brand spec non-negotiable, 1.89:1 fail). Ghost is the
@@ -22,17 +42,8 @@ export function Button({
   className?: string;
   children: ReactNode;
 }) {
-  const classes = [
-    "btn",
-    variant === "primary" ? "btn-primary" : "btn-ghost",
-    size === "sm" ? "btn-sm" : "",
-    className ?? "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
-    <Link href={href} className={classes} data-cta={variant}>
+    <Link href={href} className={buttonClasses({ variant, size, className })} data-cta={variant}>
       {children}
       {arrow && <ArrowIcon />}
     </Link>

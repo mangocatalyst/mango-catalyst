@@ -1,8 +1,10 @@
 import { Section } from "@/components/layout/Section";
-import { Button } from "@/components/ui/Button";
+import { BookButton } from "@/components/booking/BookButton";
+import { CalInline } from "@/components/booking/CalInline";
 import { Card } from "@/components/ui/Card";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CheckIcon } from "@/components/ui/icons";
+import { calTarget } from "@/lib/cal";
 
 /**
  * Home section 6, copy verbatim from build/out/copy/home.md (the D1 offer
@@ -83,9 +85,9 @@ export function Pricing() {
             ))}
           </ul>
 
-          <Button href="/contact#book" className="mt-8 w-full" arrow>
+          <BookButton href="/contact#book" className="mt-8 w-full" arrow>
             Book a 15-minute fit call
-          </Button>
+          </BookButton>
         </Card>
 
         <div className="flex flex-col gap-6 lg:pt-2">
@@ -107,6 +109,18 @@ export function Pricing() {
           </p>
         </div>
       </div>
+
+      {/* Book right here: inline auto-resizing booker (month view, no midnight
+          grid, no inner scroll). Rendered only when the scheduler is wired;
+          otherwise the card's popup CTA + /contact fallback carry it. */}
+      {calTarget() ? (
+        <div className="mt-16">
+          <SectionHeading tone="light" title="Grab a slot" />
+          <div className="mt-8 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
+            <CalInline className="min-h-[36rem] w-full" />
+          </div>
+        </div>
+      ) : null}
     </Section>
   );
 }

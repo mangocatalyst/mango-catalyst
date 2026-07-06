@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { Button } from "@/components/ui/Button";
+import { BookButton } from "@/components/booking/BookButton";
 import { Wordmark } from "@/components/ui/Wordmark";
 
 /** Slim global nav per the seo-spec linking plan (section 5). */
@@ -41,9 +41,9 @@ export function Navbar() {
               </li>
             ))}
           </ul>
-          <Button href={CTA.href} size="sm">
+          <BookButton href={CTA.href} size="sm">
             {CTA.label}
-          </Button>
+          </BookButton>
         </div>
 
         <MobileNav links={NAV_LINKS} cta={CTA} />

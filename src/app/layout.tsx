@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CtaTracker } from "@/components/analytics/CtaTracker";
+import { CalLoader } from "@/components/booking/CalLoader";
 import "./globals.css";
 import { bigShoulders, inter } from "./fonts";
 import { SITE } from "@/lib/constants";
@@ -74,6 +75,7 @@ export default function RootLayout({
         </div>
         <Footer />
         <CtaTracker />
+        <CalLoader />
         <Analytics />
         <SpeedInsights />
       </body>

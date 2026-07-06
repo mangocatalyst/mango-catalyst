@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph, serviceLd } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Button } from "@/components/ui/Button";
+import { BookButton } from "@/components/booking/BookButton";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 
 /**
@@ -118,9 +118,7 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
             }
           </p>
           <div className="mt-9">
-            <Button href="/contact" arrow>
-              Book a 15-minute fit call
-            </Button>
+            <BookButton arrow>Book a 15-minute fit call</BookButton>
           </div>
         </Section>
       </main>

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Button } from "@/components/ui/Button";
+import { BookButton } from "@/components/booking/BookButton";
 import { HeroBackdrop } from "@/components/sections/HeroBackdrop";
 
 /**
@@ -81,9 +81,7 @@ export function Hero() {
           </p>
 
           <div data-reveal="rise" style={delay(0.8)} className="mt-7 sm:mt-8">
-            <Button href="/contact#book" arrow>
-              Book a 15-minute fit call
-            </Button>
+            <BookButton arrow>Book a 15-minute fit call</BookButton>
             <p className="mt-3 max-w-[34rem] text-sm text-faint">
               {
                 "No pitch deck. We look at one thing eating your week and figure out if it can run itself."

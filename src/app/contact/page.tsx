@@ -5,6 +5,7 @@ import { breadcrumbLd, graph } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
+import { CalInline } from "@/components/booking/CalInline";
 
 /**
  * Contact: booking-first (seo-spec 2.6), copy verbatim from
@@ -111,12 +112,7 @@ export default async function ContactPage({
             </Card>
           ) : calUrl ? (
             <div className="mt-10 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
-              <iframe
-                src={calUrl}
-                title="Book a 15-minute fit call"
-                loading="lazy"
-                className="h-[40rem] w-full"
-              />
+              <CalInline className="min-h-[36rem] w-full" />
             </div>
           ) : (
             <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8">

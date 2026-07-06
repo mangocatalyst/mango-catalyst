@@ -1,6 +1,6 @@
 import { SITE } from "@/lib/constants";
 import { Section } from "@/components/layout/Section";
-import { Button } from "@/components/ui/Button";
+import { BookButton } from "@/components/booking/BookButton";
 
 /**
  * Home section 8, copy verbatim from build/out/copy/home.md. The loudest
@@ -27,9 +27,7 @@ export function CTABlock() {
       </p>
 
       <div className="mt-9">
-        <Button href="/contact#book" arrow>
-          Book a 15-minute fit call
-        </Button>
+        <BookButton arrow>Book a 15-minute fit call</BookButton>
         {SITE.email ? (
           <p className="mt-4 text-sm text-faint">
             {"Prefer email? Reach me at "}
