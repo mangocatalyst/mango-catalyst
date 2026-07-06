@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { TrussArt } from "@/components/industries/TradeArt";
 
-const PATH = "/industries/roofing";
+const PATH = "/industries/roofing-automation";
 const DESCRIPTION =
   "Storm-week lead pile, insurance paperwork, and job photos scattered across phones, handled automatically. Office automation for Upper Midwest roofing contractors. Book a 15-minute fit call.";
 

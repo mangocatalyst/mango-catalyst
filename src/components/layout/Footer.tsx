@@ -27,16 +27,17 @@ const PROGRAM_LINKS = [
   { href: "/programs/slack", label: "Slack" },
   { href: "/programs/google-workspace", label: "Google Workspace" },
   { href: "/mn-its", label: "MN-ITS Helper" },
+  { href: "/programs/everything-else", label: "Everything else" },
 ];
 
 const INDUSTRY_LINKS = [
-  { href: "/industries/hvac", label: "HVAC" },
-  { href: "/industries/plumbing", label: "Plumbing" },
-  { href: "/industries/roofing", label: "Roofing" },
-  { href: "/industries/construction", label: "Construction" },
-  { href: "/industries/handyman", label: "Handyman" },
-  { href: "/industries/snow-plowing", label: "Snow plowing" },
-  { href: "/industries/landscaping", label: "Landscaping" },
+  { href: "/industries/hvac-automation", label: "HVAC" },
+  { href: "/industries/plumbing-automation", label: "Plumbing" },
+  { href: "/industries/roofing-automation", label: "Roofing" },
+  { href: "/industries/construction-automation", label: "Construction" },
+  { href: "/industries/handyman-automation", label: "Handyman" },
+  { href: "/industries/snow-plowing-automation", label: "Snow plowing" },
+  { href: "/industries/landscaping-automation", label: "Landscaping" },
 ];
 
 const GUIDE_LINKS = [

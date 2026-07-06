@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { PlotPlanArt } from "@/components/industries/TradeArt";
 
-const PATH = "/industries/landscaping";
+const PATH = "/industries/landscaping-automation";
 const DESCRIPTION =
   "Spring rush intake, recurring maintenance billing, and weather reshuffles, handled automatically. Office automation for Upper Midwest landscaping and lawn care companies. Book a 15-minute fit call.";
 
@@ -63,7 +63,7 @@ export default function LandscapingIndustryPage() {
         whereToStart: (
           <>
             {"If your trucks push snow all winter, the "}
-            <Link href="/industries/snow-plowing" className="inline-link-light">
+            <Link href="/industries/snow-plowing-automation" className="inline-link-light">
               snow plowing page
             </Link>
             {" covers that half of the year. Here's "}

@@ -10,7 +10,7 @@ import { DispatchArt } from "@/components/industries/TradeArt";
  * dispatch-board hero art the imagery doc specified for this slot.
  */
 
-const PATH = "/industries/hvac";
+const PATH = "/industries/hvac-automation";
 const DESCRIPTION =
   "Stop doing invoicing, dispatch updates, and follow-up by hand. Office automation for Upper Midwest HVAC and home-service shops. Book a 15-minute fit call.";
 

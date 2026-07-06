@@ -44,7 +44,7 @@ export default function ServiceTitanProgramPage() {
         whereToStart: (
           <>
             {"ServiceTitan shops are usually trades shops, so start with "}
-            <Link href="/industries/hvac" className="inline-link-light">
+            <Link href="/industries/hvac-automation" className="inline-link-light">
               what automation looks like in an HVAC office
             </Link>
             {", or browse "}

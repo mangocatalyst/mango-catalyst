@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { FramePlanArt } from "@/components/industries/TradeArt";
 
-const PATH = "/industries/construction";
+const PATH = "/industries/construction-automation";
 const DESCRIPTION =
   "Receipt piles, sub scheduling changes, and job photos buried in texts, handled automatically. Office automation for Upper Midwest contractors and remodelers. Book a 15-minute fit call.";
 

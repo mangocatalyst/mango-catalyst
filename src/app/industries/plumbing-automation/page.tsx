@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { PipeRunArt } from "@/components/industries/TradeArt";
 
-const PATH = "/industries/plumbing";
+const PATH = "/industries/plumbing-automation";
 const DESCRIPTION =
   "Stop chasing open estimates, warranty registrations, and permit paperwork by hand. Office automation for Upper Midwest plumbing shops. Book a 15-minute fit call.";
 

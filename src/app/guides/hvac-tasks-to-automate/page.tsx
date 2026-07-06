@@ -78,7 +78,7 @@ const SECTIONS: { heading: string; body: ReactNode }[] = [
         {
           "Pick the task that repeats the most and hurts the most when it slips, then start with only that one. A small automation that works this month beats a shop-wide plan that ships next year, and the first win teaches you what to automate second. If you want help ranking your own list, that's exactly what "
         }
-        <Link href="/industries/hvac" className="inline-link">
+        <Link href="/industries/hvac-automation" className="inline-link">
           HVAC business automation
         </Link>
         {" is for."}

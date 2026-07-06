@@ -108,7 +108,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
     question: "What kind of businesses do you work with?",
     answer: [
       "Small businesses that are drowning in repetitive office work and don't have a systems person on the payroll, usually under 25 people. I started with ",
-      { text: "trades and home services", href: "/industries/hvac" },
+      { text: "trades and home services", href: "/industries/hvac-automation" },
       " because that's where I come from, but the same busywork problem shows up in property management, small manufacturing, and professional services. If your team is re-typing the same information into multiple screens, chasing follow-ups by memory, or doing invoices after hours, we should talk.",
     ],
   },

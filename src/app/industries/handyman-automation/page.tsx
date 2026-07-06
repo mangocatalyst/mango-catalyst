@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { PunchListArt } from "@/components/industries/TradeArt";
 
-const PATH = "/industries/handyman";
+const PATH = "/industries/handyman-automation";
 const DESCRIPTION =
   "Small jobs shouldn't carry big office overhead. Quote requests, booking, invoicing, and follow-up that run themselves, for Upper Midwest handyman businesses. Book a 15-minute fit call.";
 

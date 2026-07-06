@@ -47,7 +47,7 @@ export default function SlackProgramPage() {
               the full list of what we build
             </Link>
             {", or see how it fits a trades office in "}
-            <Link href="/industries/hvac" className="inline-link-light">
+            <Link href="/industries/hvac-automation" className="inline-link-light">
               HVAC business automation
             </Link>
             {". If you'd rather just talk it through, that's what the call is for."}

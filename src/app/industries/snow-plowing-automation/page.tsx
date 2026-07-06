@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { PlowTruckArt } from "@/components/industries/TradeArt";
 
-const PATH = "/industries/snow-plowing";
+const PATH = "/industries/snow-plowing-automation";
 const DESCRIPTION =
   "Per-push billing, proof-of-service logs, and 'is my lot done yet' calls, handled automatically. Office automation for Upper Midwest snow plowing contractors. Book a 15-minute fit call.";
 
@@ -63,7 +63,7 @@ export default function SnowPlowingIndustryPage() {
         whereToStart: (
           <>
             {"A lot of plow operations mow all summer; the "}
-            <Link href="/industries/landscaping" className="inline-link-light">
+            <Link href="/industries/landscaping-automation" className="inline-link-light">
               landscaping page
             </Link>
             {" covers that half of the year. Here's "}
