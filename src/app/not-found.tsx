@@ -13,7 +13,7 @@ export default function NotFound() {
       <h1 className="mt-6 font-display text-[clamp(2.6rem,1.8rem+4vw,5rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-ink">
         That page ran off.
       </h1>
-      <p className="mt-5 max-w-[40rem] text-[1.05rem] leading-[1.65] text-body xl:max-w-[48rem] xl:text-[1.2rem]">
+      <p className="mt-5 max-w-[40rem] text-[1.05rem] leading-[1.65] text-body lg:max-w-[48rem] lg:text-[1.2rem]">
         {"Head back home, or "}
         <Link href="/contact#book" className="inline-link">
           book a 15-minute fit call

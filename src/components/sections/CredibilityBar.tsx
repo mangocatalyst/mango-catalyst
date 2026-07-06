@@ -51,7 +51,7 @@ export function CredibilityBar() {
         ))}
       </ul>
 
-      <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
+      <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
         <strong className="font-semibold text-ink">The honest part: </strong>
         {
           "Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews I don't have yet. What I can do is walk you through, on the call, exactly how I'd scope the thing eating your week: what the work looks like now, which part can run itself, and what stays human. You'll see how I think before you spend a dollar."

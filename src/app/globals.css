@@ -65,6 +65,15 @@ body {
   color: var(--color-deep);
 }
 
+/* No one-or-two-word last lines in prose. In @layer base so the
+   .text-balance utility (headings, pull-quote) still wins over it. */
+@layer base {
+  p,
+  li {
+    text-wrap: pretty;
+  }
+}
+
 /* Jump targets (section ids) clear the sticky navbar. */
 [id] {
   scroll-margin-top: 5.5rem;

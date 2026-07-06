@@ -222,12 +222,12 @@ export default function WhatIsConsultantGuidePage() {
               What is an automation consultant?
             </h1>
             {/* The extractable direct answer, set as the lead. */}
-            <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.7] text-body sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem]">
+            <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.7] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
               {DIRECT_ANSWER}
             </p>
           </header>
 
-          <div className="mt-4 max-w-[44rem] xl:max-w-[52rem] xl:text-[1.2rem]">
+          <div className="mt-4 max-w-[44rem] lg:max-w-[52rem] lg:text-[1.2rem]">
             {SECTIONS.map((section) => (
               <section key={section.heading} className="mt-12">
                 <h2 className="max-w-[30ch] font-display text-[clamp(1.45rem,1.15rem+1.1vw,2rem)] font-bold uppercase leading-[1.08] tracking-[0.015em] text-balance text-ink">
@@ -239,7 +239,7 @@ export default function WhatIsConsultantGuidePage() {
           </div>
 
           {/* One soft closing CTA (copy verbatim, single paragraph, inline link). */}
-          <Card className="mt-16 max-w-[44rem] p-8 sm:p-10 xl:max-w-[52rem]">
+          <Card className="mt-16 max-w-[44rem] p-8 sm:p-10 lg:max-w-[52rem]">
             <p className="text-[1.05rem] leading-[1.7] text-ink sm:text-[1.125rem]">
               {"The fastest way to find out if you need one: "}
               <Link href="/contact" className="inline-link">

@@ -28,7 +28,7 @@ export function SectionHeading({
       </h2>
       {lead ? (
         <p
-          className={`mt-5 max-w-[44rem] text-[1.05rem] leading-[1.65] sm:text-[1.125rem] xl:max-w-[52rem] xl:text-[1.2rem] ${
+          className={`mt-5 max-w-[44rem] text-[1.05rem] leading-[1.65] sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem] ${
             tone === "light" ? "text-navy-2" : "text-body"
           }`}
         >

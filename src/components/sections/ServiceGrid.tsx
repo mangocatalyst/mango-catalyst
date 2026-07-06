@@ -90,13 +90,13 @@ export function ServiceGrid() {
         }
       />
 
-      <p className="mt-10 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
+      <p className="mt-10 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted lg:max-w-[52rem] lg:text-[1.05rem]">
         {
           "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything I build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
         }
       </p>
 
-      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
+      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted lg:max-w-[52rem] lg:text-[1.05rem]">
         {
           "Some of that busywork lives inside a web page with no API to hook into. For those, I build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
         }
@@ -133,7 +133,7 @@ export function ServiceGrid() {
         ))}
       </div>
 
-      <p className="mt-20 max-w-[44rem] font-display text-[1.35rem] font-semibold leading-[1.45] text-amber xl:max-w-[52rem] xl:text-[1.5rem]">
+      <p className="mt-20 max-w-[44rem] font-display text-[1.35rem] font-semibold leading-[1.45] text-balance text-amber lg:max-w-[52rem] lg:text-[1.5rem]">
         {
           "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
         }
