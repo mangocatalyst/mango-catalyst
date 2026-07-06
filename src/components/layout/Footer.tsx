@@ -27,7 +27,7 @@ const PROGRAM_LINKS = [
   { href: "/programs/slack", label: "Slack" },
   { href: "/programs/google-workspace", label: "Google Workspace" },
   { href: "/mn-its", label: "MN-ITS Helper" },
-  { href: "/programs/everything-else", label: "Everything else" },
+  { href: "/programs/everything-else", label: "Everything Else" },
 ];
 
 const INDUSTRY_LINKS = [
@@ -36,22 +36,22 @@ const INDUSTRY_LINKS = [
   { href: "/industries/roofing-automation", label: "Roofing" },
   { href: "/industries/construction-automation", label: "Construction" },
   { href: "/industries/handyman-automation", label: "Handyman" },
-  { href: "/industries/snow-plowing-automation", label: "Snow plowing" },
+  { href: "/industries/snow-plowing-automation", label: "Snow Plowing" },
   { href: "/industries/landscaping-automation", label: "Landscaping" },
 ];
 
 const GUIDE_LINKS = [
   {
     href: "/guides/hvac-tasks-to-automate",
-    label: "HVAC tasks to automate first",
+    label: "HVAC Tasks To Automate First",
   },
   {
     href: "/guides/manual-data-entry-cost",
-    label: "The real cost of manual data entry",
+    label: "The Real Cost Of Manual Data Entry",
   },
   {
     href: "/guides/what-is-automation-consultant",
-    label: "What is an automation consultant?",
+    label: "What Is An Automation Consultant?",
   },
 ];
 
