@@ -81,7 +81,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "If I cancel, what happens to my data and my automations?",
     answer: [
-      "You don't get held hostage: the retainer is month to month, and your data lives in your own tools. The automations get wired into the accounts you already own and pay for wherever possible (your CRM, your Google Workspace, your forms), so canceling doesn't strand your information with me. When we scope your setup, the handoff terms get agreed in writing, including what gets documented and handed over if you leave, because the honest answer is that the exact shape depends on what I build. Ask me on the fit call and I'll walk you through what leaving would look like for your setup. I'd rather keep you because it's working than trap you because you signed something.",
+      "Your data is always yours. It lives in the tools you already own (your CRM, your Google Workspace, your forms) and it stays there when you leave; nothing of yours is ever held hostage. The automations work differently: I build them, I own them, and they run while the retainer runs. Wherever it makes sense I run them on my own infrastructure rather than inside an off-the-shelf tool, because that lets me build things Zapier can't. The honest flip side is that when you cancel, the automations stop; you keep every piece of data they produced, and I keep the machinery. If we build inside tools you own instead, that's part of what we scope together. Ask me on the fit call and I'll walk you through exactly what leaving would look like for your setup.",
     ],
   },
   {
@@ -115,7 +115,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "Do I have to sign a long contract?",
     answer: [
-      "No. The monthly is month to month. If it's not earning its keep, you cancel. I'd rather keep you because it's working than trap you because you signed something.",
+      "No. The first three months are a commitment; after that it's month to month and you cancel anytime. The honest reason for the three months: the build work is front-loaded, so most of my hours land before your second invoice. The alternative would be charging the true build cost up front, roughly triple the setup fee, and I'd rather keep the front door cheap. After month three, if it's not earning its keep, you cancel. I'd rather keep you because it's working than trap you because you signed something.",
     ],
   },
 ];

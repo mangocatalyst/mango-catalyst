@@ -107,7 +107,8 @@ const SECTIONS: { heading: string; body: ReactNode }[] = [
         an incentive to ship and leave; retainers cost more per month but
         include the maintenance that keeps automations from quietly dying. For
         one honest, public data point: Mango Catalyst charges $795 one-time
-        for the first working automation, then $1,000 a month, month to month,
+        for the first working automation, then $1,000 a month (3-month start,
+        month to month after that),
         which covers keeping everything running, a queue of small tweaks, and
         scoping for bigger builds. Whatever the model, get the number and what
         it includes in writing before anyone builds anything.

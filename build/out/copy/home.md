@@ -103,7 +103,7 @@ Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews 
 
 3. **I build it and set it up.** Setup is a one-time $795. I build your first automation, wired into the tools you already use, and get it running. You don't manage anything.
 
-4. **It runs, and keeping it running is my job.** $1,000 a month, month to month. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, I reply within 1 business day and fixes land within 2 to 3 business days.
+4. **It runs, and keeping it running is my job.** $1,000 a month; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, I reply within 1 business day and fixes land within 2 to 3 business days.
 
 **Closing line:** You keep doing the work you're good at. The office work just stops being your problem.
 
@@ -117,16 +117,18 @@ Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews 
 
 **Pricing card:**
 - **First workflow setup: $795 one-time.** I build your first automation and get it running, wired into the tools you already use.
-- **Ongoing automation partner: $1,000 a month.** Month to month, cancel anytime.
+- **Ongoing automation partner: $1,000 a month.** First 3 months, then month to month. Your data is always yours; the automations run while the retainer runs.
 
 **What the monthly actually includes (so there are no surprises):**
 - Keeping everything I've built for you working. When a tool updates or an integration breaks, fixing it is included: I reply within 1 business day, and fixes land within 2 to 3 business days.
 - A monthly queue of tweaks and improvements. Small changes (under about 2 hours of work) come out of the queue, no extra charge per tweak.
 - Bigger new builds (a whole new workflow from scratch) get scoped and agreed first, so you always know what you're getting. No surprise bills, and no "unlimited" promise I can't keep.
 
-**The break-even, in plain numbers:** count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk.
+**The break-even, in plain numbers:** count the office hours your team spends on the task each month, multiply by what an hour actually costs you ($20 to $40 for most office roles, once taxes and benefits are counted), and set that next to $1,000. That's the whole math, and you can run it before we ever talk.
 
 **Why it's a retainer, not a project (one line):** Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers.
+
+**Why the 3-month start (one line):** the build work is front-loaded. Most of my hours land in the first weeks, and the 3-month start is what makes the $795 setup possible instead of charging the whole build cost up front.
 
 **CTA under pricing:** Book a 15-minute fit call
 

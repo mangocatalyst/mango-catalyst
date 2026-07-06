@@ -65,7 +65,8 @@ export function Pricing() {
               </span>
             </p>
             <p className="mt-3 text-[0.95rem] leading-relaxed text-navy-2">
-              Month to month, cancel anytime.
+              First 3 months, then month to month. Your data is always yours;
+              the automations run while the retainer runs.
             </p>
           </div>
 
@@ -96,7 +97,7 @@ export function Pricing() {
               The break-even, in plain numbers:
             </strong>{" "}
             {
-              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
+              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you ($20 to $40 for most office roles, once taxes and benefits are counted), and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
             }
           </p>
           <p className="mt-4 text-[0.95rem] leading-relaxed text-navy-2">
@@ -106,6 +107,14 @@ export function Pricing() {
             {
               "Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers."
             }
+          </p>
+          <p className="mt-4 text-[0.95rem] leading-relaxed text-navy-2">
+            <strong className="font-semibold text-navy">
+              Why the 3-month start:
+            </strong>{" "}
+            the build work is front-loaded. Most of my hours land in the first
+            weeks, and the 3-month start is what makes the $795 setup possible
+            instead of charging the whole build cost up front.
           </p>
         </Card>
 
