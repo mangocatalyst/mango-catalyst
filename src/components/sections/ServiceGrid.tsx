@@ -133,20 +133,20 @@ export function ServiceGrid() {
         ))}
       </div>
 
-      <p className="mt-16 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted">
+      <p className="mt-16 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
         {
           "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything we build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
         }
       </p>
 
-      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted">
+      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
         {
           "Some of that busywork lives inside a web page with no API to hook into. For those, we build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
         }
       </p>
 
       <div className="mt-10 flex flex-col gap-4">
-        <p className="max-w-[44rem] leading-[1.65] text-body">
+        <p className="max-w-[44rem] leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
           {
             "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
           }
@@ -154,7 +154,7 @@ export function ServiceGrid() {
         <ArrowLink href="/services">Everything we build</ArrowLink>
       </div>
 
-      <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body">
+      <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
         {"Run a trade business? Start with the page written for yours: "}
         {INDUSTRY_LINKS.map((link, i) => (
           <span key={link.href}>

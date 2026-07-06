@@ -14,9 +14,10 @@
  * amber link draws slowly (2.2s to 5.6s) with a small ring flash as it
  * reaches each document. Ambient after that: the whole plane floats, chips
  * and the call waveform pulse, the navy now-line creeps, and an amber tracer
- * rides the link every 16s (the job moving through the system). An inline
- * pointer script (no client component, no hydration) tilts the plane a few
- * degrees toward the cursor anywhere over the hero.
+ * rides the link every 16s (the job moving through the system). A tiny
+ * HeroTilt client component tilts the plane a few degrees toward the cursor
+ * anywhere over the hero (a client component, not an inline script, so it
+ * still runs after client-side navigations).
  *
  * Static rule (mobile, prefers-reduced-motion, no-JS): every animated
  * property's base value is the settled composition with the link fully
@@ -27,6 +28,7 @@
  *
  * Plane is a fixed 660x430 design space, scaled per breakpoint in CSS.
  */
+import { HeroTilt } from "@/components/sections/HeroTilt";
 
 /** Call log sheet, 190x130 design space (rendered 220x150). */
 function CallLogSheet() {
@@ -214,42 +216,7 @@ export function HeroBackdrop() {
         </div>
         <div className="hb-veil" />
       </div>
-      {/* Pointer tilt enhancer: plain inline script per the Next JSON-LD
-          pattern, so the hero stays a server component with zero hydration.
-          Writes two custom properties + a rotate onto .hb-plane; every
-          consumer is CSS. Skips itself on touch, small screens, and
-          reduced motion. */}
-      <script
-        id="hero-tilt"
-        dangerouslySetInnerHTML={{
-          __html: `(function(){
-var sec=document.getElementById('top');
-var plane=sec&&sec.querySelector('.hb-plane');
-if(!plane)return;
-if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-if(!matchMedia('(hover: hover) and (pointer: fine) and (min-width: 48rem)').matches)return;
-var px=null,py=null,home=true,cx=0,cy=0,raf=null;
-function frame(){
-raf=null;
-var tx=0,ty=0;
-if(!home&&px!==null){
-var r=sec.getBoundingClientRect();
-tx=((px-r.left)/r.width-.5)*8;
-ty=(.5-(py-r.top)/r.height)*8;
-}
-cx+=(tx-cx)*.09;
-cy+=(ty-cy)*.09;
-plane.style.transform='rotateX('+(26+cy).toFixed(2)+'deg) rotateY('+cx.toFixed(2)+'deg) rotateZ(-4deg)';
-plane.style.setProperty('--hb-px',(cx*6).toFixed(1)+'px');
-plane.style.setProperty('--hb-py',(cy*-4).toFixed(1)+'px');
-if(Math.abs(tx-cx)>.004||Math.abs(ty-cy)>.004)raf=requestAnimationFrame(frame);
-}
-function kick(){if(!raf)raf=requestAnimationFrame(frame);}
-sec.addEventListener('pointermove',function(e){px=e.clientX;py=e.clientY;home=false;kick();});
-sec.addEventListener('pointerleave',function(){home=true;kick();});
-})();`,
-        }}
-      />
+      <HeroTilt />
     </>
   );
 }

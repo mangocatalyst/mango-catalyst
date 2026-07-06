@@ -51,7 +51,7 @@ export function HowItWorks() {
         ))}
       </ol>
 
-      <p className="mt-12 max-w-[44rem] text-[1.1rem] font-medium leading-[1.6] text-ink">
+      <p className="mt-12 max-w-[44rem] text-[1.1rem] font-medium leading-[1.6] text-ink xl:max-w-[52rem] xl:text-[1.25rem]">
         {
           "You keep doing the work you're good at. The office work just stops being your problem."
         }

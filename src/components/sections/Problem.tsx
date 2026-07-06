@@ -31,7 +31,7 @@ export function Problem() {
     <Section id="the-problem" tone="deep">
       <SectionHeading title="The office work is eating the day" />
 
-      <div className="mt-8 flex max-w-[44rem] flex-col gap-5">
+      <div className="mt-8 flex max-w-[44rem] flex-col gap-5 xl:max-w-[52rem] xl:text-[1.2rem]">
         {PARAGRAPHS.map((text) => (
           <p key={text.slice(0, 24)} className="leading-[1.65] text-body">
             {text}

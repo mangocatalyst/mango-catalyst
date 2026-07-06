@@ -20,7 +20,7 @@ export function CTABlock() {
         />
       </h2>
 
-      <p className="mt-6 max-w-[42rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem]">
+      <p className="mt-6 max-w-[42rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] xl:max-w-[50rem] xl:text-[1.2rem]">
         {
           "One 15-minute call. You tell me what's driving you nuts, I tell you straight whether it can be automated and roughly what that looks like. No pitch deck, no pressure. If I don't think I can save you real time, I'll say so on the call."
         }
