@@ -64,7 +64,7 @@ export default function ConstructionIndustryPage() {
           <>
             {"Here's "}
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {", and the "}
             <Link href="/faq" className="inline-link-light">

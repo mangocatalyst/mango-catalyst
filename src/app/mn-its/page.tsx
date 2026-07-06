@@ -143,7 +143,7 @@ export default function MnItsPage() {
               "Book the 15-minute call and bring a sample claim. We'll walk through what your billing cycle looks like, and whether the extension fits it, before you commit to anything. Curious what else can run itself? Here's "
             }
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {"."}
           </p>

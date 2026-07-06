@@ -107,20 +107,24 @@ export function Pricing() {
               "Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers."
             }
           </p>
+
+          {/* Booker sits in the right column under the value props, filling the
+              space beside the tall pricing card (no full-width band below). It
+              shrinks to the column width; month view, no inner scroll. Rendered
+              only when the scheduler is wired; otherwise the card's popup CTA +
+              /contact fallback carry it. */}
+          {calTarget() ? (
+            <div className="mt-2">
+              <h3 className="font-display text-[1.6rem] font-bold leading-tight text-navy">
+                Grab a slot
+              </h3>
+              <div className="mt-5 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
+                <CalInline className="min-h-[34rem] w-full" />
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
-
-      {/* Book right here: inline auto-resizing booker (month view, no midnight
-          grid, no inner scroll). Rendered only when the scheduler is wired;
-          otherwise the card's popup CTA + /contact fallback carry it. */}
-      {calTarget() ? (
-        <div className="mt-16">
-          <SectionHeading tone="light" title="Grab a slot" />
-          <div className="mt-8 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
-            <CalInline className="min-h-[36rem] w-full" />
-          </div>
-        </div>
-      ) : null}
     </Section>
   );
 }

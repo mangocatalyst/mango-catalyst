@@ -49,7 +49,7 @@ export default function ServiceTitanProgramPage() {
             </Link>
             {", or browse "}
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {". If you'd rather just talk it through, that's what the call is for."}
           </>

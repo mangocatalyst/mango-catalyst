@@ -25,7 +25,7 @@ import {
 
 const PAGE_TITLE = "Automation Services for Small Businesses";
 const PAGE_DESCRIPTION =
-  "Invoicing, lead follow-up, scheduling, reporting, and data entry that run on their own. We connect the tools you already pay for. Book a 15-minute fit call.";
+  "Invoicing, lead follow-up, scheduling, reporting, and data entry that run on their own. I connect the tools you already pay for. Book a 15-minute fit call.";
 
 export const metadata: Metadata = {
   // Layout template appends "| Mango Catalyst" (seo-spec 2.2 title, 57 chars).

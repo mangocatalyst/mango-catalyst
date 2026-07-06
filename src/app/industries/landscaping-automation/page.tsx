@@ -68,7 +68,7 @@ export default function LandscapingIndustryPage() {
             </Link>
             {" covers that half of the year. Here's "}
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {
               ". And if you'd rather just talk it through, that's what the call is for."

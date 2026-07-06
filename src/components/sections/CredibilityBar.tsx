@@ -16,7 +16,7 @@ const PRACTICE: { lead: string; body: string }[] = [
   },
   {
     lead: "A method, not a pitch.",
-    body: "Discovery, plan, build. We find the one task eating your week, I write down exactly what will change, and I build the smallest version that proves it. One clear win beats a giant plan that never ships.",
+    body: "Discovery, plan, build. I find the one task eating your week, I write down exactly what will change, and I build the smallest version that proves it. One clear win beats a giant plan that never ships.",
   },
   {
     lead: "Platforms I work in every day:",

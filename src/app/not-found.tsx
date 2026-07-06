@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+
+// Override the layout's global index,follow so the 404 emits noindex only.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 /** Branded 404. Copy verbatim from build/out/copy/home.md global microcopy. */
 export default function NotFound() {

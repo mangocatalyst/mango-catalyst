@@ -48,7 +48,7 @@ export default function EverythingElseProgramPage() {
           <>
             {"Browse "}
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {", or read "}
             <Link

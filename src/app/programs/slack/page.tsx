@@ -44,7 +44,7 @@ export default function SlackProgramPage() {
           <>
             {"Slack is usually one piece of a bigger wiring job, so browse "}
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {", or see how it fits a trades office in "}
             <Link href="/industries/hvac-automation" className="inline-link-light">

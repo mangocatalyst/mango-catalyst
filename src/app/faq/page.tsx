@@ -69,7 +69,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "Do you use AI?",
     answer: [
-      "Yes. I use AI every day, and it's a big part of why one person can build and run this much. AI handles the grunt work of the building: the first drafts, the boilerplate, the tedious parts. The judgment stays human: every automation that touches your business is designed, reviewed, and tested by me before it runs. AI can also be part of what we build for you, drafting the reply to a routine email, summarizing the call notes, turning the numbers into plain English, always with a person approving anything that matters. And the same data rule applies here as everywhere else: nothing of yours gets fed into an AI tool without your say-so, and which tools see what is something we agree on when we scope the build.",
+      "Yes. I use AI every day, and it's a big part of why one person can build and run this much. AI handles the grunt work of the building: the first drafts, the boilerplate, the tedious parts. The judgment stays human: every automation that touches your business is designed, reviewed, and tested by me before it runs. AI can also be part of what I build for you, drafting the reply to a routine email, summarizing the call notes, turning the numbers into plain English, always with a person approving anything that matters. And the same data rule applies here as everywhere else: nothing of yours gets fed into an AI tool without your say-so, and which tools see what is something we agree on when we scope the build.",
     ],
   },
   {
@@ -81,7 +81,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "If I cancel, what happens to my data and my automations?",
     answer: [
-      "You don't get held hostage: the retainer is month to month, and your data lives in your own tools. The automations get wired into the accounts you already own and pay for wherever possible (your CRM, your Google Workspace, your forms), so canceling doesn't strand your information with me. When we scope your setup, the handoff terms get agreed in writing, including what gets documented and handed over if you leave, because the honest answer is that the exact shape depends on what we build. Ask me on the fit call and I'll walk you through what leaving would look like for your setup. I'd rather keep you because it's working than trap you because you signed something.",
+      "You don't get held hostage: the retainer is month to month, and your data lives in your own tools. The automations get wired into the accounts you already own and pay for wherever possible (your CRM, your Google Workspace, your forms), so canceling doesn't strand your information with me. When we scope your setup, the handoff terms get agreed in writing, including what gets documented and handed over if you leave, because the honest answer is that the exact shape depends on what I build. Ask me on the fit call and I'll walk you through what leaving would look like for your setup. I'd rather keep you because it's working than trap you because you signed something.",
     ],
   },
   {

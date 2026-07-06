@@ -8,7 +8,7 @@ import { CopyIcon, FunnelIcon, MoonIcon } from "@/components/ui/icons";
 const PARAGRAPHS = [
   "You're booked solid and still behind. Invoices go out late because somebody has to sit down and make them. Leads from the trade show sit in a notebook for a week. Somebody re-types the same info into three different screens. The schedule lives in one person's head, and when they're out, the day falls apart.",
   "You don't need another full-time hire to handle the busywork. You need the busywork to handle itself.",
-  "Most shops your size are stuck in the middle: too small to have someone whose whole job is systems and automation, too big to keep running it all by hand. That gap is exactly what we close.",
+  "Most shops your size are stuck in the middle: too small to have someone whose whole job is systems and automation, too big to keep running it all by hand. That gap is exactly what I close.",
 ];
 
 const PAINS: { icon: ReactNode; text: string }[] = [

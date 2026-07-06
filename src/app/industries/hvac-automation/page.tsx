@@ -79,7 +79,7 @@ export default function HvacIndustryPage() {
             </Link>
             {". If you want the whole menu, here's "}
             <Link href="/services" className="inline-link-light">
-              the full list of what we build
+              the full list of what I build
             </Link>
             {
               ". And if you'd rather just talk it through, that's what the call is for."

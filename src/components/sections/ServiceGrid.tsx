@@ -83,22 +83,22 @@ const CARDS: {
 ];
 
 const INDUSTRY_LINKS: { href: string; label: string }[] = [
-  { href: "/industries/hvac", label: "HVAC" },
-  { href: "/industries/plumbing", label: "plumbing" },
-  { href: "/industries/roofing", label: "roofing" },
-  { href: "/industries/construction", label: "construction" },
-  { href: "/industries/handyman", label: "handyman" },
-  { href: "/industries/snow-plowing", label: "snow plowing" },
-  { href: "/industries/landscaping", label: "landscaping" },
+  { href: "/industries/hvac-automation", label: "HVAC" },
+  { href: "/industries/plumbing-automation", label: "plumbing" },
+  { href: "/industries/roofing-automation", label: "roofing" },
+  { href: "/industries/construction-automation", label: "construction" },
+  { href: "/industries/handyman-automation", label: "handyman" },
+  { href: "/industries/snow-plowing-automation", label: "snow plowing" },
+  { href: "/industries/landscaping-automation", label: "landscaping" },
 ];
 
 export function ServiceGrid() {
   return (
     <Section id="services">
       <SectionHeading
-        title="What we actually build"
+        title="What I actually build"
         lead={
-          "The busywork that can actually be automated is the repetitive kind: invoicing, lead follow-up, scheduling, reporting, data entry. We don't sell you software. We connect the tools you already pay for and make that work run on its own. Plain English, working systems, no jargon."
+          "The busywork that can actually be automated is the repetitive kind: invoicing, lead follow-up, scheduling, reporting, data entry. I don't sell you software. I connect the tools you already pay for and make that work run on its own. Plain English, working systems, no jargon."
         }
       />
 
@@ -135,13 +135,13 @@ export function ServiceGrid() {
 
       <p className="mt-16 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
         {
-          "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything we build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
+          "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything I build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
         }
       </p>
 
       <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
         {
-          "Some of that busywork lives inside a web page with no API to hook into. For those, we build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
+          "Some of that busywork lives inside a web page with no API to hook into. For those, I build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
         }
       </p>
 
@@ -151,7 +151,7 @@ export function ServiceGrid() {
             "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
           }
         </p>
-        <ArrowLink href="/services">Everything we build</ArrowLink>
+        <ArrowLink href="/services">Everything I build</ArrowLink>
       </div>
 
       <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
