@@ -13,11 +13,20 @@ import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 const PAGE_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/industries/hvac", label: "HVAC business automation" },
   { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+];
+
+const INDUSTRY_LINKS = [
+  { href: "/industries/hvac", label: "HVAC" },
+  { href: "/industries/plumbing", label: "Plumbing" },
+  { href: "/industries/roofing", label: "Roofing" },
+  { href: "/industries/construction", label: "Construction" },
+  { href: "/industries/handyman", label: "Handyman" },
+  { href: "/industries/snow-plowing", label: "Snow plowing" },
+  { href: "/industries/landscaping", label: "Landscaping" },
 ];
 
 const GUIDE_LINKS = [
@@ -58,7 +67,7 @@ export function Footer() {
       {/* The Chart Sheet backdrop: aria-hidden decoration behind the links. */}
       <FooterBackdrop />
       <div className="relative mx-auto w-full max-w-6xl px-6 py-14 sm:px-10 sm:py-16">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1.4fr]">
+        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
           <div>
             <Wordmark />
             <p className="mt-3 max-w-[24rem] text-sm leading-relaxed text-muted">
@@ -72,6 +81,17 @@ export function Footer() {
             </p>
             <ul className="mt-4 flex flex-col gap-2.5">
               {PAGE_LINKS.map((link) => (
+                <FooterLink key={link.href} {...link} />
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Industries">
+            <p className="text-[0.7rem] font-medium tracking-[0.22em] uppercase text-faint">
+              Industries
+            </p>
+            <ul className="mt-4 flex flex-col gap-2.5">
+              {INDUSTRY_LINKS.map((link) => (
                 <FooterLink key={link.href} {...link} />
               ))}
             </ul>

@@ -99,3 +99,23 @@ export function CheckIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+/** Equipment tag: warranty and equipment records card. */
+export function TagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" />
+      <circle cx="7.5" cy="7.5" r="1.25" />
+    </svg>
+  );
+}
+
+/** Clipboard form: forms, portals, and shortcuts card. */
+export function ClipboardIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <rect x="5" y="4" width="14" height="18" rx="2" />
+      <path d="M9 4a3 3 0 0 1 6 0M9 11h6M9 15h4" />
+    </svg>
+  );
+}
