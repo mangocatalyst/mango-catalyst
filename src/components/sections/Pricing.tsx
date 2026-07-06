@@ -30,7 +30,7 @@ export function Pricing() {
         }
       />
 
-      <div className="mt-12 grid items-start gap-10 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:gap-14">
+      <div className="mt-12 grid items-start gap-10 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:items-stretch lg:gap-14">
         <Card tone="light" accent className="p-7 sm:p-9">
           <div>
             <h3 className="text-[0.8rem] font-semibold tracking-[0.18em] uppercase text-muted-lt">
@@ -108,18 +108,23 @@ export function Pricing() {
             }
           </p>
 
-          {/* Booker sits in the right column under the value props, filling the
-              space beside the tall pricing card (no full-width band below). It
-              shrinks to the column width; month view, no inner scroll. Rendered
-              only when the scheduler is wired; otherwise the card's popup CTA +
-              /contact fallback carry it. */}
+          {/* Booker sits in the right column under the value props. On lg the
+              pricing card dictates the row height: the booker box contributes
+              zero intrinsic height (absolute fill) and just takes whatever
+              space is left under the value props, scrolling the slot list
+              inside itself instead of stretching the section. On mobile it
+              keeps its natural height. Rendered only when the scheduler is
+              wired; otherwise the card's popup CTA + /contact fallback carry
+              it. */}
           {calTarget() ? (
-            <div className="mt-2">
+            <div className="mt-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
               <h3 className="font-display text-[1.6rem] font-bold leading-tight text-navy">
                 Grab a slot
               </h3>
-              <div className="mt-5 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
-                <CalInline className="min-h-[34rem] w-full" />
+              <div className="relative mt-5 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)] lg:min-h-0 lg:flex-1">
+                <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
+                  <CalInline className="min-h-[34rem] w-full lg:min-h-0" />
+                </div>
               </div>
             </div>
           ) : null}
