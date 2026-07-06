@@ -4,8 +4,9 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 
 /**
- * Global footer: the crawl safety net (seo-spec section 5). All seven
- * top-level pages, the three guides with descriptive anchors, the NAP line
+ * Global footer: the crawl safety net (seo-spec section 5). All top-level
+ * pages, the programs column (platforms + MN-ITS Helper, 2026-07-06),
+ * the three guides with descriptive anchors, the NAP line
  * (byte-identical to schema; email omitted until set in constants), and the
  * privacy link. No social icons, no phone, ever.
  */
@@ -13,11 +14,19 @@ import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 const PAGE_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/mn-its", label: "MN-ITS Helper" },
   { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+];
+
+/** Platforms worked in extensively, plus the one owned build (MN-ITS Helper). */
+const PROGRAM_LINKS = [
+  { href: "/programs/servicetitan", label: "ServiceTitan" },
+  { href: "/programs/zapier", label: "Zapier" },
+  { href: "/programs/slack", label: "Slack" },
+  { href: "/programs/google-workspace", label: "Google Workspace" },
+  { href: "/mn-its", label: "MN-ITS Helper" },
 ];
 
 const INDUSTRY_LINKS = [
@@ -68,7 +77,7 @@ export function Footer() {
       {/* The Chart Sheet backdrop: aria-hidden decoration behind the links. */}
       <FooterBackdrop />
       <div className="relative mx-auto w-full max-w-6xl px-6 py-14 sm:px-10 sm:py-16">
-        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
+        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.4fr]">
           <div>
             <Wordmark />
             <p className="mt-3 max-w-[24rem] text-sm leading-relaxed text-muted">
@@ -93,6 +102,17 @@ export function Footer() {
             </p>
             <ul className="mt-4 flex flex-col gap-2.5">
               {INDUSTRY_LINKS.map((link) => (
+                <FooterLink key={link.href} {...link} />
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Programs">
+            <p className="text-[0.7rem] font-medium tracking-[0.22em] uppercase text-faint">
+              Programs
+            </p>
+            <ul className="mt-4 flex flex-col gap-2.5">
+              {PROGRAM_LINKS.map((link) => (
                 <FooterLink key={link.href} {...link} />
               ))}
             </ul>
