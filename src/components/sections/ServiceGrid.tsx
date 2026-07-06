@@ -28,7 +28,7 @@ const CARDS: {
 }[] = [
   {
     icon: <InvoiceIcon className="size-5" />,
-    title: "Invoicing, billing, and the paper trail",
+    title: "Invoicing, Billing, and the Paper Trail",
     body: "Jobs close, invoices go out, payments get tracked. The repeatable part runs on its own, so the weekly catch-up on billing mostly disappears.",
     examples: [
       "Supply-house receipt emails matched line by line to the right purchase order in your CRM, for every vendor you buy from.",
@@ -37,7 +37,7 @@ const CARDS: {
   },
   {
     icon: <FunnelIcon className="size-5" />,
-    title: "Lead capture and follow-up",
+    title: "Lead Capture and Follow-Up",
     body: "Every lead, from the trade show, the website, the phone, lands in one place, gets routed to the right person, and gets followed up on automatically. Nothing sits in a notebook.",
     examples: [
       "Hang-ups and abandoned calls classified automatically in your phone system, so your booking rate reflects what actually happened.",
@@ -46,7 +46,7 @@ const CARDS: {
   },
   {
     icon: <CalendarIcon className="size-5" />,
-    title: "Scheduling, dispatch, and job chatter",
+    title: "Scheduling, Dispatch, and Job Chatter",
     body: "The coordination around a job, not just the calendar entry, kept together instead of scattered across texts, sticky notes, and inboxes.",
     examples: [
       "A dedicated channel per job in your team chat, the right people added automatically, and the photos and messages in it archived back onto the job record when it closes.",
@@ -55,7 +55,7 @@ const CARDS: {
   },
   {
     icon: <ChartIcon className="size-5" />,
-    title: "Reporting you don't have to build",
+    title: "Reporting You Don't Have to Build",
     body: "Daily numbers on what got done, what got sold, and what got missed, put together for you instead of you stitching it from five screens.",
     examples: [
       "Install-quality scorecards per technician: recalls, go-backs, and the hours spent fixing them, built from your CRM and payroll.",
@@ -64,7 +64,7 @@ const CARDS: {
   },
   {
     icon: <TagIcon className="size-5" />,
-    title: "Warranty and equipment records",
+    title: "Warranty and Equipment Records",
     body: "The equipment paper trail keeps itself, so nobody finds out at the service call that the unit was never registered.",
     examples: [
       "Every unit you install logged with model and serial, and registered with the manufacturer automatically, portal or not.",
@@ -73,7 +73,7 @@ const CARDS: {
   },
   {
     icon: <ClipboardIcon className="size-5" />,
-    title: "Forms, portals, and the clicks between",
+    title: "Forms, Portals, and the Clicks Between",
     body: "The fifty-times-a-week stuff that lives outside your main system: web portals, agency forms, the same six clicks to do one small thing.",
     examples: [
       "Portal forms pre-filled from saved presets, with your staff reviewing and clicking submit.",
@@ -102,7 +102,19 @@ export function ServiceGrid() {
         }
       />
 
-      <div className="mt-14 grid gap-x-14 gap-y-14 sm:grid-cols-2">
+      <p className="mt-10 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
+        {
+          "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything I build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
+        }
+      </p>
+
+      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
+        {
+          "Some of that busywork lives inside a web page with no API to hook into. For those, I build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
+        }
+      </p>
+
+      <div className="mt-14 grid gap-x-16 gap-y-16 sm:grid-cols-2">
         {CARDS.map((card) => (
           <div key={card.title}>
             <div className="flex items-center gap-3">
@@ -133,19 +145,7 @@ export function ServiceGrid() {
         ))}
       </div>
 
-      <p className="mt-16 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
-        {
-          "Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in. And everything I build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
-        }
-      </p>
-
-      <p className="mt-6 max-w-[44rem] text-card leading-relaxed text-muted xl:max-w-[52rem] xl:text-[1.05rem]">
-        {
-          "Some of that busywork lives inside a web page with no API to hook into. For those, I build a Chrome extension that does the same clicking and typing right in the browser your staff already use, so the data stays on their machine and never leaves the building."
-        }
-      </p>
-
-      <div className="mt-10 flex flex-col gap-4">
+      <div className="mt-14 flex flex-col gap-4">
         <p className="max-w-[44rem] leading-[1.65] text-body xl:max-w-[52rem] xl:text-[1.2rem]">
           {
             "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
