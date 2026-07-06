@@ -8,7 +8,8 @@ import type { SVGProps } from "react";
  * aria-hidden by the layout that places them. Ambient motion is pure CSS
  * behind the hero's media gate (ta-* classes, see globals.css): the amber
  * node breathes everywhere, plus one thematic touch per trade (now-line
- * creep, snow drift, valve drip). Static contexts render as drawn.
+ * creep, snow drift, pipe flow, punch-list check-off). Static contexts
+ * render as drawn.
  *
  * Shared design space: 460x330. Line ramp: #22314F faint, #2A3B5E base,
  * #35496F mid, #46608F loud, #5E7BAE text. Amber #F6A328 once.
@@ -37,7 +38,8 @@ export function DispatchArt(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...frame(props)}>
       <Registration />
-      <rect x="52" y="46" width="356" height="238" rx="7" fill="#16213A" fillOpacity=".55" stroke="#35496F" strokeWidth="1.2" />
+      <rect x="60" y="55" width="356" height="238" rx="7" fill="#0A1120" opacity=".8" />
+      <rect x="52" y="46" width="356" height="238" rx="7" fill="#16213A" fillOpacity=".7" stroke="#35496F" strokeWidth="1.2" />
       <rect x="52" y="46" width="356" height="26" rx="7" fill="#22314F" fillOpacity=".7" />
       <text x="64" y="63" fill="#5E7BAE" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">DISPATCH BOARD</text>
       <path d="M130 82v6M190 82v6M250 82v6M310 82v6M370 82v6" stroke="#35496F" strokeWidth="1" />
@@ -72,6 +74,8 @@ export function PipeRunArt(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...frame(props)}>
       <Registration />
+      {/* pipe body: one thick dark stroke on the centerline, under the outlines */}
+      <path d="M40 102h202a16 16 0 0 1 16 16v82a16 16 0 0 0 16 16h64" stroke="#16213A" strokeOpacity=".85" strokeWidth="10" fill="none" />
       {/* main run: double-line pipe with a clean elbow down to the tank */}
       <g stroke="#35496F" strokeWidth="1.4">
         <path d="M40 96h202a22 22 0 0 1 22 22v82a10 10 0 0 0 10 10h64" />
@@ -81,11 +85,12 @@ export function PipeRunArt(props: SVGProps<SVGSVGElement>) {
       <path d="M130 84l24 36M154 84l-24 36" stroke="#46608F" strokeWidth="1.4" />
       <path d="M142 78v-16h-12M142 62h12" stroke="#46608F" strokeWidth="1.2" />
       {/* gauge */}
-      <circle cx="212" cy="70" r="17" stroke="#46608F" strokeWidth="1.2" />
+      <circle cx="212" cy="70" r="17" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".7" />
       <path d="M212 70l9 -8" stroke="#5E7BAE" strokeWidth="1.4" />
       <path d="M212 87v9" stroke="#35496F" strokeWidth="1.2" />
       {/* water heater tank */}
-      <rect x="338" y="150" width="74" height="130" rx="16" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".5" />
+      <rect x="345" y="158" width="74" height="130" rx="16" fill="#0A1120" opacity=".8" />
+      <rect x="338" y="150" width="74" height="130" rx="16" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".7" />
       <path d="M352 150v-18M398 150v-18" stroke="#35496F" strokeWidth="1.2" />
       <path d="M348 190h54M348 246h54" stroke="#2A3B5E" strokeWidth="1" />
       <text x="352" y="222" fill="#46608F" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="1.5">SN 44087</text>
@@ -94,8 +99,10 @@ export function PipeRunArt(props: SVGProps<SVGSVGElement>) {
         <path d="M40 132h214" strokeDasharray="4 4" />
         <path d="M40 126v12M254 126v12" />
       </g>
-      {/* drip: the one amber moment, at the valve outlet */}
-      <circle className="ta-drip" cx="142" cy="120" r="4" fill="#F6A328" />
+      {/* the one amber moment: the job riding the line, hero-tracer style.
+          Static + no-offset-path contexts keep the dot at the valve outlet
+          (attribute transform); motion sends it down the pipe centerline. */}
+      <circle className="ta-flow" cx="0" cy="0" r="4" fill="#F6A328" transform="translate(142 120)" />
     </svg>
   );
 }
@@ -105,8 +112,9 @@ export function FramePlanArt(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...frame(props)}>
       <Registration />
-      {/* outer wall, double line */}
-      <rect x="72" y="62" width="300" height="212" stroke="#46608F" strokeWidth="1.4" />
+      {/* outer wall, double line, over a filled footprint + drop shadow */}
+      <rect x="80" y="71" width="300" height="212" fill="#0A1120" opacity=".7" />
+      <rect x="72" y="62" width="300" height="212" fill="#16213A" fillOpacity=".5" stroke="#46608F" strokeWidth="1.4" />
       <rect x="80" y="70" width="284" height="196" stroke="#2A3B5E" strokeWidth="1" />
       {/* interior walls */}
       <path d="M204 70v92M204 196v70M80 162h74M290 70v70M290 196v70M204 196h160" stroke="#35496F" strokeWidth="1.2" />
@@ -136,8 +144,9 @@ export function PunchListArt(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...frame(props)}>
       <Registration />
-      {/* clipboard */}
-      <rect x="76" y="58" width="176" height="222" rx="8" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".5" />
+      {/* clipboard, over a drop shadow */}
+      <rect x="84" y="67" width="176" height="222" rx="8" fill="#0A1120" opacity=".8" />
+      <rect x="76" y="58" width="176" height="222" rx="8" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".7" />
       <rect x="140" y="46" width="48" height="20" rx="6" stroke="#46608F" strokeWidth="1.2" fill="#22314F" />
       <text x="94" y="92" fill="#5E7BAE" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">PUNCH LIST</text>
       {/* rows: box + line */}
@@ -155,11 +164,14 @@ export function PunchListArt(props: SVGProps<SVGSVGElement>) {
         <rect x="116" y="203" width="76" height="5" rx="2" />
         <rect x="116" y="233" width="96" height="5" rx="2" />
       </g>
-      {/* two done marks in navy, one amber: the item that runs itself now */}
-      <path d="M95 114l4 5 6-8" stroke="#46608F" strokeWidth="1.6" />
-      <path d="M95 144l4 5 6-8" stroke="#46608F" strokeWidth="1.6" />
-      <path className="ta-amber" d="M95 174l4 5 6-8" stroke="#F6A328" strokeWidth="1.8" />
+      {/* two done marks in navy, one amber: the item that runs itself now.
+          Motion: the checks draw themselves down the list, then the list
+          resets (ta-ck1..3); static contexts keep all three drawn. */}
+      <path className="ta-check ta-ck1" pathLength="1" d="M95 114l4 5 6-8" stroke="#46608F" strokeWidth="1.6" />
+      <path className="ta-check ta-ck2" pathLength="1" d="M95 144l4 5 6-8" stroke="#46608F" strokeWidth="1.6" />
+      <path className="ta-check ta-ck3" pathLength="1" d="M95 174l4 5 6-8" stroke="#F6A328" strokeWidth="1.8" />
       {/* step ladder: open A-frame, front rails + rear leg */}
+      <path d="M292 278L342 74h14l-24 204z" fill="#16213A" fillOpacity=".45" />
       <g stroke="#35496F" strokeWidth="1.4">
         <path d="M292 278L342 74h14l-24 204" />
         <path d="M352 84l40 194" />
@@ -178,6 +190,9 @@ export function TrussArt(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...frame(props)}>
       <Registration />
+      {/* gable mass: drop shadow + filled roof plane under the linework */}
+      <path d="M72 260L238 104l166 156z" fill="#0A1120" opacity=".7" />
+      <path d="M64 252L230 96l166 156z" fill="#16213A" fillOpacity=".55" />
       {/* truss: bottom chord, rafters, king post, webs */}
       <g stroke="#46608F" strokeWidth="1.4">
         <path d="M64 252h332" />
@@ -190,7 +205,7 @@ export function TrussArt(props: SVGProps<SVGSVGElement>) {
         <path d="M92 226l124 -116M112 232l112 -105M134 238l97 -91M158 244l80 -75" opacity=".8" />
       </g>
       {/* chimney */}
-      <path d="M296 158v-52h26v78" stroke="#35496F" strokeWidth="1.2" />
+      <path d="M296 158v-52h26v78" stroke="#35496F" strokeWidth="1.2" fill="#16213A" fillOpacity=".6" />
       <path d="M292 106h34" stroke="#35496F" strokeWidth="1.2" />
       {/* pitch annotation: small right triangle + arc */}
       <path d="M262 126v22h-22" stroke="#5E7BAE" strokeWidth="1" />
@@ -227,18 +242,20 @@ export function PlowTruckArt(props: SVGProps<SVGSVGElement>) {
         <circle cx="256" cy="96" r="1.6" />
         <circle cx="376" cy="106" r="1.6" />
       </g>
-      {/* pickup: cab high in back, bed behind, side view line art */}
+      {/* pickup: cab high in back, bed behind, side view over a drop shadow */}
+      <path d="M158 234v-40h50l16-38h56l8 38h88v40z" fill="#0A1120" opacity=".7" />
       <g stroke="#46608F" strokeWidth="1.4">
-        <path d="M150 226v-40h50l16-38h56l8 38h88v40z" fill="#16213A" fillOpacity=".5" />
+        <path d="M150 226v-40h50l16-38h56l8 38h88v40z" fill="#16213A" fillOpacity=".7" />
         <path d="M220 182l12-26h44l6 26" strokeWidth="1" opacity=".85" />
         <path d="M150 206h218" strokeWidth="1" opacity=".5" />
-        <circle cx="200" cy="230" r="20" />
+        <circle cx="200" cy="230" r="20" fill="#16213A" fillOpacity=".8" />
         <circle cx="200" cy="230" r="8" strokeWidth="1" />
-        <circle cx="332" cy="230" r="20" />
+        <circle cx="332" cy="230" r="20" fill="#16213A" fillOpacity=".8" />
         <circle cx="332" cy="230" r="8" strokeWidth="1" />
       </g>
       {/* plow mount + angled blade: two curved lines + rib hatching */}
       <path d="M150 214l-30 6" stroke="#35496F" strokeWidth="1.4" />
+      <path d="M127 185c-11 11-15 34-10 60" stroke="#16213A" strokeOpacity=".85" strokeWidth="7" fill="none" />
       <path d="M122 182c-13 12-18 38-12 66" stroke="#46608F" strokeWidth="1.6" fill="none" />
       <path d="M132 188c-10 10-14 32-9 54" stroke="#35496F" strokeWidth="1.2" fill="none" />
       <path d="M120 196l10 4M114 214l10 4M112 232l10 4" stroke="#2A3B5E" strokeWidth="1" />
@@ -260,16 +277,17 @@ export function PlotPlanArt(props: SVGProps<SVGSVGElement>) {
       <Registration />
       {/* property boundary */}
       <rect x="64" y="54" width="332" height="230" stroke="#35496F" strokeWidth="1.2" strokeDasharray="7 5" />
-      {/* house footprint */}
-      <rect x="96" y="86" width="120" height="88" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".5" />
+      {/* house footprint, over a drop shadow */}
+      <rect x="103" y="93" width="120" height="88" fill="#0A1120" opacity=".7" />
+      <rect x="96" y="86" width="120" height="88" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".7" />
       <path d="M96 130h120" stroke="#2A3B5E" strokeWidth="1" />
       {/* walkway: double line from the door to the boundary */}
       <path d="M216 148h36v136M228 148h36v136" stroke="#2A3B5E" strokeWidth="1" />
       {/* tree canopies: double circles + center dot, plot-plan style */}
       <g stroke="#46608F" strokeWidth="1.2">
-        <circle cx="330" cy="108" r="32" />
+        <circle cx="330" cy="108" r="32" fill="#16213A" fillOpacity=".4" />
         <circle cx="330" cy="108" r="22" strokeWidth="1" opacity=".7" />
-        <circle cx="122" cy="238" r="24" />
+        <circle cx="122" cy="238" r="24" fill="#16213A" fillOpacity=".4" />
         <circle cx="122" cy="238" r="15" strokeWidth="1" opacity=".7" />
       </g>
       <g fill="#46608F">
@@ -277,7 +295,7 @@ export function PlotPlanArt(props: SVGProps<SVGSVGElement>) {
         <circle cx="122" cy="238" r="2" />
       </g>
       {/* kidney planting bed along the lower right, even hatch */}
-      <path d="M292 210c34-10 72-2 88 18 12 16 2 34-18 38-26 6-58-2-74-18-12-14-8-32 4-38z" stroke="#35496F" strokeWidth="1.2" />
+      <path d="M292 210c34-10 72-2 88 18 12 16 2 34-18 38-26 6-58-2-74-18-12-14-8-32 4-38z" stroke="#35496F" strokeWidth="1.2" fill="#16213A" fillOpacity=".4" />
       <g stroke="#22314F" strokeWidth="1">
         <path d="M300 212v50M320 206v56M340 206v54M360 210v46" />
       </g>
@@ -302,8 +320,9 @@ export function LocalOnlyArt(props: SVGProps<SVGSVGElement>) {
       {/* the machine boundary: everything lives inside this dashed line */}
       <rect x="56" y="48" width="348" height="234" rx="12" stroke="#35496F" strokeWidth="1.2" strokeDasharray="7 5" />
       <text x="72" y="272" fill="#46608F" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">YOUR MACHINE</text>
-      {/* browser window with a claim form */}
-      <rect x="92" y="76" width="184" height="150" rx="7" fill="#16213A" fillOpacity=".55" stroke="#46608F" strokeWidth="1.2" />
+      {/* browser window with a claim form, over a drop shadow */}
+      <rect x="99" y="84" width="184" height="150" rx="7" fill="#0A1120" opacity=".8" />
+      <rect x="92" y="76" width="184" height="150" rx="7" fill="#16213A" fillOpacity=".7" stroke="#46608F" strokeWidth="1.2" />
       <path d="M92 100h184" stroke="#2A3B5E" strokeWidth="1" />
       <circle cx="104" cy="88" r="3" stroke="#35496F" strokeWidth="1" />
       <circle cx="116" cy="88" r="3" stroke="#35496F" strokeWidth="1" />
@@ -317,7 +336,7 @@ export function LocalOnlyArt(props: SVGProps<SVGSVGElement>) {
       <rect x="106" y="192" width="64" height="18" rx="4" stroke="#46608F" strokeWidth="1" fill="#22314F" fillOpacity=".9" />
       <text x="116" y="204" fill="#5E7BAE" fontSize="8" fontFamily="var(--font-mono, monospace)">REVIEW</text>
       {/* preset store: a small card stack beside the window */}
-      <rect x="308" y="112" width="72" height="88" rx="6" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".5" />
+      <rect x="308" y="112" width="72" height="88" rx="6" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".7" />
       <rect x="316" y="104" width="72" height="88" rx="6" stroke="#35496F" strokeWidth="1" fill="#0E1729" />
       <g fill="#2A3B5E">
         <rect x="328" y="120" width="48" height="5" rx="2" />

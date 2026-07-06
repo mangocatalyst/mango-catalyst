@@ -26,6 +26,7 @@ export function IndustryHero({
       className="relative isolate overflow-hidden"
       containerClassName="pb-[clamp(3.5rem,7vw,5.5rem)]"
     >
+      <div aria-hidden className="hero-glow" />
       <div aria-hidden className="trade-art">{art}</div>
       <div className="relative">
         <div aria-hidden className="h-[3px] w-10 bg-amber" />

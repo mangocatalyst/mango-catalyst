@@ -851,7 +851,8 @@ body {
   }
 }
 
-/* One drop forms at the valve, sits, falls and fades; then the next. */
+/* One drop forms at the valve, sits, falls and fades; then the next.
+   Only used as the .ta-flow fallback where offset-path is unsupported. */
 @keyframes ta-drip {
   0% {
     transform: translateY(0);
@@ -865,6 +866,63 @@ body {
   90%,
   100% {
     transform: translateY(22px);
+    opacity: 0;
+  }
+}
+
+/* Punch list: each check draws itself down the list, holds, then the list
+   resets for the next round. Same one-timeline-staggered-offsets pattern as
+   the hero sheet entrances (hb-in1..4). */
+@keyframes ta-ck1 {
+  0%,
+  4% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  10%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  92%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+@keyframes ta-ck2 {
+  0%,
+  30% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  36%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  92%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+@keyframes ta-ck3 {
+  0%,
+  56% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  62%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  92%,
+  100% {
+    stroke-dashoffset: 1;
     opacity: 0;
   }
 }
@@ -894,8 +952,39 @@ body {
     animation-delay: -8.6s;
   }
 
-  .ta-drip {
-    animation: ta-drip 7s ease-in infinite;
+  /* Punch list checks: dasharray lives inside the gate so static contexts
+     keep the drawn checks (paths carry pathLength="1"). */
+  .ta-check {
+    stroke-dasharray: 1;
+  }
+  .ta-ck1 {
+    animation: ta-ck1 14s linear infinite;
+  }
+  .ta-ck2 {
+    animation: ta-ck2 14s linear infinite;
+  }
+  .ta-ck3 {
+    animation: ta-ck3 14s linear infinite;
+  }
+
+  /* Plumbing: the amber dot rides the pipe centerline (hb-run, the hero
+     tracer's keyframes). transform: none clears the static valve-outlet
+     position so offset-path alone places the dot. */
+  .ta-flow {
+    transform: none;
+    offset-path: path("M40 102H242A16 16 0 0 1 258 118V200A16 16 0 0 0 274 216H338");
+    offset-rotate: 0deg;
+    animation: hb-run 14s linear infinite;
+  }
+}
+
+/* No offset-path: put the dot back at the valve and let it drip instead. */
+@supports not (offset-path: path("M0 0H8")) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
+    .ta-flow {
+      transform: translate(142px, 120px);
+      animation: ta-drip 7s ease-in infinite;
+    }
   }
 }
 
