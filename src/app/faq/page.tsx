@@ -55,6 +55,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
     question: "Is this going to replace my people?",
     answer: [
       "No. This replaces the busywork your people hate, the typing, the copy-paste, the chasing. It frees them up to do the work you actually hired them for, and it lets you grow without adding office staff just to keep up with paperwork. The goal is more done with the team you have, not fewer people.",
+      "There's always a human in the loop. The automation handles the repetitive part and stops where judgment starts, so a person reviews and approves the work that matters. Done right, it lifts what your team gets done without burning them out. It never takes the people out of the equation.",
     ],
   },
   {
