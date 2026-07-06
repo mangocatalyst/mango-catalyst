@@ -1,30 +1,17 @@
 /**
- * Footer backdrop: "The Chart Sheet" (Bryan's pick, winner F1), with his
- * requested edits applied: the sheet border box, the inner frame, ALL
- * graticule lines and their lat/long tick labels, the corner registration
- * marks, and the two stray corner sheets are removed. What remains, inked
- * straight onto the deep navy band: the Lake Superior coastline, the small
- * peninsula, the compass rose (it composes clean without the frame, so it
- * stays), the amber period on Duluth, and the tiny DULUTH label with its
- * short leader.
+ * Footer backdrop: "The Chart Sheet" (Bryan's pick, winner F1), 2026-07-06
+ * recompose. Inked straight onto the deep navy band: the Lake Superior
+ * coastline, the small peninsula, and the amber period on Duluth. The
+ * compass rose and the tiny DULUTH label are gone. Aria-hidden absolute
+ * layer at 25% opacity behind the footer content.
  *
- * Server component, zero client JS, aria-hidden absolute layer at 25%
- * opacity behind the footer content. The sheet's old -1.5deg tilt is dropped
- * in the recompose: with no frame or graticule to reference it, the tilt
- * read as noise. The lake keeps its right-two-thirds bias and Duluth sits in
- * the left third, near where the NAP line renders.
- *
- * Motion (desktop + motion-ok only, 2026-07-03 rework): a tiny FooterLive
- * client component's IntersectionObserver adds .footer-live when the chart
- * is ~35% in view,
- * playing the entrance ONCE: the chart leans toward Duluth (scale 1.0 to
- * 1.3, transform-origin exactly on the Duluth point, 469.4 419.4 in
- * viewBox units) and the amber period emits one sonar ring, then breathes
- * slowly forever. This replaced the scroll-scrubbed view() timeline, which
- * had no scroll runway at the bottom of the page (the whole effect played
- * inside the final inertial flick, so nobody ever saw it) and was a no-op
- * in Firefox. Mobile and reduced motion get the fully static composition;
- * the observer skips itself there, matching the CSS gate.
+ * The footer's real NAP line ("Mango Catalyst · Duluth, MN") is the dot's
+ * label now: FooterLive translates the svg so the dot (469.4, 419.4 in
+ * viewBox units) sits just left of that line on desktop; mobile keeps the
+ * static centered composition. The zoom-toward-Duluth entrance and sonar
+ * ring are also gone (the zoomed hold cropped the lake mid-line at the svg
+ * edge); the only motion left is the dot's faint always-on pulse in CSS,
+ * which shows the complete lake at rest on every screen width.
  */
 import { FooterLive } from "@/components/layout/FooterLive";
 
@@ -32,21 +19,7 @@ export function FooterBackdrop() {
   return (
     <div aria-hidden className="footer-art">
       <svg viewBox="0 0 1440 560" preserveAspectRatio="xMidYMid meet">
-        <g className="footer-chart">
-          {/* Compass rose */}
-          <g stroke="#35496F" fill="none">
-            <circle cx="240" cy="168" r="24" strokeWidth="1" />
-            <circle cx="240" cy="168" r="15" strokeWidth="0.6" strokeOpacity="0.6" />
-            <path
-              d="M240 186 V150 M222 168 H216 M264 168 H258 M240 192 V198"
-              strokeWidth="0.8"
-            />
-          </g>
-          <path d="M240 142 L244.5 152 L240 149.5 L235.5 152 Z" fill="#46608F" />
-          <circle cx="240" cy="168" r="1.8" fill="#46608F" />
-          <text className="footer-art-tick" x="240" y="136" textAnchor="middle">
-            N
-          </text>
+        <g>
 
           {/* Lake Superior coastline */}
           <path
@@ -66,22 +39,8 @@ export function FooterBackdrop() {
             strokeLinejoin="round"
           />
 
-          {/* Duluth: leader, one-shot ring, amber period, label */}
-          <line x1="466" y1="422" x2="434" y2="448" stroke="#35496F" strokeWidth="0.8" />
-          <circle
-            className="footer-ring"
-            cx="469.4"
-            cy="419.4"
-            r="4"
-            fill="none"
-            stroke="#F6A328"
-            strokeWidth="1.2"
-            vectorEffect="non-scaling-stroke"
-          />
+          {/* Duluth: the amber period. The NAP line in the footer is its label. */}
           <circle className="footer-dot" cx="469.4" cy="419.4" r="3.2" fill="#F6A328" />
-          <text className="footer-art-lbl" x="428" y="452" textAnchor="end">
-            DULUTH
-          </text>
         </g>
       </svg>
       <FooterLive />

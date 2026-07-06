@@ -132,7 +132,10 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 pt-6 sm:flex-row sm:items-baseline sm:justify-between">
-          <p className="text-sm text-faint">{nap}</p>
+          {/* data-footer-nap: FooterLive parks the chart's Duluth dot just left of this line. */}
+          <p data-footer-nap className="text-sm text-faint">
+            {nap}
+          </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-6">
             <p className="text-[0.8rem] text-faint">
               We use privacy-friendly analytics. No creepy tracking, no ad
