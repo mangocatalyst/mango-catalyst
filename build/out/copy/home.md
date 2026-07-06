@@ -124,7 +124,7 @@ Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews 
 - A monthly queue of tweaks and improvements. Small changes (under about 2 hours of work) come out of the queue, no extra charge per tweak.
 - Bigger new builds (a whole new workflow from scratch) get scoped and agreed first, so you always know what you're getting. No surprise bills, and no "unlimited" promise I can't keep.
 
-**The break-even, in plain numbers:** count the office hours your team spends on the task each month, multiply by what an hour actually costs you ($20 to $40 for most office roles, once taxes and benefits are counted), and set that next to $1,000. That's the whole math, and you can run it before we ever talk.
+**The break-even, in plain numbers:** count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk.
 
 **Why it's a retainer, not a project (one line):** Automation isn't a thing you buy once. Tools change, your shop changes, and the systems need someone keeping them alive. That's what the monthly covers.
 

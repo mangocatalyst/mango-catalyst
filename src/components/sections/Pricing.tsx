@@ -97,7 +97,7 @@ export function Pricing() {
               The break-even, in plain numbers:
             </strong>{" "}
             {
-              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you ($20 to $40 for most office roles, once taxes and benefits are counted), and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
+              "count the office hours your team spends on the task each month, multiply by what an hour actually costs you, and set that next to $1,000. That's the whole math, and you can run it before we ever talk."
             }
           </p>
           <p className="mt-4 text-[0.95rem] leading-relaxed text-navy-2">
