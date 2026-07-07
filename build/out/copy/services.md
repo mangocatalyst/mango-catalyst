@@ -11,7 +11,7 @@
 
 ## H1
 
-Automation services for small businesses
+Automation services for service shops
 
 ## Intro (answer-first)
 
@@ -45,7 +45,7 @@ The mind-numbing typing and copy-paste work can be handed off to a system that d
 
 ## Closing line
 
-If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself.
+If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself.
 
 ## Bottom CTA (one, per spec)
 

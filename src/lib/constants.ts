@@ -11,7 +11,7 @@ export const SITE = {
   /** Canonical host. The apex 308-redirects to www on Vercel, so www is canonical. */
   url: "https://www.mangocatalyst.com",
   description:
-    "Business automation for upper-Midwest small businesses. We build the automation that takes invoicing, scheduling, and lead follow-up off your hands.",
+    "Business automation for Upper Midwest service shops. I build the automation that takes invoicing, scheduling, and lead follow-up off your hands.",
   /** Service-area business (home-based): city only, no street address published. */
   city: "Duluth",
   region: "MN",

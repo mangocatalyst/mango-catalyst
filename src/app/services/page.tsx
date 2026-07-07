@@ -140,7 +140,7 @@ export default function ServicesPage() {
         <Section id="services" className="flex-1">
           <div aria-hidden className="h-[3px] w-10 bg-amber" />
           <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
-            Automation services for small businesses
+            Automation services for service shops
           </h1>
 
           {/* Answer-first intro: the direct answer to "what services?" */}
@@ -170,7 +170,7 @@ export default function ServicesPage() {
 
           <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
             {
-              "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
+              "If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself."
             }
           </p>
         </Section>

@@ -3,7 +3,7 @@
 ## Page metadata (from seo-spec section 2.6)
 
 - **Title:** `Book a 15-Minute Fit Call | Mango Catalyst`
-- **Meta description:** `Book a 15-minute fit call with real time slots, or send a note about the task eating your week. Based in Minnesota, serving the upper Midwest. No pitch.`
+- **Meta description:** `Book a 15-minute fit call with real time slots, or send a note about the task that keeps stealing your hours. Based in Minnesota, serving the Upper Midwest. No pitch.`
 - **Canonical:** `/contact`
 - **Schema:** `breadcrumbLd([Home, Contact])` only.
 - **NO phone number anywhere on this page (or the site).**
@@ -16,9 +16,9 @@ Book a 15-minute fit call
 
 ## Intro (answer-first)
 
-Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing eating your week can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day.
+Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing draining your hours can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day.
 
-**Intro (fallback variant, REQUIRED when the booking env var is empty):** Tell me what's eating your week in the form below. I reply within one business day and we set up a 15-minute call with a video link. No pitch either way.
+**Intro (fallback variant, REQUIRED when the booking env var is empty):** Tell me what's slowing the office down in the form below. I reply within one business day and we set up a 15-minute call with a video link. No pitch either way.
 
 ## Booking block (Cal.com embed; URL from env var)
 
@@ -55,7 +55,7 @@ The scheduler is being set up. Use the form below instead, and I'll confirm a ti
 ## Contact details block
 
 - **Email line (renders from `SITE.email` constants, assumed hello@mangocatalyst.com):** Prefer email? Reach me at hello@mangocatalyst.com.
-- **Service-area line:** Based in Minnesota, serving the upper Midwest.
+- **Service-area line:** Based in Minnesota, serving the Upper Midwest.
 
 ## Microcopy note for design
 

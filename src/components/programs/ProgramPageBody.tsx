@@ -115,7 +115,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
           <div aria-hidden className="h-[3px] w-10 bg-amber" />
           <p className="mt-6 max-w-[26ch] font-display text-[clamp(1.9rem,1.2rem+2.4vw,3rem)] font-bold uppercase leading-[1.08] tracking-[0.015em] text-balance text-ink">
             {
-              "One 15-minute call. Bring the task that's eating your week, and I'll tell you straight whether it can run itself."
+              "One 15-minute call. Bring the task that keeps stealing your hours, and I'll tell you straight whether it can run itself."
             }
           </p>
           <div className="mt-9">
