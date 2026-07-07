@@ -135,7 +135,7 @@ export function ServiceGrid() {
 
       <p className="mt-20 max-w-[44rem] font-display text-[1.35rem] font-semibold leading-[1.45] text-balance text-amber lg:max-w-[52rem] lg:text-[1.5rem]">
         {
-          "If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself."
+          "If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself."
         }
       </p>
     </Section>

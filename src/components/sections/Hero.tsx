@@ -43,7 +43,7 @@ export function Hero() {
             className="flex items-baseline justify-between"
           >
             <p className="text-[0.8rem] font-medium tracking-[0.22em] uppercase text-muted">
-              Small-business automation
+              Automation for service shops
             </p>
             <p className="hidden text-sm text-faint sm:block">
               Duluth, Minnesota
@@ -79,7 +79,7 @@ export function Hero() {
             className="mt-6 max-w-[38rem] text-[1.05rem] leading-[1.6] text-body sm:mt-7 sm:text-[1.15rem]"
           >
             {
-              "The ones that take the office off your hands: invoicing, lead follow-up, dispatch, reporting. Automation for small businesses in Minnesota and the upper Midwest, built by someone who ran service operations inside a real shop, not a software salesman."
+              "The ones that take the office off your hands: invoicing, lead follow-up, dispatch, reporting. Automation for service shops across Minnesota and the Upper Midwest, built by someone who ran service operations inside a real shop, not a software salesman."
             }
           </p>
 
@@ -87,7 +87,7 @@ export function Hero() {
             <BookButton arrow>Book a 15-Minute Fit Call</BookButton>
             <p className="mt-3 max-w-[34rem] text-sm text-faint">
               {
-                "No pitch deck. We look at one thing eating your week and figure out if it can run itself."
+                "No pitch deck. I look at one thing eating your week and figure out if it can run itself."
               }
             </p>
           </div>

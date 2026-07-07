@@ -3,7 +3,7 @@
 ## Page metadata (from seo-spec section 2.1)
 
 - **Title (overrides layout default):** `Small Business Automation in Minnesota | Mango Catalyst`
-- **Meta description:** `Automation that takes invoicing, scheduling, and follow-up off your plate. Built by someone who ran the operation inside a real shop. Book a 15-minute fit call.`
+- **Meta description:** `Automation that takes invoicing, scheduling, and follow-up off your plate. Built by someone who ran service operations inside a real shop. Book a 15-minute fit call.`
 - **Canonical:** `/`
 - **OG title:** `The Other Tools of the Trade`
 - **OG description:** `Automation that runs the office side of your shop. Built by someone who ran service operations inside a real shop, not a software salesman. Book a 15-minute fit call.`
@@ -15,11 +15,13 @@
 
 **H1 (the only H1 on the page):** The Other Tools of the Trade
 
-**Subhead:** The ones that take the office off your hands: invoicing, lead follow-up, dispatch, reporting. Automation for small businesses in Minnesota and the upper Midwest, built by someone who ran service operations inside a real shop, not a software salesman.
+**Eyebrow (kicker over the H1):** Automation for service shops
+
+**Subhead:** The ones that take the office off your hands: invoicing, lead follow-up, dispatch, reporting. Automation for service shops across Minnesota and the Upper Midwest, built by someone who ran service operations inside a real shop, not a software salesman.
 
 **Primary CTA button:** Book a 15-minute fit call
 
-**Microline (under the button, small, muted):** No pitch deck. We look at one thing eating your week and figure out if it can run itself.
+**Microline (under the button, small, muted):** No pitch deck. I look at one thing eating your week and figure out if it can run itself.
 
 ---
 
@@ -63,7 +65,7 @@ Most shops your size are stuck in the middle: too small to have someone whose wh
 
 **Tools line (under the cards):** Day to day I work in ServiceTitan, Zapier, and Google Workspace. If your tool has an API, I can probably wire it in.
 
-**Closing line:** If the thing eating your week isn't on this list, ask anyway. The whole job is figuring out what can run itself. [Link "everything we build" to `/services`]
+**Closing line:** If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself. [Link "everything we build" to `/services`]
 
 **Wedge line (links to the vertical page):** Run an HVAC or home-service shop? Start with the page written for you: [HVAC business automation](/industries/hvac).
 
@@ -71,19 +73,21 @@ Most shops your size are stuck in the middle: too small to have someone whose wh
 
 ## Section 4: Credibility strip (`#proof`)
 
-**H2:** Built by someone who ran the operation
+**H2:** Built by someone who ran service operations
+
+**Name + photo (under the H2):** [PHOTO PLACEHOLDER: Bryan headshot, added later] I'm Bryan Koop. Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself.
 
 **Body (answer-first: why trust this person):**
 Mango Catalyst is one person who ran service operations inside a real service business and builds automation the way an operator would, not the way a salesman would. I'm not a software company. I ran the scheduling, the dispatch, the phones, the customer messes, and the daily numbers. Same problems you have: too many small tasks, not enough people, owners doing paperwork at night. So I started building my way out of it, and the building stuck.
 
 What that looks like in practice:
 
-- **One owned, shipped build.** I built a browser extension that automates medical claim data entry into Minnesota's provider billing portal. It's privacy-first by design: everything runs on the user's own machine, so sensitive data never leaves the building. That instinct, build it so the data stays put, carries into everything I wire together.
-- **A method, not a pitch.** Discovery, plan, build. We find the one task eating your week, I write down exactly what will change, and I build the smallest version that proves it. One clear win beats a giant plan that never ships.
+- **A real build I shipped:** I built a browser extension that automates medical claim data entry into Minnesota's provider billing portal. It's privacy-first by design: everything runs on the user's own machine, so sensitive data never leaves the building. Different industry, same problem: repeated portal work, sensitive data, and staff losing hours to typing. The same pattern fits dispatch boards, supply-house receipts, warranty registration, and job closeout.
+- **A method, not a pitch.** Discovery, plan, build. I find the one task that keeps stealing hours, I write down exactly what will change, and I build the smallest version that proves it.
 - **Platforms I work in every day:** ServiceTitan, Zapier, Google Workspace. If your tool has an API, I can probably connect it.
 
 **The honest part (handles the no-testimonials problem head-on):**
-Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews I don't have yet. What I can do is walk you through, on the call, exactly how I'd scope the thing eating your week: what the work looks like now, which part can run itself, and what stays human. You'll see how I think before you spend a dollar.
+Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews I don't have yet. What I can do is walk you through, on the call, exactly how I'd scope the busywork burning your evenings: what the work looks like now, which part can run itself, and what stays human. You'll see how I think before you spend a dollar.
 
 [Link "who you're working with" to `/about`]
 
@@ -97,13 +101,13 @@ Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews 
 
 **Steps:**
 
-1. **We talk (15 minutes).** You tell me what's eating your week. I ask the questions a software salesman wouldn't know to ask, because I've run the operation myself instead of selling the tool.
+1. **We talk (15 minutes).** You tell me what's slowing the office down. I ask the questions a software salesman wouldn't know to ask, because I've run service operations myself instead of selling the tool.
 
 2. **We pick one thing.** We find the single most annoying, most repeated task and start there. One clear win beats a giant plan that never ships.
 
 3. **I build it and set it up.** Setup is a one-time $795. I build your first automation, wired into the tools you already use, and get it running. You don't manage anything.
 
-4. **It runs, and keeping it running is my job.** $1,000 a month; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, I reply within 1 business day and fixes land within 2 to 3 business days.
+4. **It runs, and keeping it running is my job.** $1,000 a month; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, fixing it is my job.
 
 **Closing line:** You keep doing the work you're good at. The office work just stops being your problem.
 
@@ -117,7 +121,7 @@ Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews 
 
 **Pricing card:**
 - **First workflow setup: $795 one-time.** I build your first automation and get it running, wired into the tools you already use.
-- **Ongoing automation partner: $1,000 a month.** First 3 months, then month to month. Your data is always yours; the automations run while the retainer runs.
+- **Ongoing automation partner: $1,000 a month.** First 3 months, then month to month, cancel anytime after. Your data lives in the tools you own and leaves with you. The automations run while the retainer runs; if you cancel, they stop and you keep every piece of data they produced.
 
 **What the monthly actually includes (so there are no surprises):**
 - Keeping everything I've built for you working. When a tool updates or an integration breaks, fixing it is included: I reply within 1 business day, and fixes land within 2 to 3 business days.

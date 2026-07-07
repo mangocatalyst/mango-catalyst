@@ -82,7 +82,7 @@ export function Footer() {
           <div>
             <Wordmark />
             <p className="mt-3 max-w-[24rem] text-sm leading-relaxed text-muted">
-              The other tools of the trade. Automation for upper-Midwest shops.
+              The other tools of the trade. Automation for Upper Midwest shops.
             </p>
           </div>
 
@@ -108,9 +108,9 @@ export function Footer() {
             </ul>
           </nav>
 
-          <nav aria-label="Programs">
+          <nav aria-label="Platforms">
             <p className="text-[0.7rem] font-medium tracking-[0.22em] uppercase text-faint">
-              Programs
+              Platforms
             </p>
             <ul className="mt-4 flex flex-col gap-2.5">
               {PROGRAM_LINKS.map((link) => (

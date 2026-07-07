@@ -65,8 +65,10 @@ export function Pricing() {
               </span>
             </p>
             <p className="mt-3 text-[0.95rem] leading-relaxed text-navy-2">
-              First 3 months, then month to month. Your data is always yours;
-              the automations run while the retainer runs.
+              First 3 months, then month to month, cancel anytime after. Your
+              data lives in the tools you own and leaves with you. The
+              automations run while the retainer runs; if you cancel, they stop
+              and you keep every piece of data they produced.
             </p>
           </div>
 

@@ -6,7 +6,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 const STEPS: { title: string; body: string }[] = [
   {
     title: "We talk (15 minutes).",
-    body: "You tell me what's eating your week. I ask the questions a software salesman wouldn't know to ask, because I've run the operation myself instead of selling the tool.",
+    body: "You tell me what's slowing the office down. I ask the questions a software salesman wouldn't know to ask, because I've run service operations myself instead of selling the tool.",
   },
   {
     title: "We pick one thing.",
@@ -18,7 +18,7 @@ const STEPS: { title: string; body: string }[] = [
   },
   {
     title: "It runs, and keeping it running is my job.",
-    body: "$1,000 a month; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, I reply within 1 business day and fixes land within 2 to 3 business days.",
+    body: "$1,000 a month; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, fixing it is my job.",
   },
 ];
 

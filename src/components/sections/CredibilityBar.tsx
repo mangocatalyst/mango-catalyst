@@ -11,12 +11,12 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const PRACTICE: { lead: string; body: string }[] = [
   {
-    lead: "One owned, shipped build.",
-    body: "I built a browser extension that automates medical claim data entry into Minnesota's provider billing portal. It's privacy-first by design: everything runs on the user's own machine, so sensitive data never leaves the building. That instinct, build it so the data stays put, carries into everything I wire together.",
+    lead: "A real build I shipped:",
+    body: "I built a browser extension that automates medical claim data entry into Minnesota's provider billing portal. It's privacy-first by design: everything runs on the user's own machine, so sensitive data never leaves the building. Different industry, same problem: repeated portal work, sensitive data, and staff losing hours to typing. The same pattern fits dispatch boards, supply-house receipts, warranty registration, and job closeout.",
   },
   {
     lead: "A method, not a pitch.",
-    body: "Discovery, plan, build. I find the one task eating your week, I write down exactly what will change, and I build the smallest version that proves it. One clear win beats a giant plan that never ships.",
+    body: "Discovery, plan, build. I find the one task that keeps stealing hours, I write down exactly what will change, and I build the smallest version that proves it.",
   },
   {
     lead: "Platforms I work in every day:",
@@ -28,11 +28,23 @@ export function CredibilityBar() {
   return (
     <Section id="proof" tone="deep">
       <SectionHeading
-        title="Built by someone who ran the operation"
+        title="Built by someone who ran service operations"
         lead={
           "Mango Catalyst is one person who ran service operations inside a real service business and builds automation the way an operator would, not the way a salesman would. I'm not a software company. I ran the scheduling, the dispatch, the phones, the customer messes, and the daily numbers. Same problems you have: too many small tasks, not enough people, owners doing paperwork at night. So I started building my way out of it, and the building stuck."
         }
       />
+
+      {/* ponytail: photo is a plain placeholder box (no next/image, no asset
+          yet); swap the div for the real headshot when Bryan supplies it. */}
+      <div className="mt-8 flex items-center gap-5">
+        <div className="flex size-24 shrink-0 items-center justify-center rounded-full border border-dashed border-body/40 p-2 text-center text-[0.7rem] leading-tight text-body/60">
+          {"Photo coming soon"}
+        </div>
+        <p className="max-w-[44rem] leading-relaxed text-body">
+          <strong className="font-semibold text-ink">{"I'm Bryan Koop."}</strong>{" "}
+          {"Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself."}
+        </p>
+      </div>
 
       <p className="mt-10 font-semibold text-ink">
         What that looks like in practice:
@@ -54,7 +66,7 @@ export function CredibilityBar() {
       <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
         <strong className="font-semibold text-ink">The honest part: </strong>
         {
-          "Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews I don't have yet. What I can do is walk you through, on the call, exactly how I'd scope the thing eating your week: what the work looks like now, which part can run itself, and what stays human. You'll see how I think before you spend a dollar."
+          "Mango Catalyst is new, so I'm not going to show you a wall of five-star reviews I don't have yet. What I can do is walk you through, on the call, exactly how I'd scope the busywork burning your evenings: what the work looks like now, which part can run itself, and what stays human. You'll see how I think before you spend a dollar."
         }
       </p>
 
