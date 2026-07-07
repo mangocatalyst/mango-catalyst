@@ -256,6 +256,74 @@ body {
   pointer-events: none;
 }
 
+/* Ambient glow drift (2026-07-06, Bryan's "very subtle, not very very
+   subtle"): two more navy radials over the base glow, each on its own slow
+   out-of-phase drift, so the backdrop shimmers organically like a shader
+   without shipping one. Home hero only. transform/opacity only (composited);
+   static extra depth for mobile + reduced motion. */
+.hero-glow-b,
+.hero-glow-c {
+  position: absolute;
+  pointer-events: none;
+}
+
+.hero-glow-b {
+  left: -6%;
+  top: -22%;
+  width: 68%;
+  height: 100%;
+  background: radial-gradient(
+    closest-side,
+    rgb(44 62 100 / 0.55),
+    rgb(44 62 100 / 0) 70%
+  );
+}
+
+.hero-glow-c {
+  left: 26%;
+  top: 8%;
+  width: 62%;
+  height: 92%;
+  background: radial-gradient(
+    closest-side,
+    rgb(22 36 64 / 0.6),
+    rgb(22 36 64 / 0) 72%
+  );
+}
+
+@keyframes hero-glow-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(5%, 4%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-glow-drift-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.06);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-4%, -5%) scale(1);
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
+  .hero-glow-b {
+    animation: hero-glow-drift-b 16s ease-in-out infinite;
+  }
+  .hero-glow-c {
+    animation: hero-glow-drift-c 22s ease-in-out infinite;
+  }
+}
+
 /* The headline. Big Shoulders, huge, stacked three lines, uppercase. The
    svh term caps it on short wide screens so the CTA stays above the fold
    under the 4rem navbar. */
@@ -539,9 +607,28 @@ body {
 
 .hb-veil {
   position: absolute;
-  inset: -40px;
+  inset: -120px;
   background: var(--color-base);
   opacity: 0.75;
+  /* Feathered edges (2026-07-06): the drifting hero glows pass under the art;
+     a hard-edged veil chopped them with a visible seam. Full dim from the
+     plane boundary inward, 120px fade outside it. */
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent,
+      #000 120px,
+      #000 calc(100% - 120px),
+      transparent
+    ),
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 120px,
+      #000 calc(100% - 120px),
+      transparent
+    );
+  mask-composite: intersect;
 }
 
 .hb-t {

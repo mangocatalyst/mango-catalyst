@@ -25,9 +25,12 @@ export function Hero() {
       id="top"
       className="hero-reveal relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-base"
     >
-      {/* Backdrop: matte navy glow plus the Missing Link light-table
-          artwork right-of-center (see HeroBackdrop). */}
+      {/* Backdrop: matte navy glow (three drifting layers, see
+          .hero-glow-b/-c) plus the Missing Link light-table artwork
+          right-of-center (see HeroBackdrop). */}
       <div aria-hidden className="hero-glow" />
+      <div aria-hidden className="hero-glow-b" />
+      <div aria-hidden className="hero-glow-c" />
       <HeroBackdrop />
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 sm:px-10">
