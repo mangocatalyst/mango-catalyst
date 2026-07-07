@@ -75,7 +75,7 @@ Most shops your size are stuck in the middle: too small to have someone whose wh
 
 **H2:** Built by someone who ran service operations
 
-**Name + photo (under the H2):** [PHOTO PLACEHOLDER: Bryan headshot, added later] I'm Bryan Koop. Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself.
+**Name + photo (under the H2):** [PHOTO PLACEHOLDER: Bryan headshot, added later] I'm Bryan. Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself.
 
 **Body (answer-first: why trust this person):**
 Mango Catalyst is one person who ran service operations inside a real service business and builds automation the way an operator would, not the way a salesman would. I'm not a software company. I ran the scheduling, the dispatch, the phones, the customer messes, and the daily numbers. Same problems you have: too many small tasks, not enough people, owners doing paperwork at night. So I started building my way out of it, and the building stuck.

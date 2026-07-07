@@ -114,7 +114,7 @@ export function articleLd(opts: {
     description: opts.description,
     url: opts.url,
     mainEntityOfPage: opts.url,
-    author: { "@type": "Person", name: "Bryan Koop", url: `${SITE.url}/about` },
+    author: { "@type": "Person", name: "Bryan", url: `${SITE.url}/about` },
     publisher: { "@id": ORG_ID },
   };
   if (opts.datePublished) node.datePublished = opts.datePublished;

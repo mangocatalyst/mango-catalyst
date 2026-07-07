@@ -41,7 +41,7 @@ export function CredibilityBar() {
           {"Photo coming soon"}
         </div>
         <p className="max-w-[44rem] leading-relaxed text-body">
-          <strong className="font-semibold text-ink">{"I'm Bryan Koop."}</strong>{" "}
+          <strong className="font-semibold text-ink">{"I'm Bryan."}</strong>{" "}
           {"Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself."}
         </p>
       </div>
