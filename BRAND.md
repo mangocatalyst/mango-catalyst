@@ -47,7 +47,8 @@ Lowercase Inter semibold wordmark `mango catalyst` plus one amber spark dot afte
 | Token | Hex | Role |
 |---|---|---|
 | `amber` | `#F6A328` | THE accent. CTA fill, dark-band links, active states, selection |
-| `amber-hi` | `#FFB84D` | Amber hover |
+| `amber-hi` | `#FFB84D` | Amber hover for TEXT (inline links, arrow links). Buttons hover darker |
+| `amber-mid` | `#E2941D` | Primary button hover (darker won the 2026-07-07 lighter-vs-darker trial) |
 | `amber-deep` | `#C97E12` | Amber pressed |
 | `success` | `#37C99A` | Success + positive numbers (always paired with glyph + word) |
 | `error` | `#FF6B6B` | Errors, validation (always paired with glyph + word) |
@@ -89,7 +90,7 @@ Casing: Title Case for button labels, the navbar CTA, and card H3 headlines ("Bo
 
 ## Components
 
-- **Primary button** `.btn-primary`: amber fill + `deep` text, radius 0.5rem, padding 1rem 1.5rem (`.btn-sm` 0.55rem 1.05rem). Hover `amber-hi` (same navy text), active `amber-deep` + `ink` + 1px translate. Disabled `surface-hi` + `faint`. Arrow icon nudges 3px on hover.
+- **Primary button** `.btn-primary`: amber fill + `deep` text, radius 0.5rem, padding 1rem 1.5rem (`.btn-sm` 0.55rem 1.05rem). Hover `amber-mid` (darker, same navy text; changed from `amber-hi` 2026-07-07), active `amber-deep` + `ink` + 1px translate. Disabled `surface-hi` + `faint`. Arrow icon nudges 3px on hover.
 - **Ghost button** `.btn-ghost`: transparent, 1px amber border, amber text. Dark bands only, and only as the ONE secondary action. Never competes with the primary.
 - **Inline links**: always underlined (never color-only). Dark: `.inline-link`, amber with 45 percent underline, hover `amber-hi`. Light: `.inline-link-light`, navy 500 with 35 percent underline, hover underline goes `amber-deep`.
 - **Focus ring**: 2px amber outline, 2px offset, on every interactive element, never removed. Flips navy on light bands (`data-tone="light"`) and draws inside amber fills (offset -6px) so it reads on any background.

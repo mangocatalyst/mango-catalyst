@@ -34,6 +34,7 @@
   /* Accent and status */
   --color-amber: #f6a328;
   --color-amber-hi: #ffb84d;
+  --color-amber-mid: #e2941d; /* button hover: darker, midpoint to amber-deep (2026-07-07) */
   --color-amber-deep: #c97e12;
   --color-success: #37c99a;
   --color-error: #ff6b6b;
@@ -153,7 +154,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: var(--color-amber-hi);
+  background: var(--color-amber-mid);
   color: var(--color-deep);
 }
 
