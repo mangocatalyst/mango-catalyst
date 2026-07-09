@@ -8,13 +8,33 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 import { LocalOnlyArt } from "@/components/industries/TradeArt";
+import { DemoVideo, Shot } from "@/components/mnits/DemoMedia";
 
 /**
  * MN-ITS Helper product page (added 2026-07-06, Bryan's call: PHI carve-out
- * removed, the extension offered openly). This is the ONE owned build from
- * the canonical brief, so first-person product claims are in bounds here.
- * Every capability claim below traces to the extension repo README or its
- * test suite (local-only enforced by an automated no-egress test).
+ * removed, the extension offered openly; reworked 2026-07-09 into a
+ * watch-then-walk-through tutorial with a clicks/keystrokes tally). This is
+ * the ONE owned build from the canonical brief, so first-person product
+ * claims are in bounds here. Every capability claim below traces to the
+ * extension repo README or its test suite (local-only enforced by an
+ * automated no-egress test).
+ *
+ * TALLY DERIVATION. Counted the same way the extension's own productivity
+ * counter counts (mnits-extension fill-flow.js trackStats: text field = 1
+ * click, dropdown = 2 clicks, button = 1 click, characters = typed value
+ * length), walking the fill flow for a claim with 20 service dates:
+ *   header, pages 2-5: 14 clicks, ~30 characters
+ *     p2 Continue(1); p3 subscriber(1)+DOB(1)+Search(1)+Continue(1);
+ *     p4 PoS dropdown(2)+PCN(1)+DxType dropdown(2)+DxCode(1)+Add(1)+
+ *     Continue(1); p5 Continue(1). Chars: ID 8 + DOB 10 + PCN ~6 + PoS 2 +
+ *     DxType ~1 + DxCode 3.
+ *   each service line, page 6: 12 clicks, ~38 characters
+ *     dateFrom(1)+dateTo(1)+PoS dropdown(2)+procedure(1)+mod1(1)+mod2(1)+
+ *     dx pointer dropdown(2)+charge(1)+units(1)+Save/View(1). Chars:
+ *     dates 20 + PoS 2 + procedure 5 + mods 4 + pointer 1 + charge ~6 +
+ *     units 1.
+ *   20 lines: 14 + 240 = 254 clicks, 30 + 760 = ~790 characters.
+ * Copy rounds to "about 250 clicks and 790 keystrokes".
  */
 
 const PATH = "/mn-its";
@@ -27,26 +47,56 @@ export const metadata = pageMetadata({
   description: DESCRIPTION,
 });
 
-const FEATURES: { lead: string; text: string }[] = [
+type Step = {
+  title: string;
+  body: string;
+  shot: { src: string; alt: string };
+  chip?: string;
+};
+
+const STEPS: Step[] = [
   {
-    lead: "Fills the claim screens from per-client presets.",
-    text: "Place of service, service counts, procedure code, modifiers: saved once per client, filled every time, instead of retyped every billing cycle.",
+    title: "Save each client once",
+    body: "In the extension's options, enter what never changes: member ID, date of birth, diagnosis and procedure codes, modifiers, place of service, units, charge amount. That's the last time anyone types it.",
+    shot: { src: "mn-its/preset-form.png", alt: "the client preset form" },
+    chip: "One-time setup, about two minutes per client.",
   },
   {
-    lead: "Bills date ranges or picked days.",
-    text: "Consecutive mode runs first date to last date. Individual mode lets your biller pick specific days on a calendar. Per client, not one-size-fits-all.",
+    title: "Open a claim and pick your client",
+    body: "Log into MN-ITS the way you already do and start a Professional Claim. Click the Helper icon and pick the client from your list.",
+    shot: { src: "mn-its/popup-client.png", alt: "the popup with a client selected" },
   },
+  {
+    title: "Pick the days you're billing",
+    body: "Consecutive mode takes a first and last date. Individual mode gives you a calendar to tap specific days, with a per-day unit count when a day differs. Whichever mode, these are the last clicks you make for a while.",
+    shot: { src: "mn-its/popup-calendar.png", alt: "the calendar with days selected" },
+  },
+  {
+    title: "Click Start and watch it type",
+    body: "Pages 2 through 6 fill themselves: subscriber lookup, claim header, diagnosis, then one service line for every day you picked. A status banner narrates each step as it lands.",
+    shot: { src: "mn-its/line-fill.png", alt: "a service line mid-fill" },
+    chip: "What you just skipped on a 20-day claim: about 250 clicks and 790 keystrokes.",
+  },
+  {
+    title: "It stops at review. You submit.",
+    body: "The extension never clicks submit. Your biller sees the completed claim exactly as MN-ITS will receive it, checks it, and submits it themselves. Every single time.",
+    shot: { src: "mn-its/review-stop.png", alt: "the review screen where the extension stops" },
+    chip: "The part that stays human.",
+  },
+];
+
+const ALSO: { lead: string; text: string }[] = [
   {
     lead: "Handles multiple locations and logins.",
     text: "Each location keeps its own MN-ITS login, and passwords stay where they already live, in Chrome's own password manager. The extension never stores them.",
   },
   {
-    lead: "Always stops at the review screen.",
-    text: "The extension fills; a person submits. Your biller sees the completed claim exactly as MN-ITS will receive it and clicks submit themselves, every single time.",
-  },
-  {
     lead: "Backs up its own settings, encrypted.",
     text: "Client presets export as an encrypted backup file, so a new machine or a bad day doesn't mean rebuilding every client by hand.",
+  },
+  {
+    lead: "Keeps score.",
+    text: "A running counter in the extension's options shows every click and keystroke it has typed on your behalf since the day you installed it.",
   },
 ];
 
@@ -81,13 +131,83 @@ export default function MnItsPage() {
           art={<LocalOnlyArt className="w-full" />}
         />
 
-        <Section id="features" tone="deep">
+        <Section id="see-it-work" tone="light">
           <SectionHeading
-            title="What it does"
-            lead="It automates the typing, not the judgment. The claim your biller submits is one they've looked at:"
+            tone="light"
+            title="Watch it fill a claim"
+            lead="A real Professional Claim, filled start to review screen. No narration needed: the typing you're not doing is the whole pitch."
+          />
+          <DemoVideo
+            src="mn-its/demo.mp4"
+            poster="mn-its/demo-poster.png"
+            caption="Recorded on a live claim with the extension's built-in demo mask on: client information is blurred by the software before the screen is ever captured."
+          />
+        </Section>
+
+        <Section id="how-to-use-it" tone="light" containerClassName="pt-0">
+          <SectionHeading
+            tone="light"
+            title="How to use it"
+            lead="Five steps, and only the first one happens more than zero times per claim after setup:"
+          />
+          <ol className="mt-12 grid gap-14">
+            {STEPS.map((step, i) => (
+              <li
+                key={step.title}
+                className="grid items-start gap-6 lg:grid-cols-[1fr_26rem] lg:gap-12"
+              >
+                <div>
+                  <div className="flex items-baseline gap-4">
+                    <span
+                      aria-hidden
+                      className="font-display text-[1.6rem] font-bold text-navy-2/50"
+                    >
+                      {i + 1}
+                    </span>
+                    <h3 className="font-display text-[1.35rem] font-bold uppercase tracking-[0.015em] text-navy">
+                      {step.title}
+                    </h3>
+                  </div>
+                  <p className="mt-4 leading-[1.65] text-navy-2">{step.body}</p>
+                  {step.chip ? (
+                    <p className="mt-4 inline-block rounded-md bg-navy px-4 py-2 text-[0.9rem] font-semibold text-ink">
+                      {step.chip}
+                    </p>
+                  ) : null}
+                </div>
+                <Shot src={step.shot.src} alt={step.shot.alt} />
+              </li>
+            ))}
+          </ol>
+        </Section>
+
+        <Section id="the-math" tone="light" containerClassName="pt-0">
+          <div className="max-w-[52rem] border-t border-border-lt pt-12">
+            <p className="font-display text-[clamp(1.7rem,1.1rem+2vw,2.6rem)] font-bold uppercase leading-[1.12] tracking-[0.015em] text-balance text-navy">
+              One 20-day claim: about 790 keystrokes and 250 clicks, down to
+              about five clicks.
+            </p>
+            <p className="mt-5 max-w-[44rem] leading-[1.65] text-navy-2">
+              Now multiply by every client, every billing cycle. You don't have
+              to take the math on faith: the extension keeps its own running
+              count of every click and keystroke it types for you, and you can
+              watch it grow in its options page.
+            </p>
+            <p className="mt-4 max-w-[44rem] text-[0.9rem] leading-[1.6] text-muted-lt">
+              Counted the way the extension's productivity counter counts: one
+              click per field, two per dropdown, characters as typed, on a
+              Professional Claim with twenty service dates.
+            </p>
+          </div>
+        </Section>
+
+        <Section id="also" tone="deep">
+          <SectionHeading
+            title="Also in the box"
+            lead="The parts a two-minute demo doesn't show:"
           />
           <ul className="mt-10 grid max-w-[52rem] gap-7">
-            {FEATURES.map((feature) => (
+            {ALSO.map((feature) => (
               <li key={feature.lead} className="flex gap-5">
                 <span
                   aria-hidden
