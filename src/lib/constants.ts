@@ -43,6 +43,7 @@ export const STATIC_ROUTES = [
   "/industries/snow-plowing-automation",
   "/industries/landscaping-automation",
   "/mn-its",
+  "/dashboards",
   "/programs/servicetitan",
   "/programs/zapier",
   "/programs/slack",
