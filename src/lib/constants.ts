@@ -55,5 +55,6 @@ export const STATIC_ROUTES = [
   "/guides/hvac-tasks-to-automate",
   "/guides/manual-data-entry-cost",
   "/guides/what-is-automation-consultant",
+  "/guides/hvac-owner-dashboard",
   "/privacy",
 ] as const;

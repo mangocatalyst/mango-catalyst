@@ -35,11 +35,13 @@ const BODY = `# ${SITE.name}
 - [Google Workspace](${u("/programs/google-workspace")})
 - [Everything else](${u("/programs/everything-else")})
 - [MN-ITS](${u("/mn-its")})
+- [Owner Dashboard](${u("/dashboards")}): the whole shop on one page, refreshed hourly from ServiceTitan; includes a clickable fake-data demo.
 
 ## Guides
 - [HVAC tasks to automate](${u("/guides/hvac-tasks-to-automate")})
 - [The cost of manual data entry](${u("/guides/manual-data-entry-cost")})
 - [What is an automation consultant](${u("/guides/what-is-automation-consultant")})
+- [What an HVAC owner dashboard should show](${u("/guides/hvac-owner-dashboard")})
 `;
 
 export function GET() {

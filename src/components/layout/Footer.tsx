@@ -54,6 +54,10 @@ const GUIDE_LINKS = [
     href: "/guides/what-is-automation-consultant",
     label: "What Is An Automation Consultant?",
   },
+  {
+    href: "/guides/hvac-owner-dashboard",
+    label: "What An Owner Dashboard Should Show",
+  },
 ];
 
 function FooterLink({ href, label }: { href: string; label: string }) {

@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
 };
 
-/** The three guides, descriptive anchors + one-line summaries (copy verbatim). */
+/** The guides, descriptive anchors + one-line summaries (copy verbatim). */
 const GUIDES = [
   {
     href: "/guides/hvac-tasks-to-automate",
@@ -58,6 +58,12 @@ const GUIDES = [
     href: "/guides/what-is-automation-consultant",
     title: "What is an automation consultant?",
     blurb: "What one does, what one costs, and how to tell if you need one.",
+  },
+  {
+    href: "/guides/hvac-owner-dashboard",
+    title: "What an HVAC owner dashboard should actually show",
+    blurb:
+      "The six numbers worth reading every morning, and the ones a dashboard should refuse to show.",
   },
 ] as const;
 
