@@ -65,7 +65,7 @@ const HOW: { title: string; body: string }[] = [
   },
   {
     title: "One page, on any device, behind a login",
-    body: "Everything bakes into a single fast page: no app to install, no seats to buy, no dashboard builder to learn. Your crew can get their own view, like an install whiteboard, without seeing the owner numbers.",
+    body: "Everything bakes into a single fast page: no app to install, no seats to buy, no dashboard builder to learn. Your crew can get their own view, like the install whiteboard demoed below, without seeing the owner numbers.",
   },
 ];
 
@@ -177,6 +177,46 @@ export default function DashboardsPage() {
               </li>
             ))}
           </ol>
+        </Section>
+
+        <Section id="whiteboard" tone="light">
+          <SectionHeading
+            tone="light"
+            title="The crew's view: the install whiteboard"
+            lead="Every sold install is a row; every step to a finished, paid, registered job is a checkbox the whole crew shares. The steps ServiceTitan can prove, like equipment recorded, registration filed, and payment collected, check themselves. This one runs on the same fictional company as the dashboard above: click the pills, tick the boxes, type a note."
+          />
+          <div className="mt-10">
+            <div className="overflow-hidden rounded-lg border border-border-lt bg-white shadow-lg">
+              <div className="flex items-center gap-2 border-b border-border-lt bg-light px-4 py-2.5">
+                <span aria-hidden className="size-2.5 rounded-full bg-border-lt" />
+                <span aria-hidden className="size-2.5 rounded-full bg-border-lt" />
+                <span aria-hidden className="size-2.5 rounded-full bg-border-lt" />
+                <span className="ml-3 truncate text-[0.8rem] text-muted-lt">
+                  Boreal Comfort Co · Install Whiteboard · demonstration data
+                </span>
+              </div>
+              <iframe
+                src="/demo/whiteboard.html"
+                title="Install whiteboard live demo with fictional data"
+                loading="lazy"
+                className="h-[42rem] w-full"
+              />
+            </div>
+            <p className="mt-4 text-[0.95rem] leading-[1.6] text-navy-2">
+              {"Cramped in a frame? "}
+              <a
+                href="/demo/whiteboard.html"
+                target="_blank"
+                rel="noopener"
+                className="inline-link-light"
+              >
+                Open the whiteboard demo in its own tab
+              </a>
+              {
+                ". The real one lives at a private URL the crew opens on the shop TV and their phones."
+              }
+            </p>
+          </div>
         </Section>
 
         <Section id="privacy" tone="deep">

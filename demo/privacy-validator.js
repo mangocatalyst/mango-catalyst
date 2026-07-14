@@ -10,7 +10,10 @@ const os = require('node:os');
 const path = require('node:path');
 
 const ARTIFACT = process.argv[2] || path.join(__dirname, 'build', 'index.html');
-const html = fs.readFileSync(ARTIFACT, 'utf8');
+// base64 font payloads collide with short-name substrings ("Zack"); skip them
+const html = fs.readFileSync(ARTIFACT, 'utf8')
+  .replace(/data:font\/woff2;base64,[A-Za-z0-9+/=]+/g, 'data:font/woff2;base64,STRIPPED')
+  .replace(/"(?:[A-Za-z-]+-\d{3})":\s*"[A-Za-z0-9+/=]{100,}"/g, '""'); // fonts-b64 JSON style
 const lower = html.toLowerCase();
 const problems = [];
 const hit = (needle, why) => { if (lower.includes(String(needle).toLowerCase())) problems.push(`${why}: "${needle}"`); };
@@ -51,6 +54,15 @@ if (!fs.existsSync(path.join(NSDATA, 'raw.json'))) {
     (s.recalls || []).forEach(o => addName(o.customer));
   }
   (raw.owner?.members?.list || []).forEach(m => addName(m.name));
+
+  // install whiteboard: real customers, advisors, installers
+  const wbPath = path.join(NSDATA, '..', 'whiteboard.json');
+  if (fs.existsSync(wbPath)) {
+    for (const r of JSON.parse(fs.readFileSync(wbPath, 'utf8')).rows || []) {
+      addName(r.name); addName(r.advisor);
+      String(r.installers || '').split(',').forEach(n => addName(n));
+    }
+  }
 
   // real slack digest sentences
   for (const f of fs.readdirSync(NSDATA).filter(f => /^slack-flags-.*\.json$/.test(f))) {

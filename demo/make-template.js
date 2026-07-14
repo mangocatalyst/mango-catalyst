@@ -141,6 +141,11 @@ swap('<button class="chip" id="w-default">Save as default for everyone</button>'
 swap(/<span>v(\d{4}-\d{2}-\d{2}\.\d+)<\/span>/.source.length && html.match(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/)[0],
   '<span>demo v2026-07-13.1</span>');
 
+// a code comment names real NS installers; caught by the validator 2026-07-14
+swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap from
+   the pull, Scott + Corey 8s and Zack four 10s). Charts below reuse these. */`,
+  '/* booked-capacity math (service: 8h per tech-day; install: per-day cap from the pull). Charts below reuse these. */');
+
 /* ---------- guardrails ---------- */
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
 if (/go\.servicetitan\.com/.test(html)) throw new Error('live ServiceTitan link survived the transform');
