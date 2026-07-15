@@ -223,7 +223,7 @@
 <div class="wrap">
   <div class="chrome">
     <span class="hash">★</span> <span class="display" style="font-size:17px; letter-spacing:.03em; text-transform:uppercase;">Install White Board</span>
-    <span class="tab" id="whip-tab">$0 WHIP</span>
+    <span class="tab" id="wip-tab">$0 WIP</span>
     <span class="spacer"></span>
     <span class="live" id="live"><span class="dot"></span><span class="muted" id="stamp">loading…</span></span>
     <button class="themebtn" id="themebtn" title="Toggle dark mode">◐</button>
@@ -234,7 +234,7 @@
     <div class="summary">
       <div class="kpi accent"><span class="n" id="k-active">0</span><span class="l">Active jobs</span></div>
       <div class="kpi"><span class="n" id="k-done">0</span><span class="l">Complete</span></div>
-      <div class="kpi accent"><span class="n" id="k-whip">$0</span><span class="l">WHIP (uncollected $)</span></div>
+      <div class="kpi accent"><span class="n" id="k-wip">$0</span><span class="l">WIP (uncollected $)</span></div>
       <div class="kpi"><span class="n" id="k-stalled" style="color:var(--warn)">0</span><span class="l">Open 5d+ · no steps</span></div>
       <div class="bottlenecks">
         <span class="lead">Filter by what’s outstanding</span>
@@ -294,7 +294,7 @@
 
   <p class="note">
     Tap a pill to cycle it, tick a box, type a note. In this demo edits stay on this page and reset on reload; the real board saves for the whole crew, from any phone.
-    <b>WHIP</b> = active, uncollected dollars. Schedule, price and crew come from ServiceTitan, so change those there.
+    <b>WIP</b> = active, uncollected dollars. Schedule, price and crew come from ServiceTitan, so change those there.
   </p>
 </div>
 
@@ -420,7 +420,7 @@
         <td class="meta">${TYPE[r.type] || esc(r.type) || "-"}</td>
         <td class="meta">${esc(r.advisor) || "-"}</td>
         <td class="meta crew">${esc(r.installers) || "-"}</td>
-        <td class="meta price${paid ? " paid" : ""}" title="${paid ? "collected, out of WHIP" : ""}">${fmtMoney(r.price)}</td>
+        <td class="meta price${paid ? " paid" : ""}" title="${paid ? "collected, out of WIP" : ""}">${fmtMoney(r.price)}</td>
         <td class="st">${pill(r, "tls")}</td>
         <td class="st">${pill(r, "permit")}</td>
         <td class="st">${pill(r, "rebate")}</td>
@@ -437,10 +437,10 @@
     const rows = board.rows || [];
     $("k-active").textContent = rows.filter((r) => !r.done).length;
     $("k-done").textContent = rows.filter((r) => r.done).length;
-    // Bryan's rule: collected payments leave the WHIP
-    const whip = rows.reduce((s, r) => s + (!r.done && r.payment !== "done" ? r.price || 0 : 0), 0);
-    $("k-whip").textContent = fmtMoney(whip);
-    $("whip-tab").textContent = `${fmtMoney(whip)} WHIP`;
+    // Bryan's rule: collected payments leave the WIP
+    const wip = rows.reduce((s, r) => s + (!r.done && r.payment !== "done" ? r.price || 0 : 0), 0);
+    $("k-wip").textContent = fmtMoney(wip);
+    $("wip-tab").textContent = `${fmtMoney(wip)} WIP`;
     $("k-stalled").textContent = rows.filter(stalled).length;
     for (const k of ["permit", "inspection", "registered", "payment"])
       $("c-" + k).textContent = rows.filter((r) => needs(r, k)).length;

@@ -125,8 +125,8 @@ const unsoldEst = { value: bests.reduce((s, e) => s + e.value, 0), groups: bests
 const topOpenEst = bests.sort((a, b) => b.value - a.value).slice(0, 10)
   .map(e => ({ customer: customer(), value: e.value, created: e.created, advisor: e.soldBy }));
 
-/* ---------- WHIP ---------- */
-const whip = {
+/* ---------- WIP ---------- */
+const wip = {
   now: 10, soldValue: ri(148, 172) * 1000,
   byType: { full_system: 3, furnace: 2, mini_split: 2, heat_pump: 2, boiler: 1 },
   statuses: { Scheduled: 8, Dispatched: 2 },
@@ -303,7 +303,7 @@ const raw = {
   footNote: 'Demonstration dashboard for Boreal Comfort Co, a fictional company: every number, name, and note on this page is synthetic. In production the dashboard refreshes hourly from your ServiceTitan account, and red flags and wins are triaged nightly by AI from your crew\'s Slack channels.',
   days, upcoming, estList: estList.map(({ install, ...e }) => e), topOpenEst,
   poWindow: { Pending: 18, Canceled: 45, Received: 560, Sent: 8 },
-  whip, unsoldEst,
+  wip, unsoldEst,
   incomplete: [
     { id: jobId(), summary: 'Waiting on heat pump lineset from supplier', age: 12 },
     { id: jobId(), summary: 'Return trip scheduled to finish venting', age: 5 },
@@ -316,16 +316,16 @@ const raw = {
 fs.writeFileSync(path.join(DATA, 'raw.json'), JSON.stringify(raw));
 
 /* ---------- history.json: random-walk balance snapshots ---------- */
-const hist = { whip: {}, unpaid: {}, ar: {}, members: {}, unsold: {} };
-let hWhip = 8, hUnpaid = unpaid.totalBalance * .9, hAr = 102000, hMem = memberList.length - 22, hUnsold = unsoldEst.value * .92;
+const hist = { wip: {}, unpaid: {}, ar: {}, members: {}, unsold: {} };
+let hWip = 8, hUnpaid = unpaid.totalBalance * .9, hAr = 102000, hMem = memberList.length - 22, hUnsold = unsoldEst.value * .92;
 for (let i = 60; i >= 0; i--) {
   const d = addDays(R, -i);
-  hWhip = Math.max(4, Math.min(14, hWhip + ri(-1, 1)));
+  hWip = Math.max(4, Math.min(14, hWip + ri(-1, 1)));
   hUnpaid = Math.max(60000, hUnpaid + ri(-6000, 6500));
   hAr = Math.max(70000, hAr + ri(-3000, 3200));
   hMem += rnd() < .35 ? 1 : 0;
   hUnsold = Math.max(500000, hUnsold + ri(-15000, 16000));
-  hist.whip[d] = i === 0 ? whip.now : hWhip;
+  hist.wip[d] = i === 0 ? wip.now : hWip;
   hist.unpaid[d] = i === 0 ? unpaid.totalBalance : Math.round(hUnpaid);
   hist.ar[d] = Math.round(hAr);
   hist.members[d] = i === 0 ? memberList.length : hMem;
