@@ -74,3 +74,19 @@ export const INDUSTRY_LINKS = [
   { href: "/industries/snow-plowing-automation", label: "Snow Plowing" },
   { href: "/industries/landscaping-automation", label: "Landscaping" },
 ] as const;
+
+/**
+ * The eight platform pages (platforms worked in extensively, plus the one
+ * owned build, MN-ITS Helper), surfaced in both the footer Platforms column
+ * and the header Platforms dropdown. All already in STATIC_ROUTES above.
+ */
+export const PROGRAM_LINKS = [
+  { href: "/programs/servicetitan", label: "ServiceTitan" },
+  { href: "/programs/zapier", label: "Zapier" },
+  { href: "/programs/slack", label: "Slack" },
+  { href: "/programs/google-workspace", label: "Google Workspace" },
+  { href: "/mn-its", label: "MN-ITS Helper" },
+  { href: "/dashboards", label: "Owner Dashboard" },
+  { href: "/ai", label: "AI" },
+  { href: "/programs/everything-else", label: "Everything Else" },
+] as const;

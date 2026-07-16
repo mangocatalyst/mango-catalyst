@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SITE, INDUSTRY_LINKS } from "@/lib/constants";
+import { SITE, INDUSTRY_LINKS, PROGRAM_LINKS } from "@/lib/constants";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 
@@ -18,18 +18,6 @@ const PAGE_LINKS = [
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-];
-
-/** Platforms worked in extensively, plus the one owned build (MN-ITS Helper). */
-const PROGRAM_LINKS = [
-  { href: "/programs/servicetitan", label: "ServiceTitan" },
-  { href: "/programs/zapier", label: "Zapier" },
-  { href: "/programs/slack", label: "Slack" },
-  { href: "/programs/google-workspace", label: "Google Workspace" },
-  { href: "/mn-its", label: "MN-ITS Helper" },
-  { href: "/dashboards", label: "Owner Dashboard" },
-  { href: "/ai", label: "AI" },
-  { href: "/programs/everything-else", label: "Everything Else" },
 ];
 
 const GUIDE_LINKS = [
