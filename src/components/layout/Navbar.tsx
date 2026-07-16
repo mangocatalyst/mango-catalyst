@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { NavDropdown } from "@/components/layout/NavDropdown";
 import { BookButton } from "@/components/booking/BookButton";
 import { Wordmark } from "@/components/ui/Wordmark";
-import { INDUSTRY_LINKS } from "@/lib/constants";
+import { INDUSTRY_LINKS, PROGRAM_LINKS } from "@/lib/constants";
 
 /** Slim global nav per the seo-spec linking plan (section 5). */
 const NAV_LINKS = [
@@ -44,9 +44,14 @@ export function Navbar() {
                   </Link>
                 </li>
                 {index === 0 && (
-                  <li>
-                    <NavDropdown label="Industries" links={INDUSTRY_LINKS} />
-                  </li>
+                  <>
+                    <li>
+                      <NavDropdown label="Industries" links={INDUSTRY_LINKS} />
+                    </li>
+                    <li>
+                      <NavDropdown label="Platforms" links={PROGRAM_LINKS} />
+                    </li>
+                  </>
                 )}
               </Fragment>
             ))}
@@ -56,7 +61,12 @@ export function Navbar() {
           </BookButton>
         </div>
 
-        <MobileNav links={NAV_LINKS} cta={CTA} industries={INDUSTRY_LINKS} />
+        <MobileNav
+          links={NAV_LINKS}
+          cta={CTA}
+          industries={INDUSTRY_LINKS}
+          platforms={PROGRAM_LINKS}
+        />
       </nav>
     </header>
   );
