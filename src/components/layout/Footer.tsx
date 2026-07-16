@@ -28,6 +28,7 @@ const PROGRAM_LINKS = [
   { href: "/programs/google-workspace", label: "Google Workspace" },
   { href: "/mn-its", label: "MN-ITS Helper" },
   { href: "/dashboards", label: "Owner Dashboard" },
+  { href: "/ai", label: "AI" },
   { href: "/programs/everything-else", label: "Everything Else" },
 ];
 
