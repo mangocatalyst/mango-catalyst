@@ -170,8 +170,12 @@ export default function ServicesPage() {
 
           <p className="mt-10 max-w-[44rem] border-l-2 border-amber pl-5 leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
             {
-              "If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself."
+              "If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself. And where it helps, "
             }
+            <Link href="/ai" className="inline-link">
+              AI can be part of the build
+            </Link>
+            {", always with a person approving anything that matters."}
           </p>
         </Section>
 

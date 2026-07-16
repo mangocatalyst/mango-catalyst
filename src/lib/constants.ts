@@ -44,6 +44,7 @@ export const STATIC_ROUTES = [
   "/industries/landscaping-automation",
   "/mn-its",
   "/dashboards",
+  "/ai",
   "/programs/servicetitan",
   "/programs/zapier",
   "/programs/slack",

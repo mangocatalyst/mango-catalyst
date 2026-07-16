@@ -6,6 +6,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Problem } from "@/components/sections/Problem";
 import { ServiceGrid } from "@/components/sections/ServiceGrid";
 import { DashboardTeaser } from "@/components/sections/DashboardTeaser";
+import { AiTeaser } from "@/components/sections/AiTeaser";
 import { CredibilityBar } from "@/components/sections/CredibilityBar";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Pricing } from "@/components/sections/Pricing";
@@ -57,6 +58,7 @@ export default function Home() {
         <Problem />
         <ServiceGrid />
         <DashboardTeaser />
+        <AiTeaser />
         <CredibilityBar />
         <HowItWorks />
         <Pricing />

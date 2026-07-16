@@ -36,6 +36,7 @@ const BODY = `# ${SITE.name}
 - [Everything else](${u("/programs/everything-else")})
 - [MN-ITS](${u("/mn-its")})
 - [Owner Dashboard](${u("/dashboards")}): the whole shop on one page, refreshed hourly from ServiceTitan; includes a clickable fake-data demo.
+- [AI](${u("/ai")}): where AI fits in the builds and where it doesn't.
 
 ## Guides
 - [HVAC tasks to automate](${u("/guides/hvac-tasks-to-automate")})
