@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { NavDropdown } from "@/components/layout/NavDropdown";
 import { BookButton } from "@/components/booking/BookButton";
 import { Wordmark } from "@/components/ui/Wordmark";
+import { INDUSTRY_LINKS } from "@/lib/constants";
 
 /** Slim global nav per the seo-spec linking plan (section 5). */
 const NAV_LINKS = [
@@ -30,15 +33,22 @@ export function Navbar() {
 
         <div className="hidden items-center gap-8 lg:flex">
           <ul className="flex items-center gap-7">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-[0.925rem] text-body transition-colors hover:text-ink"
-                >
-                  {link.label}
-                </Link>
-              </li>
+            {NAV_LINKS.map((link, index) => (
+              <Fragment key={link.href}>
+                <li>
+                  <Link
+                    href={link.href}
+                    className="text-[0.925rem] text-body transition-colors hover:text-ink"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+                {index === 0 && (
+                  <li>
+                    <NavDropdown label="Industries" links={INDUSTRY_LINKS} />
+                  </li>
+                )}
+              </Fragment>
             ))}
           </ul>
           <BookButton href={CTA.href} size="sm">
@@ -46,7 +56,7 @@ export function Navbar() {
           </BookButton>
         </div>
 
-        <MobileNav links={NAV_LINKS} cta={CTA} />
+        <MobileNav links={NAV_LINKS} cta={CTA} industries={INDUSTRY_LINKS} />
       </nav>
     </header>
   );

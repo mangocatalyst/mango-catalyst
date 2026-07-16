@@ -119,3 +119,12 @@ export function ClipboardIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+/** Downward chevron for disclosure triggers; rotate at the call site when open. */
+export function ChevronDownIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
