@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SITE } from "@/lib/constants";
+import { SITE, INDUSTRY_LINKS } from "@/lib/constants";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 
@@ -30,16 +30,6 @@ const PROGRAM_LINKS = [
   { href: "/dashboards", label: "Owner Dashboard" },
   { href: "/ai", label: "AI" },
   { href: "/programs/everything-else", label: "Everything Else" },
-];
-
-const INDUSTRY_LINKS = [
-  { href: "/industries/hvac-automation", label: "HVAC" },
-  { href: "/industries/plumbing-automation", label: "Plumbing" },
-  { href: "/industries/roofing-automation", label: "Roofing" },
-  { href: "/industries/construction-automation", label: "Construction" },
-  { href: "/industries/handyman-automation", label: "Handyman" },
-  { href: "/industries/snow-plowing-automation", label: "Snow Plowing" },
-  { href: "/industries/landscaping-automation", label: "Landscaping" },
 ];
 
 const GUIDE_LINKS = [

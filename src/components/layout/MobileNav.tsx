@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { calTarget, CAL_CONFIG } from "@/lib/cal";
+import { ChevronDownIcon } from "@/components/ui/icons";
 
 /**
  * The one interactivity island in the site chrome: the mobile nav toggle.
@@ -12,20 +13,30 @@ import { calTarget, CAL_CONFIG } from "@/lib/cal";
 export function MobileNav({
   links,
   cta,
+  industries,
 }: {
   links: { href: string; label: string }[];
   cta: { href: string; label: string };
+  industries: readonly { href: string; label: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const [industriesOpen, setIndustriesOpen] = useState(false);
+
+  // Every close path funnels through here so the nested Industries disclosure
+  // never survives the panel closing out from under it.
+  const close = useCallback(() => {
+    setOpen(false);
+    setIndustriesOpen(false);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") close();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, close]);
 
   return (
     <div className="lg:hidden">
@@ -34,7 +45,7 @@ export function MobileNav({
         aria-expanded={open}
         aria-controls="mobile-nav"
         aria-label={open ? "Close menu" : "Open menu"}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => (open ? close() : setOpen(true))}
         className="flex size-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface"
       >
         <svg
@@ -59,19 +70,58 @@ export function MobileNav({
       <div
         id="mobile-nav"
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-hairline bg-deep px-6 pt-2 pb-6 shadow-[0_16px_32px_rgba(10,17,32,0.5)]"
+        className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-hairline bg-deep px-6 pt-2 pb-6 shadow-[0_16px_32px_rgba(10,17,32,0.5)]"
       >
         <ul className="flex flex-col">
-          {links.map((link) => (
-            <li key={link.href} className="border-b border-hairline/50">
-              <Link
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="block py-3.5 text-[1.05rem] text-body transition-colors hover:text-ink"
-              >
-                {link.label}
-              </Link>
-            </li>
+          {links.map((link, index) => (
+            <Fragment key={link.href}>
+              <li className="border-b border-hairline/50">
+                <Link
+                  href={link.href}
+                  onClick={close}
+                  className="block py-3.5 text-[1.05rem] text-body transition-colors hover:text-ink"
+                >
+                  {link.label}
+                </Link>
+              </li>
+              {index === 0 && (
+                <li className="border-b border-hairline/50">
+                  <button
+                    type="button"
+                    aria-expanded={industriesOpen}
+                    aria-controls="mobile-industries"
+                    onClick={() => setIndustriesOpen((value) => !value)}
+                    className="flex w-full items-center justify-between py-3.5 text-[1.05rem] text-body transition-colors hover:text-ink"
+                  >
+                    Industries
+                    <ChevronDownIcon
+                      width={16}
+                      height={16}
+                      className={`motion-safe:transition-transform motion-safe:duration-150 ${
+                        industriesOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <ul
+                    id="mobile-industries"
+                    hidden={!industriesOpen}
+                    className="pb-1"
+                  >
+                    {industries.map((industry) => (
+                      <li key={industry.href}>
+                        <Link
+                          href={industry.href}
+                          onClick={close}
+                          className="block pl-4 py-2.5 text-body transition-colors hover:text-ink"
+                        >
+                          {industry.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
+            </Fragment>
           ))}
         </ul>
         {(() => {
@@ -82,7 +132,7 @@ export function MobileNav({
           return (
             <a
               href={cta.href}
-              onClick={() => setOpen(false)}
+              onClick={close}
               className="btn btn-primary mt-5 w-full"
               data-cta="primary"
               {...calAttrs}

@@ -59,3 +59,18 @@ export const STATIC_ROUTES = [
   "/guides/hvac-owner-dashboard",
   "/privacy",
 ] as const;
+
+/**
+ * The seven trade pages, surfaced in both the footer Industries column and the
+ * header Industries dropdown. Slugs all carry the `-automation` suffix and are
+ * already in STATIC_ROUTES above.
+ */
+export const INDUSTRY_LINKS = [
+  { href: "/industries/hvac-automation", label: "HVAC" },
+  { href: "/industries/plumbing-automation", label: "Plumbing" },
+  { href: "/industries/roofing-automation", label: "Roofing" },
+  { href: "/industries/construction-automation", label: "Construction" },
+  { href: "/industries/handyman-automation", label: "Handyman" },
+  { href: "/industries/snow-plowing-automation", label: "Snow Plowing" },
+  { href: "/industries/landscaping-automation", label: "Landscaping" },
+] as const;
