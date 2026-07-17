@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AnalyticsGate } from "@/components/analytics/AnalyticsGate";
 import { CtaTracker } from "@/components/analytics/CtaTracker";
 import { CalLoader } from "@/components/booking/CalLoader";
 import "./globals.css";
@@ -76,8 +75,7 @@ export default function RootLayout({
         <Footer />
         <CtaTracker />
         <CalLoader />
-        <Analytics />
-        <SpeedInsights />
+        <AnalyticsGate />
       </body>
     </html>
   );
