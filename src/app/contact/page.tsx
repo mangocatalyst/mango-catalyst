@@ -145,7 +145,11 @@ export default async function ContactPage({
               role="alert"
               className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-error bg-surface-lt p-4 font-medium text-navy lg:max-w-[52rem] lg:text-[1.2rem]"
             >
-              Something went wrong on our end. Try again, or email me directly.
+              {"Something went wrong on our end. Try again, or email me directly at "}
+              <a href={`mailto:${email}`} className="inline-link-light">
+                {email}
+              </a>
+              .
             </p>
           ) : null}
 

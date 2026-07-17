@@ -137,8 +137,8 @@ export default function PrivacyPage() {
           <PolicySection heading="Want your info removed?">
             <p>
               Email{" "}
-              <a href="mailto:hello@mangocatalyst.com" className="inline-link">
-                hello@mangocatalyst.com
+              <a href={`mailto:${SITE.email}`} className="inline-link">
+                {SITE.email}
               </a>{" "}
               and ask.{" "}
               {

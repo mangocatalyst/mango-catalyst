@@ -19,7 +19,7 @@ export const SITE = {
   areaServed: ["Minnesota", "Wisconsin", "Iowa", "North Dakota", "South Dakota"],
   priceRange: "$$",
   // --- VERIFY before launch (left "" => omitted from schema/metadata) ---
-  email: "", // public contact email, once decided
+  email: "hello@mangocatalyst.com", // confirmed real by Bryan 2026-07-16
   telephone: "", // leave "" to omit; never publish the personal cell (phone-routing rule)
   ogImage: "/og.png", // 1200x630, shipped from the logo-assets branch
   logo: "/icon.png", // 512x512 spark mark (logo-assets); full wordmark: /logo.svg
