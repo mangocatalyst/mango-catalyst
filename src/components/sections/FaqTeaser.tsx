@@ -49,7 +49,7 @@ export function FaqTeaser() {
       </ul>
 
       <p className="mt-12 text-navy-2">
-        {"All nine answers, no runaround: "}
+        {"Every answer, no runaround: "}
         <Link href="/faq" className="inline-link-light font-medium">
           Straight answers
         </Link>

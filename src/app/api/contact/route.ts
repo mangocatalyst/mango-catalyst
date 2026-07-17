@@ -27,6 +27,8 @@ import { SITE } from "@/lib/constants";
  *    a missing/garbled/future stamp, is NOT dropped (autofill makes fast
  *    legitimate submits real); it is processed normally with a "fast-fill"
  *    flag in the delivery payload and logs, so a human can triage it.
+ * 3. Per-IP rate limit + field length caps: see below. Both reject with the
+ *    normal "something went wrong" failure response, not a silent drop.
  */
 
 /** Faster than this between page render and submit reads as autofill or a bot. */
@@ -38,6 +40,59 @@ const MAX_FUTURE_SKEW_MS = 60_000;
 /** Filled honeypot: the one signal that silently drops the submission. */
 function isHoneypotHit(honeypot: string): boolean {
   return honeypot.trim() !== "";
+}
+
+/** Field length caps: generous for real use, small enough to stop a paste-bomb. */
+const MAX_LENGTHS = { name: 200, email: 254, business: 200, message: 5000 };
+
+function isOversized(fields: {
+  name: string;
+  email: string;
+  business: string;
+  message: string;
+}): boolean {
+  return (
+    fields.name.length > MAX_LENGTHS.name ||
+    fields.email.length > MAX_LENGTHS.email ||
+    fields.business.length > MAX_LENGTHS.business ||
+    fields.message.length > MAX_LENGTHS.message
+  );
+}
+
+/**
+ * Per-IP rate limit: N submissions per window, held in a plain Map.
+ * ponytail: in-memory, per-instance only, so a visitor bouncing across
+ * serverless instances (or a cold start) gets a fresh bucket; it still caps
+ * the common case (one instance, one spammer) with zero new services or
+ * deps. Upgrade path if real abuse shows up: Vercel KV/Upstash-backed
+ * counter, or a Vercel Firewall rate-limit rule in front of this route.
+ */
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+/** Unique IPs never get removed on their own; bound the Map so a warm
+ *  instance can't accumulate one entry per drive-by visitor forever. */
+const RATE_LIMIT_MAX_TRACKED_IPS = 1000;
+const rateLimitHits = new Map<string, { count: number; windowStart: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitHits.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    if (rateLimitHits.size >= RATE_LIMIT_MAX_TRACKED_IPS) {
+      // ponytail: cheap bound, not an LRU; an occasional full reset is fine
+      // for an advisory limiter on a low-traffic contact form.
+      rateLimitHits.clear();
+    }
+    rateLimitHits.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+/** Vercel sets x-forwarded-for; first entry is the original client. */
+function clientIp(request: NextRequest): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 }
 
 /**
@@ -99,8 +154,22 @@ export async function POST(request: NextRequest) {
     console.log("[contact] fast-fill submission (under minimum fill time)");
   }
 
-  // Server-side mirror of the form's required fields.
-  if (!name || !email || !message || !/^\S+@\S+\.\S+$/.test(email)) {
+  // Server-side mirror of the form's required fields, plus the length caps.
+  if (
+    !name ||
+    !email ||
+    !message ||
+    !/^\S+@\S+\.\S+$/.test(email) ||
+    isOversized({ name, email, business, message })
+  ) {
+    return respond(request, false);
+  }
+
+  // Rate limit here, not earlier: honeypot hits and failed validation never
+  // reach this point, so the budget only spends on submissions that would
+  // otherwise trigger a real send.
+  if (isRateLimited(clientIp(request))) {
+    console.log("[contact] rate-limited submission");
     return respond(request, false);
   }
 

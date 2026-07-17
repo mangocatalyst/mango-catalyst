@@ -6,9 +6,9 @@ import { HeroBackdrop } from "@/components/sections/HeroBackdrop";
  * Home hero, direction A: type-led + one CSS spark (Bryan's locked pick).
  *
  * Server component, zero client JS. The H1 is the art: Big Shoulders stacked
- * three lines over one matte navy glow. Amber
- * appears exactly three times: the spark on the last word, the rule that
- * draws on at load, and the CTA. The reveal is one orchestrated CSS moment,
+ * three lines over one matte navy glow. Amber appears four times: the spark
+ * on the last word, the rule that draws on at load, the CTA, and the
+ * backdrop's one amber moment (see HeroBackdrop). The reveal is one orchestrated CSS moment,
  * gated to desktop widths and prefers-reduced-motion: no-preference; on
  * mobile and for reduced-motion visitors the hero renders static.
  *

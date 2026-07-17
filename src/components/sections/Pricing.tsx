@@ -115,8 +115,8 @@ export function Pricing() {
               Why the 3-month start:
             </strong>{" "}
             the build work is front-loaded. Most of my hours land in the first
-            weeks, and the 3-month start is what makes the $795 setup possible
-            instead of charging the whole build cost up front.
+            weeks, and three months gives what I build enough runtime to prove
+            itself before you decide anything long-term.
           </p>
         </Card>
 

@@ -22,8 +22,11 @@
   --color-faint: #7e8ba6;
 
   /* Light conversion bands (palette B). THE TRAP: amber as text or icon
-     fails AA on light backgrounds. On light bands amber is BUTTON FILL ONLY
-     (with navy text); links and accents go navy. */
+     fails AA on light backgrounds. On light bands amber carries no MEANING:
+     button fill (with navy text) plus small aria-hidden decorative marks
+     (the SectionHeading tick, the Card accent border) are fine; anything a
+     visitor must read or click goes navy. (Comment reconciled with shipped
+     design 2026-07-16, audit finding.) */
   --color-light: #f4f6fb;
   --color-surface-lt: #ffffff;
   --color-navy: #0e1729;
