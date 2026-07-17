@@ -9,7 +9,8 @@ import { INDUSTRY_LINKS, PROGRAM_LINKS } from "@/lib/constants";
 /** Slim global nav per the seo-spec linking plan (section 5). */
 const NAV_LINKS = [
   { href: "/services", label: "Services" },
-  { href: "/guides", label: "Guides" },
+  { href: "/dashboards", label: "Dashboard" },
+  { href: "/ai-consultant", label: "AI Consulting" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },
 ];

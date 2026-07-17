@@ -6,6 +6,9 @@ import { breadcrumbLd, graph, serviceLd } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
+import { BookButton } from "@/components/booking/BookButton";
+import { Card } from "@/components/ui/Card";
+import { CheckIcon } from "@/components/ui/icons";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 
 /**
@@ -15,6 +18,9 @@ import { IndustryHero } from "@/components/industries/IndustryHero";
  * data for a fictional company (Boreal Comfort Co). The artifact is baked by
  * demo/bake-demo.sh, which refuses to ship if any real customer or employee
  * string leaks in (demo/privacy-validator.js).
+ *
+ * Standalone product since 2026-07-16: $795 setup + $125/month, no full-service
+ * retainer required. Pricing rule: state the numbers flat, never justify them.
  */
 
 const PATH = "/dashboards";
@@ -74,11 +80,29 @@ export default function DashboardsPage() {
     <>
       <JsonLd
         data={graph(
-          serviceLd({
-            name: "Owner Dashboard",
-            description: DESCRIPTION,
-            url: `${SITE.url}${PATH}`,
-          }),
+          {
+            ...serviceLd({
+              name: "Owner Dashboard",
+              description: DESCRIPTION,
+              url: `${SITE.url}${PATH}`,
+            }),
+            offers: [
+              {
+                "@type": "Offer",
+                price: "795",
+                priceCurrency: "USD",
+                description:
+                  "One-time setup: the dashboard wired to your ServiceTitan, logins created, crew whiteboard included.",
+              },
+              {
+                "@type": "Offer",
+                price: "125",
+                priceCurrency: "USD",
+                description:
+                  "Per month: hosting, the hourly ServiceTitan sync, the nightly AI pass, and fixes. Month to month, cancel anytime.",
+              },
+            ],
+          },
           breadcrumbLd([
             { name: "Home", url: SITE.url },
             { name: "Owner Dashboard", url: `${SITE.url}${PATH}` },
@@ -152,6 +176,79 @@ export default function DashboardsPage() {
               </li>
             ))}
           </ul>
+        </Section>
+
+        <Section id="pricing" tone="light">
+          <SectionHeading
+            tone="light"
+            title="Buy it on its own"
+            lead="The dashboard is a standalone product. It doesn't require the monthly automation service, and nobody will steer you into one."
+          />
+          <div className="mt-12 max-w-[30rem]">
+            <Card tone="light" accent className="p-7 sm:p-9">
+              <div>
+                <h3 className="text-[0.8rem] font-semibold tracking-[0.18em] uppercase text-muted-lt">
+                  Setup
+                </h3>
+                <p className="mt-2 flex flex-wrap items-baseline gap-x-3">
+                  <span className="font-display text-[3rem] leading-none font-bold text-navy sm:text-[3.5rem]">
+                    $795
+                  </span>
+                  <span className="text-[0.95rem] font-medium text-muted-lt">
+                    one-time
+                  </span>
+                </p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-navy-2">
+                  I wire the dashboard to your ServiceTitan, set up the logins,
+                  and stand up the crew whiteboard if you want it.
+                </p>
+              </div>
+
+              <hr className="my-7 border-border-lt" />
+
+              <div>
+                <h3 className="text-[0.8rem] font-semibold tracking-[0.18em] uppercase text-muted-lt">
+                  Keeping it running
+                </h3>
+                <p className="mt-2 flex flex-wrap items-baseline gap-x-3">
+                  <span className="font-display text-[3rem] leading-none font-bold text-navy sm:text-[3.5rem]">
+                    $125
+                  </span>
+                  <span className="text-[0.95rem] font-medium text-muted-lt">
+                    a month
+                  </span>
+                </p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-navy-2">
+                  Month to month, cancel anytime. The dashboard runs while the
+                  monthly runs; if you cancel, it stops, and your data was never
+                  mine to keep. It lives in your ServiceTitan.
+                </p>
+              </div>
+
+              <hr className="my-7 border-border-lt" />
+
+              <p className="font-semibold text-navy">What the monthly covers:</p>
+              <ul className="mt-4 flex flex-col gap-3.5">
+                {[
+                  "Hosting, the hourly ServiceTitan sync, and the nightly AI pass over the crew's Slack.",
+                  "Fixes when something breaks, including when ServiceTitan changes its API out from under us.",
+                  "Roster upkeep: a tech joins or leaves, and the logins and scorecards follow.",
+                  "Custom metrics and new views get scoped and agreed first, so there are no surprise bills.",
+                ].map((item) => (
+                  <li key={item.slice(0, 24)} className="flex gap-3">
+                    <CheckIcon className="mt-0.5 size-5 flex-none text-navy-2" />
+                    <span className="text-[0.95rem] leading-relaxed text-navy-2">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <BookButton href="/contact#book" className="mt-8 w-full" arrow>
+                Book a 15-Minute Fit Call
+              </BookButton>
+            </Card>
+          </div>
         </Section>
 
         <Section id="how-it-works">

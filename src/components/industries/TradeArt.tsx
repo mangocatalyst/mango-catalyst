@@ -309,6 +309,146 @@ export function PlotPlanArt(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Electrical: a panel schedule, breakers in two columns, circuits fanning out. */
+export function PanelArt(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...frame(props)}>
+      <Registration />
+      {/* panel cabinet over a drop shadow */}
+      <rect x="96" y="63" width="180" height="230" rx="8" fill="#0A1120" opacity=".8" />
+      <rect x="88" y="54" width="180" height="230" rx="8" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".7" />
+      <text x="102" y="80" fill="#5E7BAE" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">PANEL A</text>
+      {/* main breaker */}
+      <rect x="146" y="92" width="64" height="20" rx="3" stroke="#46608F" strokeWidth="1.2" fill="#22314F" />
+      <text x="158" y="105" fill="#5E7BAE" fontSize="8" fontFamily="var(--font-mono, monospace)">200A</text>
+      {/* breaker columns */}
+      <path d="M178 120v148" stroke="#2A3B5E" strokeWidth="1" />
+      <g stroke="#35496F" strokeWidth="1.2">
+        <rect x="112" y="126" width="54" height="14" rx="2" fill="#22314F" fillOpacity=".9" />
+        <rect x="112" y="150" width="54" height="14" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+        <rect x="112" y="174" width="54" height="14" rx="2" fill="#22314F" fillOpacity=".9" />
+        <rect x="112" y="198" width="54" height="14" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+        <rect x="112" y="222" width="54" height="14" rx="2" fill="#22314F" fillOpacity=".9" />
+        <rect x="190" y="126" width="54" height="14" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+        <rect x="190" y="150" width="54" height="14" rx="2" fill="#22314F" fillOpacity=".9" />
+        <rect x="190" y="174" width="54" height="14" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+        <rect x="190" y="198" width="54" height="14" rx="2" fill="#22314F" fillOpacity=".9" />
+        <rect x="190" y="222" width="54" height="14" rx="2" fill="#2A3B5E" fillOpacity=".9" />
+      </g>
+      {/* circuits fanning out to loads on the right */}
+      <g stroke="#2A3B5E" strokeWidth="1">
+        <path d="M268 133h64l24-26h40" />
+        <path d="M268 181h96" />
+        <path d="M268 229h64l24 26h40" />
+      </g>
+      {/* load symbols: receptacle, light, motor */}
+      <circle cx="404" cy="107" r="9" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".7" />
+      <path d="M400 104v6M408 104v6" stroke="#46608F" strokeWidth="1.2" />
+      <circle cx="372" cy="181" r="9" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".7" />
+      <path d="M366 175l12 12M378 175l-12 12" stroke="#46608F" strokeWidth="1" />
+      <circle cx="404" cy="255" r="9" stroke="#46608F" strokeWidth="1.2" fill="#16213A" fillOpacity=".7" />
+      <text x="399" y="259" fill="#46608F" fontSize="9" fontFamily="var(--font-mono, monospace)">M</text>
+      {/* ground symbol under the cabinet */}
+      <path d="M178 284v14M170 298h16M173 303h10M176 308h4" stroke="#35496F" strokeWidth="1.2" />
+      {/* amber node: the circuit added this week */}
+      <circle className="ta-amber" cx="268" cy="181" r="4" fill="#F6A328" />
+    </svg>
+  );
+}
+
+/** Septic/Well: a section view, tank and drain field one side, well the other. */
+export function TankFieldArt(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...frame(props)}>
+      <Registration />
+      {/* grade line: everything below is underground */}
+      <path d="M40 128h380" stroke="#35496F" strokeWidth="1.2" />
+      <path d="M40 136h380" stroke="#22314F" strokeWidth="1" strokeDasharray="6 5" />
+      {/* house above grade, gable end */}
+      <path d="M70 128v-44h64v44" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".6" />
+      <path d="M62 84l40-26 40 26" stroke="#46608F" strokeWidth="1.4" fill="none" />
+      {/* outlet line from house to tank */}
+      <path d="M118 128l26 32h32" stroke="#35496F" strokeWidth="1.4" />
+      {/* septic tank: two-compartment, risers to grade */}
+      <rect x="184" y="150" width="96" height="56" rx="8" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".7" />
+      <path d="M232 150v56" stroke="#35496F" strokeWidth="1" />
+      <path d="M204 150v-22M258 150v-22" stroke="#35496F" strokeWidth="1.2" />
+      <path d="M196 128h16M250 128h16" stroke="#46608F" strokeWidth="1.4" />
+      {/* liquid level line inside the tank */}
+      <path d="M188 172h88" stroke="#2A3B5E" strokeWidth="1" strokeDasharray="3 3" />
+      {/* lateral to the drain field, then three dashed runs */}
+      <path d="M280 178h36" stroke="#35496F" strokeWidth="1.4" />
+      <g stroke="#2A3B5E" strokeWidth="1" strokeDasharray="5 4">
+        <path d="M316 162h76" />
+        <path d="M316 178h76" />
+        <path d="M316 194h76" />
+      </g>
+      <path d="M316 162v32" stroke="#35496F" strokeWidth="1.2" />
+      {/* well: casing from grade down to the pump, cap above grade */}
+      <path d="M352 128v-14h20v14" stroke="#46608F" strokeWidth="1.4" fill="#16213A" fillOpacity=".6" />
+      <path d="M356 128v128M368 128v128" stroke="#46608F" strokeWidth="1.4" />
+      <rect x="352" y="256" width="20" height="26" rx="4" stroke="#46608F" strokeWidth="1.2" fill="#22314F" />
+      {/* static water level tick in the casing */}
+      <path d="M348 216h28" stroke="#2A3B5E" strokeWidth="1" strokeDasharray="3 3" />
+      {/* dimension line under the tank */}
+      <g stroke="#2A3B5E" strokeWidth="1">
+        <path d="M184 300h96" strokeDasharray="4 4" />
+        <path d="M184 294v12M280 294v12" />
+      </g>
+      {/* amber node: the riser lid, the next-pumping-due tank */}
+      <circle className="ta-amber" cx="204" cy="128" r="4" fill="#F6A328" />
+    </svg>
+  );
+}
+
+/** Restoration: a dry-down floor plan, moisture zone, air movers, dehu. */
+export function DryDownArt(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...frame(props)}>
+      <Registration />
+      {/* room outline over a footprint shadow */}
+      <rect x="72" y="63" width="300" height="212" fill="#0A1120" opacity=".7" />
+      <rect x="64" y="54" width="300" height="212" fill="#16213A" fillOpacity=".5" stroke="#46608F" strokeWidth="1.4" />
+      {/* interior wall + door swing */}
+      <path d="M244 54v84M244 190v76" stroke="#35496F" strokeWidth="1.2" />
+      <path d="M244 138a52 52 0 0 1 52 52" stroke="#46608F" strokeWidth="1" fill="none" />
+      <path d="M244 138v52" stroke="#46608F" strokeWidth="1" />
+      {/* moisture zone: irregular boundary with hatch, along the left wall */}
+      <path d="M64 108c34-8 62 6 74 30 12 26 4 58-16 76-18 16-42 18-58 10z" stroke="#5E7BAE" strokeWidth="1.2" strokeDasharray="5 4" fill="#16213A" fillOpacity=".55" />
+      <g stroke="#22314F" strokeWidth="1">
+        <path d="M70 122l52 52M66 146l46 46M64 172l34 34M78 112l52 52M96 108l44 44" />
+      </g>
+      {/* air movers: circle fans aimed at the zone */}
+      <g stroke="#46608F" strokeWidth="1.2">
+        <circle cx="196" cy="112" r="13" fill="#16213A" fillOpacity=".7" />
+        <circle cx="210" cy="216" r="13" fill="#16213A" fillOpacity=".7" />
+      </g>
+      <path d="M196 105v14M189 112h14" stroke="#35496F" strokeWidth="1" />
+      <path d="M210 209v14M203 216h14" stroke="#35496F" strokeWidth="1" />
+      {/* airflow arcs from each fan toward the wet zone */}
+      <g stroke="#2A3B5E" strokeWidth="1" fill="none">
+        <path d="M180 106c-18-2-34 2-46 10M182 118c-16 2-30 10-40 20" />
+        <path d="M194 212c-16-6-30-16-38-28M198 224c-18-2-34-10-44-22" />
+      </g>
+      {/* dehumidifier in the far room, drain line to the door */}
+      <rect x="292" y="86" width="44" height="60" rx="6" stroke="#46608F" strokeWidth="1.2" fill="#22314F" fillOpacity=".9" />
+      <path d="M300 98h28M300 110h28" stroke="#2A3B5E" strokeWidth="1" />
+      <text x="296" y="136" fill="#46608F" fontSize="8" fontFamily="var(--font-mono, monospace)" letterSpacing="1">DEHU</text>
+      {/* moisture reading callout */}
+      <path d="M108 160l58 -18" stroke="#2A3B5E" strokeWidth="1" />
+      <text x="170" y="140" fill="#5E7BAE" fontSize="9" fontFamily="var(--font-mono, monospace)">MC 18%</text>
+      {/* day-count dimension line under the plan */}
+      <g stroke="#2A3B5E" strokeWidth="1">
+        <path d="M64 292h300" strokeDasharray="4 4" />
+        <path d="M64 286v12M364 286v12" />
+      </g>
+      <text x="196" y="312" fill="#46608F" fontSize="9" fontFamily="var(--font-mono, monospace)" letterSpacing="2">DAY 3</text>
+      {/* amber node: the sensor reading logged this hour */}
+      <circle className="ta-amber" cx="108" cy="160" r="4" fill="#F6A328" />
+    </svg>
+  );
+}
+
 /** MN-ITS Helper: a claim form in a browser window whose data-flow arrows
  *  loop entirely inside a dashed machine boundary (the credibility-strip
  *  schematic from the imagery doc, promoted to the /mn-its page hero).

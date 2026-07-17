@@ -37,11 +37,15 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
   async redirects() {
-    return RENAMED_TRADES.map((t) => ({
-      source: `/industries/${t}`,
-      destination: `/industries/${t}-automation`,
-      permanent: true,
-    }));
+    return [
+      ...RENAMED_TRADES.map((t) => ({
+        source: `/industries/${t}`,
+        destination: `/industries/${t}-automation`,
+        permanent: true,
+      })),
+      /* /ai reworked into the paid consulting offer at /ai-consultant (2026-07-16). */
+      { source: "/ai", destination: "/ai-consultant", permanent: true },
+    ];
   },
 };
 

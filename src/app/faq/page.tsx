@@ -70,7 +70,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
     question: "Do you use AI?",
     answer: [
       "Yes. I use AI every day, and it's a big part of why one person can build and run this much. AI handles the grunt work of the building: the first drafts, the boilerplate, the tedious parts. The judgment stays human: every automation that touches your business is designed, reviewed, and tested by me before it runs. AI can also be ",
-      { text: "part of what I build for you", href: "/ai" },
+      { text: "part of what I build for you", href: "/ai-consultant" },
       ", drafting the reply to a routine email, summarizing the call notes, turning the numbers into plain English, always with a person approving anything that matters. And the same data rule applies here as everywhere else: nothing of yours gets fed into an AI tool without your say-so, and which tools see what is something we agree on when we scope the build.",
     ],
   },

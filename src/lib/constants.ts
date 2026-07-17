@@ -42,9 +42,12 @@ export const STATIC_ROUTES = [
   "/industries/handyman-automation",
   "/industries/snow-plowing-automation",
   "/industries/landscaping-automation",
+  "/industries/electrical-automation",
+  "/industries/septic-well-automation",
+  "/industries/restoration-automation",
   "/mn-its",
   "/dashboards",
-  "/ai",
+  "/ai-consultant",
   "/programs/servicetitan",
   "/programs/zapier",
   "/programs/slack",
@@ -61,24 +64,29 @@ export const STATIC_ROUTES = [
 ] as const;
 
 /**
- * The seven trade pages, surfaced in both the footer Industries column and the
+ * The ten trade pages, surfaced in both the footer Industries column and the
  * header Industries dropdown. Slugs all carry the `-automation` suffix and are
  * already in STATIC_ROUTES above.
  */
 export const INDUSTRY_LINKS = [
   { href: "/industries/hvac-automation", label: "HVAC" },
   { href: "/industries/plumbing-automation", label: "Plumbing" },
+  { href: "/industries/electrical-automation", label: "Electrical" },
   { href: "/industries/roofing-automation", label: "Roofing" },
   { href: "/industries/construction-automation", label: "Construction" },
+  { href: "/industries/restoration-automation", label: "Restoration" },
+  { href: "/industries/septic-well-automation", label: "Septic & Well" },
   { href: "/industries/handyman-automation", label: "Handyman" },
   { href: "/industries/snow-plowing-automation", label: "Snow Plowing" },
   { href: "/industries/landscaping-automation", label: "Landscaping" },
 ] as const;
 
 /**
- * The eight platform pages (platforms worked in extensively, plus the one
+ * The six platform pages (platforms worked in extensively, plus the one
  * owned build, MN-ITS Helper), surfaced in both the footer Platforms column
  * and the header Platforms dropdown. All already in STATIC_ROUTES above.
+ * AI Consulting and the Owner Dashboard left this list 2026-07-16: both are
+ * top-level nav sections now.
  */
 export const PROGRAM_LINKS = [
   { href: "/programs/servicetitan", label: "ServiceTitan" },
@@ -86,7 +94,5 @@ export const PROGRAM_LINKS = [
   { href: "/programs/slack", label: "Slack" },
   { href: "/programs/google-workspace", label: "Google Workspace" },
   { href: "/mn-its", label: "MN-ITS Helper" },
-  { href: "/dashboards", label: "Owner Dashboard" },
-  { href: "/ai", label: "AI" },
   { href: "/programs/everything-else", label: "Everything Else" },
 ] as const;

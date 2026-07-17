@@ -14,6 +14,8 @@ import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
 const PAGE_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/dashboards", label: "Owner Dashboard" },
+  { href: "/ai-consultant", label: "AI Consulting" },
   { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },

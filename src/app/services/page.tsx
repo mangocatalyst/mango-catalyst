@@ -172,7 +172,7 @@ export default function ServicesPage() {
             {
               "If the task draining your office hours isn't on this list, ask anyway. The whole job is figuring out what can run itself. And where it helps, "
             }
-            <Link href="/ai" className="inline-link">
+            <Link href="/ai-consultant" className="inline-link">
               AI can be part of the build
             </Link>
             {", always with a person approving anything that matters."}

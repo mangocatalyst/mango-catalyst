@@ -14,13 +14,13 @@ export function AiTeaser() {
       <SectionHeading title="AI where it earns its keep" />
       <p className="mt-8 max-w-[44rem] leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
         I use AI every day to build faster, and I&apos;ll put it into your shop
-        only where it saves real time and a person still signs off: drafting the
-        routine email reply, summarizing the call notes, turning a pile of
-        numbers into a plain-English read. Not a chatbot bolted to your homepage,
-        not a strategy deck about transformation.
+        only where it saves real time and a person still signs off. Not sure
+        you&apos;re ready for a build? There&apos;s a consulting option: two
+        one-hour sessions, $500 flat, no retainer, and the $500 counts toward
+        setup if you build within 60 days.
       </p>
-      <ArrowLink href="/ai" className="mt-8">
-        See where AI fits, and where it doesn&apos;t
+      <ArrowLink href="/ai-consultant" className="mt-8">
+        See the AI consulting offer
       </ArrowLink>
     </Section>
   );

@@ -18,12 +18,16 @@ const BODY = `# ${SITE.name}
 - [Services](${u("/services")}): the automation work, scope, and how engagements run.
 - [FAQ](${u("/faq")}): common questions on scope, pricing, and process.
 - [Contact](${u("/contact")}): book a 15-minute fit call.
+- [AI Consulting](${u("/ai-consultant")}): two one-hour sessions, $500 flat, credited toward setup if a build starts within 60 days; no retainer.
 
 ## Industries
 - [HVAC](${u("/industries/hvac-automation")})
 - [Plumbing](${u("/industries/plumbing-automation")})
+- [Electrical](${u("/industries/electrical-automation")})
 - [Roofing](${u("/industries/roofing-automation")})
 - [Construction](${u("/industries/construction-automation")})
+- [Restoration](${u("/industries/restoration-automation")})
+- [Septic and well](${u("/industries/septic-well-automation")})
 - [Handyman](${u("/industries/handyman-automation")})
 - [Snow plowing](${u("/industries/snow-plowing-automation")})
 - [Landscaping](${u("/industries/landscaping-automation")})
@@ -35,8 +39,7 @@ const BODY = `# ${SITE.name}
 - [Google Workspace](${u("/programs/google-workspace")})
 - [Everything else](${u("/programs/everything-else")})
 - [MN-ITS](${u("/mn-its")})
-- [Owner Dashboard](${u("/dashboards")}): the whole shop on one page, refreshed hourly from ServiceTitan; includes a clickable fake-data demo.
-- [AI](${u("/ai")}): where AI fits in the builds and where it doesn't.
+- [Owner Dashboard](${u("/dashboards")}): the whole shop on one page, refreshed hourly from ServiceTitan; includes a clickable fake-data demo. Standalone product: $795 setup, $125 a month, no retainer required.
 
 ## Guides
 - [HVAC tasks to automate](${u("/guides/hvac-tasks-to-automate")})
