@@ -275,8 +275,8 @@ body {
   height: 100%;
   background: radial-gradient(
     closest-side,
-    rgb(44 62 100 / 0.55),
-    rgb(44 62 100 / 0) 70%
+    rgb(52 74 118 / 0.8),
+    rgb(52 74 118 / 0) 70%
   );
 }
 
@@ -287,19 +287,22 @@ body {
   height: 92%;
   background: radial-gradient(
     closest-side,
-    rgb(22 36 64 / 0.6),
-    rgb(22 36 64 / 0) 72%
+    rgb(26 42 74 / 0.8),
+    rgb(26 42 74 / 0) 72%
   );
 }
 
+/* Retuned 2026-07-16: the original 5%/0.25-swing drift measured near-zero
+   visible change (Bryan: "I do not see that"). Bigger travel and a wider
+   opacity swing keep it ambient but perceptible. */
 @keyframes hero-glow-drift-b {
   0%,
   100% {
     transform: translate(0, 0) scale(1);
-    opacity: 0.75;
+    opacity: 0.45;
   }
   50% {
-    transform: translate(5%, 4%) scale(1.08);
+    transform: translate(9%, 6%) scale(1.14);
     opacity: 1;
   }
 }
@@ -307,12 +310,12 @@ body {
 @keyframes hero-glow-drift-c {
   0%,
   100% {
-    transform: translate(0, 0) scale(1.06);
+    transform: translate(0, 0) scale(1.1);
     opacity: 1;
   }
   50% {
-    transform: translate(-4%, -5%) scale(1);
-    opacity: 0.7;
+    transform: translate(-8%, -7%) scale(1);
+    opacity: 0.4;
   }
 }
 
@@ -967,6 +970,36 @@ body {
   }
 }
 
+/* Electrical: current marches down the conductors. The dasharray lives
+   inside the motion gate, so static contexts keep solid circuit lines. */
+@keyframes ta-current {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+/* Septic: effluent drifts out the drainfield laterals. The runs are drawn
+   dashed, so the march is the only moving part; statics keep the dashes. */
+@keyframes ta-perc {
+  to {
+    stroke-dashoffset: -9;
+  }
+}
+
+/* Restoration: air-mover blades spin; airflow arcs stream toward the wet
+   zone (arcs' dasharray inside the gate, statics keep them solid). */
+@keyframes ta-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes ta-air {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
 /* Punch list: each check draws itself down the list, holds, then the list
    resets for the next round. Same one-timeline-staggered-offsets pattern as
    the hero sheet entrances (hb-in1..4). */
@@ -1062,6 +1095,43 @@ body {
   }
   .ta-ck3 {
     animation: ta-ck3 14s linear infinite;
+  }
+
+  /* Electrical: marching current on the three circuits, staggered. */
+  .ta-circuit path {
+    stroke-dasharray: 4 10;
+    animation: ta-current 1.3s linear infinite;
+  }
+  .ta-circuit path:nth-child(2) {
+    animation-delay: -0.4s;
+  }
+  .ta-circuit path:nth-child(3) {
+    animation-delay: -0.8s;
+  }
+
+  /* Septic: slow perc drift down the laterals, staggered. */
+  .ta-lateral path {
+    animation: ta-perc 2.6s linear infinite;
+  }
+  .ta-lateral path:nth-child(2) {
+    animation-delay: -0.9s;
+  }
+  .ta-lateral path:nth-child(3) {
+    animation-delay: -1.7s;
+  }
+
+  /* Restoration: blades spin about their own cross centers; air streams. */
+  .ta-fan {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ta-spin 2.4s linear infinite;
+  }
+  .ta-fan2 {
+    animation-delay: -0.7s;
+  }
+  .ta-air path {
+    stroke-dasharray: 5 7;
+    animation: ta-air 1.8s linear infinite;
   }
 
   /* Plumbing: the amber dot rides the pipe centerline (hb-run, the hero

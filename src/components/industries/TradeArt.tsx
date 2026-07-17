@@ -8,8 +8,8 @@ import type { SVGProps } from "react";
  * aria-hidden by the layout that places them. Ambient motion is pure CSS
  * behind the hero's media gate (ta-* classes, see globals.css): the amber
  * node breathes everywhere, plus one thematic touch per trade (now-line
- * creep, snow drift, pipe flow, punch-list check-off). Static contexts
- * render as drawn.
+ * creep, snow drift, pipe flow, punch-list check-off, circuit current,
+ * drainfield perc, air-mover spin). Static contexts render as drawn.
  *
  * Shared design space: 460x330. Line ramp: #22314F faint, #2A3B5E base,
  * #35496F mid, #46608F loud, #5E7BAE text. Amber #F6A328 once.
@@ -335,8 +335,9 @@ export function PanelArt(props: SVGProps<SVGSVGElement>) {
         <rect x="190" y="198" width="54" height="14" rx="2" fill="#22314F" fillOpacity=".9" />
         <rect x="190" y="222" width="54" height="14" rx="2" fill="#2A3B5E" fillOpacity=".9" />
       </g>
-      {/* circuits fanning out to loads on the right */}
-      <g stroke="#2A3B5E" strokeWidth="1">
+      {/* circuits fanning out to loads on the right; motion marches current
+          down the conductors (ta-circuit), statics keep them solid */}
+      <g className="ta-circuit" stroke="#2A3B5E" strokeWidth="1">
         <path d="M268 133h64l24-26h40" />
         <path d="M268 181h96" />
         <path d="M268 229h64l24 26h40" />
@@ -376,9 +377,10 @@ export function TankFieldArt(props: SVGProps<SVGSVGElement>) {
       <path d="M196 128h16M250 128h16" stroke="#46608F" strokeWidth="1.4" />
       {/* liquid level line inside the tank */}
       <path d="M188 172h88" stroke="#2A3B5E" strokeWidth="1" strokeDasharray="3 3" />
-      {/* lateral to the drain field, then three dashed runs */}
+      {/* lateral to the drain field, then three dashed runs; motion drifts
+          the dashes outward (ta-lateral), statics keep them dashed as drawn */}
       <path d="M280 178h36" stroke="#35496F" strokeWidth="1.4" />
-      <g stroke="#2A3B5E" strokeWidth="1" strokeDasharray="5 4">
+      <g className="ta-lateral" stroke="#2A3B5E" strokeWidth="1" strokeDasharray="5 4">
         <path d="M316 162h76" />
         <path d="M316 178h76" />
         <path d="M316 194h76" />
@@ -423,10 +425,12 @@ export function DryDownArt(props: SVGProps<SVGSVGElement>) {
         <circle cx="196" cy="112" r="13" fill="#16213A" fillOpacity=".7" />
         <circle cx="210" cy="216" r="13" fill="#16213A" fillOpacity=".7" />
       </g>
-      <path d="M196 105v14M189 112h14" stroke="#35496F" strokeWidth="1" />
-      <path d="M210 209v14M203 216h14" stroke="#35496F" strokeWidth="1" />
+      {/* blades spin (ta-fan) and the arcs stream toward the wet zone
+          (ta-air) in motion contexts; statics render as drawn */}
+      <path className="ta-fan" d="M196 105v14M189 112h14" stroke="#35496F" strokeWidth="1" />
+      <path className="ta-fan ta-fan2" d="M210 209v14M203 216h14" stroke="#35496F" strokeWidth="1" />
       {/* airflow arcs from each fan toward the wet zone */}
-      <g stroke="#2A3B5E" strokeWidth="1" fill="none">
+      <g className="ta-air" stroke="#2A3B5E" strokeWidth="1" fill="none">
         <path d="M180 106c-18-2-34 2-46 10M182 118c-16 2-30 10-40 20" />
         <path d="M194 212c-16-6-30-16-38-28M198 224c-18-2-34-10-44-22" />
       </g>
