@@ -88,7 +88,7 @@
   .chrome {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 16px; background: var(--chrome); color: #FDEBCB;
-    border-radius: 12px 12px 0 0; font-size: 13px;
+    border-radius: 12px; font-size: 13px;
   }
   .chrome .hash { color: var(--gold); font-weight: 800; }
   .chrome .tab {
@@ -107,8 +107,8 @@
   .themebtn:hover { background: rgba(255,255,255,.22); }
 
   .surface {
-    background: var(--paper); border: 1px solid var(--line); border-top: none;
-    border-radius: 0 0 12px 12px; overflow: hidden;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; margin-top: 6px;
   }
 
   .summary { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
@@ -192,7 +192,7 @@
   }
   .pill.done { color: var(--done); background: var(--done-bg); }
   .pill.pend { color: var(--pend); background: var(--pend-bg); }
-  /* ghost N/A: no fill, no dot, faint text, cuts the noise */
+  /* ghost N/A: no fill, no dot, faint text - cuts the noise */
   .pill.na   { color: var(--na); background: transparent; border-color: var(--line-soft); font-weight: 500; }
   .pill.na .dot { display: none; }
   .pill.auto { color: var(--auto); background: var(--auto-bg); }
@@ -213,11 +213,177 @@
   .empty { display: none; padding: 40px 20px; text-align: center; color: var(--ink-faint); font-size: 14px; }
   .error { display: none; padding: 12px 18px; color: var(--warn); background: var(--warn-bg); font-size: 13px; }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 14px 24px; margin-top: 20px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; font-size: 12.5px; color: var(--ink-soft); }
-  .legend h2 { width: 100%; margin: 0 0 2px; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); }
-  .legend .item { display: flex; align-items: center; gap: 8px; }
-  .note { margin-top: 14px; color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
-  .note b { color: var(--ink); }
+  /* Install booking board: per-lead-installer strip, 15 weekdays out. Answers
+     "who's the next one free" at a glance. Fed by the same board data the
+     table uses. Booked = red, next open weekday = green. */
+  .booking { margin-top: 22px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .booking-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .booking-head h2 { margin: 0; font-family: "Big Shoulders", "Arial Narrow", system-ui, sans-serif; font-size: 18px; letter-spacing: .02em; text-transform: uppercase; color: var(--brand); }
+  .booking-hint { font-size: 12px; color: var(--ink-faint); }
+  .booking-scroll { overflow-x: auto; }
+  .lane { display: flex; align-items: stretch; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line-soft); min-width: 970px; }
+  .lane:first-child { border-top: none; }
+  .lane-name { width: 128px; flex: none; display: flex; flex-direction: column; justify-content: center; }
+  .lane-name .who { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .lane-name .next { font-size: 11.5px; margin-top: 2px; color: var(--ink-faint); }
+  .lane-name .next b { color: var(--done); }
+  .lane-name .next.full b { color: var(--warn); }
+  /* days are grouped into Mon-Fri week blocks; the 26px gap between blocks is the
+     week separation. The current partial week may be a single column. */
+  .days { display: flex; gap: 42px; flex: 1; min-width: 0; }
+  .week { display: flex; gap: 4px; min-width: 0; }
+  .day { flex: 1; min-width: 0; border: 1px solid var(--line-soft); border-radius: 7px; padding: 5px 3px; text-align: center; min-height: 60px; display: flex; flex-direction: column; gap: 1px; justify-content: flex-start; }
+  .day .dow { font-size: 9px; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-faint); }
+  .day .dom { font-size: 14px; font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .day .who2 { font-size: 12px; line-height: 1.15; color: var(--ink); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+  .day .city2 { font-size: 9.5px; line-height: 1.1; color: var(--ink-faint); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .day.blocked { background: var(--line-soft); opacity: .55; }
+  .day.blocked .dom { color: var(--ink-faint); }
+  .day.booked { background: var(--warn-bg); border-color: var(--warn); }
+  .day.booked .dom, .day.booked .who2 { color: var(--warn); }
+  .day.open { border-style: dashed; }
+  .day.next { border: 2px solid var(--done); background: var(--done-bg); }
+  .day.next .dom, .day.next .tag { color: var(--done); }
+  /* current day: teal top accent + teal weekday letter, stacks over any state */
+  .day.today { border-top: 3px solid var(--teal); }
+  .day.today .dow { color: var(--teal); font-weight: 700; }
+  .day.today .tag { color: var(--teal); }
+  .day .tag { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; margin-top: auto; }
+
+  /* ---- tabs (Board | Sales); the Sales tab is revealed only when the owner
+     instance provides the sales feed ---- */
+  /* lifted from the owner dashboard's #views/.vbtn switcher: plain text links with a
+     gold underline on the active view, no boxes, so the two surfaces read as one
+     product family. Remapped onto the board's theme tokens (works in both themes). */
+  .tabnav { display: flex; align-items: flex-end; gap: 22px; padding: 14px 20px 0; background: transparent; flex-wrap: wrap; }
+  .tabbtn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--ink-soft);
+    font: inherit; font-size: 14.5px; font-weight: 600; letter-spacing: .05em; padding: 8px 2px; cursor: pointer;
+    transition: border-color .15s ease, color .15s ease; }
+  .tabbtn:hover { color: var(--teal); }
+  .tabbtn[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--gold); }
+  .tabbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .tabpanel[hidden] { display: none; }
+
+  /* ---- change-history popover (customer cell) ---- */
+  .histbtn { border: none; background: transparent; cursor: pointer; color: var(--ink-faint);
+    padding: 0 2px; margin-left: 3px; vertical-align: middle; line-height: 1; }
+  .histbtn:hover { color: var(--auto); }
+  .histbtn svg { display: block; }
+  .histpop { position: absolute; z-index: 60; width: 300px; max-height: 320px; overflow-y: auto;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 10px 34px rgba(0,0,0,.20); padding: 11px 13px; font-size: 12.5px; color: var(--ink); }
+  .histpop h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-faint); font-weight: 700; }
+  .histpop .hrow { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; border-top: 1px solid var(--line-soft); }
+  .histpop .hrow:first-of-type { border-top: none; padding-top: 0; }
+  .histpop .htop { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .histpop .htime { color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+  .histpop .hsrc { font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; padding: 1px 6px; border-radius: 999px; background: var(--auto-bg); color: var(--auto); font-weight: 700; white-space: nowrap; }
+  .histpop .hchange .col { font-weight: 700; }
+  .histpop .hchange .to { color: var(--done); font-weight: 600; }
+  .histpop .hempty { color: var(--ink-faint); padding: 4px 0; }
+
+  /* ---- sales tab ---- */
+  .sales-head { display: flex; align-items: baseline; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .sales-head h1 { margin: 0; font-size: 22px; letter-spacing: .02em; text-transform: uppercase; color: var(--brand); }
+  .sales-stamp { color: var(--ink-faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .kpi .delta { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi .delta.up { color: var(--done); }
+  .kpi .delta.down { color: var(--warn); }
+  .sales-body { display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 760px) { .sales-body { grid-template-columns: 1fr; } }
+  .chartcard { padding: 14px 18px; border-bottom: 1px solid var(--line); min-width: 0; }
+  .chartcard.left { border-right: 1px solid var(--line-soft); }
+  .cardhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .cardhead h2 { margin: 0; font-family: "Big Shoulders","Arial Narrow",system-ui,sans-serif; font-size: 15px; letter-spacing: .02em; text-transform: uppercase; color: var(--brand); }
+  .cardsub { color: var(--ink-faint); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .spark { position: relative; }
+  .spark svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .spark .base { stroke: var(--line); stroke-width: 1; }
+  .spark .sarea { fill: var(--auto-bg); opacity: .6; }
+  .spark .sline { fill: none; stroke: var(--teal); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .spark .send { fill: var(--teal); }
+  .spark .cross { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+  .spark .focus { fill: var(--paper); stroke: var(--teal); stroke-width: 2; opacity: 0; }
+  .sptip { position: absolute; pointer-events: none; background: var(--brand); color: var(--paper);
+    font-size: 11.5px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; opacity: 0;
+    transform: translate(-50%, -145%); font-variant-numeric: tabular-nums; z-index: 3; box-shadow: 0 3px 10px rgba(0,0,0,.2); }
+  .funnel { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--panel); }
+  .funnel .seg { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; min-width: 0; font-variant-numeric: tabular-nums; }
+  .funnel .seg + .seg { box-shadow: inset 2px 0 0 var(--paper); }
+  .funnel .seg.sold { background: var(--done); color: #fff; }
+  .funnel .seg.open { background: var(--gold); color: #3a2a05; }
+  .funnel .seg.dismissed { background: var(--na); color: #fff; }
+  .funnel-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 9px; font-size: 11.5px; color: var(--ink-soft); }
+  .funnel-legend .k { display: inline-flex; align-items: center; gap: 6px; }
+  .funnel-legend .sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .funnel-legend b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .pipeline { margin-top: 14px; display: flex; align-items: baseline; gap: 9px; }
+  .pipeline .pv { font-family: "Big Shoulders","Arial Narrow",system-ui,sans-serif; font-size: 24px; color: var(--teal); font-variant-numeric: tabular-nums; line-height: 1; }
+  .pipeline .pl { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-faint); font-weight: 600; }
+  .advisor-wrap .cardhead { padding: 13px 18px 0; margin-bottom: 6px; }
+
+  .foot { text-align: center; color: var(--ink-faint); font-size: 11px; padding: 16px 0 2px; letter-spacing: .02em; }
+  .foot a { color: inherit; }
+
+  /* ---- registration tab ---- */
+  .reg-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 18px; border-bottom: 1px solid var(--line); }
+  #reg-tbl th, #reg-tbl td { padding: 8px 10px; vertical-align: middle; }
+  #reg-tbl td.cust { font-weight: 700; color: var(--brand); white-space: nowrap; }
+  #reg-tbl td.mono { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .dl-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  .dl-badge.ok { color: var(--ink-soft); background: var(--line-soft); }
+  .dl-badge.amber { color: var(--pend); background: var(--pend-bg); }
+  .dl-badge.red { color: var(--warn); background: var(--warn-bg); }
+  .dl-none { color: var(--ink-faint); }
+  .reg-inp { width: 96px; padding: 4px 7px; font: inherit; font-size: 12px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 6px; }
+  .reg-inp:hover { border-color: var(--ink-faint); }
+  .reg-inp:focus { outline: none; border-color: var(--focus); background: var(--paper); }
+  .reg-actions { display: inline-flex; gap: 6px; white-space: nowrap; }
+  .regbtn { border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); font: inherit; font-size: 11.5px; font-weight: 600; padding: 4px 9px; border-radius: 7px; cursor: pointer; transition: border-color .12s, color .12s; }
+  .regbtn:hover { border-color: var(--teal); color: var(--teal); }
+  .regbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .cell-none { color: var(--ink-faint); font-style: italic; font-size: 12px; }
+  /* status filter dropdown: a .fbtn summary + tickbox menu, matching the chips' look */
+  .statusdd { position: relative; }
+  .statusdd > summary { list-style: none; cursor: pointer; }
+  .statusdd > summary::-webkit-details-marker { display: none; }
+  .statusdd > summary::after { content: "\25BE"; margin-left: 6px; font-size: 10px; opacity: .8; }
+  .statusdd[open] > summary { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .dd-menu { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; min-width: 210px; max-height: 300px; overflow-y: auto;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.18); padding: 6px; }
+  .dd-menu label { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 13px; color: var(--ink); cursor: pointer; }
+  .dd-menu label:hover { background: var(--hover); }
+  .dd-menu input { accent-color: var(--teal); width: 15px; height: 15px; flex: none; }
+
+  /* ---- sales role view: per-person cards (ported from the owner dashboard's Sales
+     view, scoped under .rview and remapped onto the board's CSS variables) ---- */
+  .rview .rchips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 4px 18px 0; }
+  @media (max-width: 720px) { .rview .rchips { grid-template-columns: 1fr; } }
+  .rview .rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; padding: 14px 18px 18px; }
+  .rview .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px 15px 12px; }
+  .rview .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 16px; min-width: 0; }
+  .rview .kpi-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); display: flex; align-items: center; gap: 6px; }
+  .rview .kpi-num { font-family: "Big Shoulders","Arial Narrow",system-ui,sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -.01em; line-height: 1.1; color: var(--ink); margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .rview .kpi-num small, .rview .cmp .v small, .rview .big small { font-size: 14px; font-weight: 600; color: var(--ink-faint); letter-spacing: 0; }
+  .rview .kpi-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .rview .panel h3 { font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); display: flex; align-items: center; gap: 7px; margin: 0 0 4px; }
+  .rview .big { font-family: "Big Shoulders","Arial Narrow",system-ui,sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -.01em; color: var(--ink); line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .rview .wire { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--done); }
+  .rview .cmp .lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+  .rview .cmp .v { font-family: "Big Shoulders","Arial Narrow",system-ui,sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.01em; color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .rview .prow { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+  .rview .prow b { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .rview .prow.lrow, .rview .prow.lrow a, .rview .prow.lrow span, .rview .prow.lrow b { font-size: 13.5px; font-weight: 400; line-height: 1.4; }
+  .rview .prow.lrow { padding: 6px 0; }
+  .rview .opp-hidden { display: none; }
+  .rview .more-row { cursor: pointer; color: var(--auto); font-size: 12.5px; margin-top: 6px; }
+  .rview .more-row:hover { color: var(--teal); text-decoration: underline; }
+  .rview .delta { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; border-radius: 20px; padding: 1px 8px; margin-top: 7px; }
+  .rview .delta.up { color: var(--done); background: var(--done-bg); }
+  .rview .delta.down { color: var(--warn); background: var(--warn-bg); }
+  .rview .delta.flat { color: var(--ink-faint); background: var(--line-soft); }
+  .rview .delta.mini { margin-top: 0; font-size: 10.5px; padding: 0 6px; vertical-align: 1px; }
+  .rview svg text { fill: var(--ink-faint); }
 </style>
 
 <div class="wrap">
@@ -229,6 +395,13 @@
     <button class="themebtn" id="themebtn" title="Toggle dark mode">◐</button>
   </div>
 
+  <div class="tabnav" id="tabnav" role="tablist" hidden>
+    <button class="tabbtn" id="tab-btn-board" role="tab" aria-selected="true" data-tab="board">Board</button>
+    <button class="tabbtn" id="tab-btn-sales" role="tab" aria-selected="false" data-tab="sales" hidden>Sales</button>
+    <button class="tabbtn" id="tab-btn-registration" role="tab" aria-selected="false" data-tab="registration" hidden>Registration</button>
+  </div>
+
+  <div id="tab-board" class="tabpanel" role="tabpanel">
   <div class="surface">
     <div class="error" id="error"></div>
     <div class="summary">
@@ -239,9 +412,10 @@
       <div class="bottlenecks">
         <span class="lead">Filter by what’s outstanding</span>
         <button class="fbtn" data-filter="all" aria-pressed="true">All</button>
-        <button class="fbtn" data-filter="permit">Needs permit <span class="cnt" id="c-permit">0</span></button>
-        <button class="fbtn" data-filter="inspection">Needs inspection <span class="cnt" id="c-inspection">0</span></button>
-        <button class="fbtn" data-filter="registered">Not registered <span class="cnt" id="c-registered">0</span></button>
+        <button class="fbtn" data-filter="permit">Needs Permit <span class="cnt" id="c-permit">0</span></button>
+        <button class="fbtn" data-filter="subs">Needs Subs <span class="cnt" id="c-subs">0</span></button>
+        <button class="fbtn" data-filter="inspection">Needs Inspection <span class="cnt" id="c-inspection">0</span></button>
+        <button class="fbtn" data-filter="registered">Not Registered <span class="cnt" id="c-registered">0</span></button>
         <button class="fbtn" data-filter="payment">Unpaid <span class="cnt" id="c-payment">0</span></button>
       </div>
     </div>
@@ -268,6 +442,7 @@
             <th class="sortable w-sold" data-key="price">Sold <span class="arrow"></span></th>
             <th class="st">TLS</th>
             <th class="st">Permit</th>
+            <th class="st">Subs</th>
             <th class="st">Rebate</th>
             <th class="st">Inspection</th>
             <th class="st">Equip in ST <span class="auto-tag">AUTO</span></th>
@@ -284,18 +459,82 @@
     <div class="empty" id="empty">Nothing matches. Toggle off / clear the filter to see everything.</div>
   </div>
 
-  <div class="legend">
-    <span class="item"><span class="pill pend"><span class="dot"></span>Pending</span> outstanding</span>
-    <span class="item"><span class="pill done"><span class="dot"></span>Done</span> handled</span>
-    <span class="item"><span class="pill na">N/A</span> never needed</span>
-    <span class="item"><span class="auto-tag" style="padding:1px 5px">AUTO</span> fills itself from ServiceTitan</span>
-    <span class="item"><span class="job" style="min-width:0"><span class="flag">OPEN 9d · 0 STEPS</span></span> nothing checked yet</span>
+  <div class="booking">
+    <div class="booking-head">
+      <h2>Install Schedule · Next 15 Weekdays</h2>
+      <span class="booking-hint">Booked days in red, open weekdays outlined. First open (green) is the next available install. Eli is off Mondays.</span>
+    </div>
+    <div class="booking-scroll"><div id="booking-lanes"></div></div>
   </div>
+  </div><!-- /#tab-board -->
 
-  <p class="note">
-    Tap a pill to cycle it, tick a box, type a note. In this demo edits stay on this page and reset on reload; the real board saves for the whole crew, from any phone.
-    <b>WIP</b> = active, uncollected dollars. Schedule, price and crew come from ServiceTitan, so change those there.
-  </p>
+  <div id="tab-sales" class="tabpanel" role="tabpanel" hidden>
+    <div class="surface">
+      <div class="sales-head">
+        <h1 class="display">Sales</h1>
+        <span class="sales-stamp" id="sales-stamp"></span>
+      </div>
+      <div class="summary">
+        <div class="kpi accent"><span class="n" id="s-mtd">$0</span><span class="l">MTD revenue</span></div>
+        <div class="kpi"><span class="n" id="s-r7">$0</span><span class="l">Rolling 7 days <span class="delta" id="s-r7d"></span></span></div>
+        <div class="kpi accent"><span class="n" id="s-wip">$0</span><span class="l">WIP value</span></div>
+        <div class="kpi"><span class="n" id="s-close">0%</span><span class="l">30-day close rate</span></div>
+      </div>
+      <div class="sales-body">
+        <div class="chartcard left">
+          <div class="cardhead"><h2>Revenue · last 30 days</h2><span class="cardsub" id="s-rev-sub"></span></div>
+          <div class="spark" id="s-spark"></div>
+        </div>
+        <div class="chartcard">
+          <div class="cardhead"><h2>Estimates · last 30 days</h2><span class="cardsub" id="s-funnel-sub"></span></div>
+          <div id="s-funnel"></div>
+          <div class="pipeline" id="s-pipeline"></div>
+        </div>
+      </div>
+      <div class="advisor-wrap">
+        <div class="cardhead"><h2>By advisor</h2></div>
+        <div class="rview" id="s-people"></div>
+      </div>
+    </div>
+  </div><!-- /#tab-sales -->
+
+  <div id="tab-registration" class="tabpanel" role="tabpanel" hidden>
+    <div class="surface">
+      <div class="error" id="reg-error"></div>
+      <div class="sales-head">
+        <h1 class="display">Registration</h1>
+        <span class="sales-stamp" id="reg-stamp"></span>
+      </div>
+      <div class="reg-toolbar">
+        <span class="count" id="reg-count"></span>
+        <button class="fbtn regf" data-regf="needs" aria-pressed="true">Needs Action <span class="cnt" id="rc-needs">0</span></button>
+        <button class="fbtn regf" data-regf="registered">Registered <span class="cnt" id="rc-registered">0</span></button>
+        <button class="fbtn regf" data-regf="all">All</button>
+        <details class="statusdd" id="reg-statusdd">
+          <summary class="fbtn" id="reg-status-summary">Status</summary>
+          <div class="dd-menu" id="reg-status-menu"></div>
+        </details>
+        <label class="toggle">
+          <input type="checkbox" id="showReg">
+          <span class="sw"></span>
+          Show registered
+        </label>
+      </div>
+      <div class="scroll">
+        <table id="reg-tbl">
+          <thead><tr>
+            <th>Customer</th><th>Brand</th><th>Model</th><th>Serial</th>
+            <th class="w-sched">Installed</th><th>Status</th><th>Deadline</th>
+            <th>Group tag</th><th>Paired serial</th><th>Actions</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="reg-empty">Nothing matches this filter.</div>
+    </div>
+  </div><!-- /#tab-registration -->
+
+  <div class="foot">Install White Board · <span id="ver">v2026-07-17.5</span></div>
 </div>
 
 <script>
@@ -336,13 +575,466 @@
       { rebate: "na", registered: "na" }),
   ] };
 
-  const CLS = { pending: "pend", done: "done", na: "na", prepared: "auto", scheduled: "auto" };
-  const LABEL = { pending: "Pending", done: "Done", na: "N/A", prepared: "Prepared", scheduled: "Scheduled" };
+  // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
+  const DEMO_SALES = {
+ "generatedAt": "2026-07-18T02:23:36.278Z",
+ "revenue": {
+  "daily": [
+   {
+    "date": "2026-06-17",
+    "value": 40945
+   },
+   {
+    "date": "2026-06-18",
+    "value": 35218
+   },
+   {
+    "date": "2026-06-19",
+    "value": 29003
+   },
+   {
+    "date": "2026-06-20",
+    "value": 9000
+   },
+   {
+    "date": "2026-06-21",
+    "value": 0
+   },
+   {
+    "date": "2026-06-22",
+    "value": 35377
+   },
+   {
+    "date": "2026-06-23",
+    "value": 26004
+   },
+   {
+    "date": "2026-06-24",
+    "value": 52917
+   },
+   {
+    "date": "2026-06-25",
+    "value": 39592
+   },
+   {
+    "date": "2026-06-26",
+    "value": 35828
+   },
+   {
+    "date": "2026-06-27",
+    "value": 0
+   },
+   {
+    "date": "2026-06-28",
+    "value": 0
+   },
+   {
+    "date": "2026-06-29",
+    "value": 31135
+   },
+   {
+    "date": "2026-06-30",
+    "value": 76216
+   },
+   {
+    "date": "2026-07-01",
+    "value": 37842
+   },
+   {
+    "date": "2026-07-02",
+    "value": 61438
+   },
+   {
+    "date": "2026-07-03",
+    "value": 36691
+   },
+   {
+    "date": "2026-07-04",
+    "value": 0
+   },
+   {
+    "date": "2026-07-05",
+    "value": 0
+   },
+   {
+    "date": "2026-07-06",
+    "value": 31815
+   },
+   {
+    "date": "2026-07-07",
+    "value": 27367
+   },
+   {
+    "date": "2026-07-08",
+    "value": 62630
+   },
+   {
+    "date": "2026-07-09",
+    "value": 39111
+   },
+   {
+    "date": "2026-07-10",
+    "value": 37100
+   },
+   {
+    "date": "2026-07-11",
+    "value": 8000
+   },
+   {
+    "date": "2026-07-12",
+    "value": 0
+   },
+   {
+    "date": "2026-07-13",
+    "value": 72213
+   },
+   {
+    "date": "2026-07-14",
+    "value": 28550
+   },
+   {
+    "date": "2026-07-15",
+    "value": 35951
+   },
+   {
+    "date": "2026-07-16",
+    "value": 30926
+   }
+  ],
+  "rev7": 212740,
+  "mtd": 509634,
+  "priorMonthTotal": 905976,
+  "rolling7": 212740,
+  "prev7": 197614
+ },
+ "estimates": {
+  "sold": 82,
+  "dismissed": 23,
+  "open": 101,
+  "total": 206,
+  "closeRate": 0.780952380952381,
+  "todaySold": 5,
+  "todayTotal": 11,
+  "unsoldPipeline": 783965
+ },
+ "wip": {
+  "count": 10,
+  "value": 162000,
+  "count30dAgo": 11,
+  "value30dAgo": 162000
+ },
+ "advisors": [
+  {
+   "name": "Sam",
+   "soldCount": 12,
+   "soldValue": 55012,
+   "installSoldCount": 3,
+   "installSoldValue": 42615,
+   "openCount": 48,
+   "openValue": 256447,
+   "oldestOpen": "2026-05-18"
+  },
+  {
+   "name": "Victor",
+   "soldCount": 4,
+   "soldValue": 45337,
+   "installSoldCount": 2,
+   "installSoldValue": 41732,
+   "openCount": 29,
+   "openValue": 90798,
+   "oldestOpen": "2026-05-20"
+  },
+  {
+   "name": "Jenna",
+   "soldCount": 7,
+   "soldValue": 22975,
+   "installSoldCount": 1,
+   "installSoldValue": 12362,
+   "openCount": 56,
+   "openValue": 241731,
+   "oldestOpen": "2026-05-19"
+  },
+  {
+   "name": "Marcus",
+   "soldCount": 4,
+   "soldValue": 10779,
+   "installSoldCount": 1,
+   "installSoldValue": 6098,
+   "openCount": 19,
+   "openValue": 101629,
+   "oldestOpen": "2026-05-25"
+  },
+  {
+   "name": "Dana",
+   "soldCount": 0,
+   "soldValue": 0,
+   "installSoldCount": 0,
+   "installSoldValue": 0,
+   "openCount": 28,
+   "openValue": 131185,
+   "oldestOpen": "2026-05-19"
+  }
+ ],
+ "salesRole": {
+  "reportDate": "2026-07-16",
+  "advisors": [
+   {
+    "name": "Sam Okafor",
+    "soldValue": 55012,
+    "sold": 12,
+    "soldValuePrev": 35227,
+    "salesRun": 0,
+    "cohort": {
+     "sold": 31,
+     "dismissed": 7,
+     "pending": 30,
+     "missed": 1
+    },
+    "openValue": 256447,
+    "openN": 48,
+    "openOldest": "2026-05-18",
+    "soldWk": {
+     "2026-04-20": 19727,
+     "2026-04-27": 46281,
+     "2026-05-04": 4975,
+     "2026-05-11": 39368,
+     "2026-05-18": 64637,
+     "2026-05-25": 20554,
+     "2026-06-01": 29862,
+     "2026-06-08": 23756,
+     "2026-06-15": 57514,
+     "2026-06-22": 21420,
+     "2026-06-29": 41260,
+     "2026-07-06": 32915,
+     "2026-07-13": 46035
+    },
+    "opps": [
+     {
+      "customer": "Ulvestad, Nils",
+      "value": 21193,
+      "created": "2026-06-05",
+      "link": null
+     },
+     {
+      "customer": "Rustad, Wade",
+      "value": 19950,
+      "created": "2026-06-30",
+      "link": null
+     },
+     {
+      "customer": "Marek, Britta & Cliff",
+      "value": 18619,
+      "created": "2026-06-13",
+      "link": null
+     }
+    ]
+   },
+   {
+    "name": "Jenna Marsh",
+    "soldValue": 22975,
+    "sold": 7,
+    "soldValuePrev": 22339,
+    "salesRun": 0,
+    "cohort": {
+     "sold": 24,
+     "dismissed": 6,
+     "pending": 30,
+     "missed": 2
+    },
+    "openValue": 241731,
+    "openN": 56,
+    "openOldest": "2026-05-19",
+    "soldWk": {
+     "2026-04-27": 9795,
+     "2026-04-20": 4539,
+     "2026-05-04": 14079,
+     "2026-05-11": 20276,
+     "2026-05-18": 579,
+     "2026-05-25": 22087,
+     "2026-06-01": 18423,
+     "2026-06-08": 16512,
+     "2026-06-15": 23810,
+     "2026-06-29": 27382,
+     "2026-06-22": 28495,
+     "2026-07-06": 22398,
+     "2026-07-13": 7774
+    },
+    "opps": [
+     {
+      "customer": "Ivarson, Signe",
+      "value": 20201,
+      "created": "2026-07-12",
+      "link": null
+     },
+     {
+      "customer": "Ivarson, Elin",
+      "value": 20089,
+      "created": "2026-06-25",
+      "link": null
+     },
+     {
+      "customer": "Lindstrand, Nils",
+      "value": 15596,
+      "created": "2026-05-30",
+      "link": null
+     }
+    ]
+   },
+   {
+    "name": "Victor Reyes",
+    "soldValue": 45337,
+    "sold": 4,
+    "soldValuePrev": 33440,
+    "salesRun": 0,
+    "cohort": {
+     "sold": 14,
+     "dismissed": 5,
+     "pending": 16,
+     "missed": 2
+    },
+    "openValue": 90798,
+    "openN": 29,
+    "openOldest": "2026-05-20",
+    "soldWk": {
+     "2026-04-20": 6693,
+     "2026-04-27": 31215,
+     "2026-05-04": 24589,
+     "2026-05-11": 47531,
+     "2026-05-18": 12059,
+     "2026-05-25": 21943,
+     "2026-06-01": 2613,
+     "2026-06-08": 12304,
+     "2026-06-15": 4349,
+     "2026-06-22": 45778,
+     "2026-06-29": 57053,
+     "2026-07-13": 23204,
+     "2026-07-06": 33727
+    },
+    "opps": [
+     {
+      "customer": "Eikland, Wade & Freya",
+      "value": 19325,
+      "created": "2026-06-23",
+      "link": null
+     },
+     {
+      "customer": "Callahan, Arvid & Vera",
+      "value": 14756,
+      "created": "2026-06-30",
+      "link": null
+     },
+     {
+      "customer": "Eikland, Liv",
+      "value": 8656,
+      "created": "2026-06-29",
+      "link": null
+     }
+    ]
+   },
+   {
+    "name": "Marcus Vellen",
+    "soldValue": 10779,
+    "sold": 4,
+    "soldValuePrev": 3807,
+    "salesRun": 7,
+    "cohort": null,
+    "openValue": 101629,
+    "openN": 19,
+    "openOldest": "2026-05-25",
+    "soldWk": {
+     "2026-04-27": 7058,
+     "2026-04-20": 302,
+     "2026-05-04": 827,
+     "2026-05-11": 25332,
+     "2026-05-18": 11688,
+     "2026-05-25": 4762,
+     "2026-06-01": 6242,
+     "2026-06-08": 7216,
+     "2026-06-29": 9238,
+     "2026-06-22": 744,
+     "2026-07-06": 1801,
+     "2026-07-13": 10779
+    },
+    "opps": [
+     {
+      "customer": "Tarvainen, Marta",
+      "value": 21067,
+      "created": "2026-07-09",
+      "link": null
+     },
+     {
+      "customer": "Holmquist, June",
+      "value": 18939,
+      "created": "2026-07-16",
+      "link": null
+     },
+     {
+      "customer": "Jerpbak, June & Marta",
+      "value": 18931,
+      "created": "2026-07-13",
+      "link": null
+     }
+    ]
+   }
+  ],
+  "team": {
+   "unsoldValue": 783965,
+   "unsoldGroups": 172,
+   "todayPresets": 7,
+   "todayTurnovers": 2
+  }
+ }
+};
+
+  // ---- registration tab: synthetic equipment. installDate uses D() so warranty
+  // deadlines (amber <=14d, red <=7d, overdue) stay plausible whenever this is baked.
+  // Statuses cover every pipeline state incl Ignore (hidden by default) and INV-*
+  // placeholders (no serial, sometimes no brand/model). Gree units carry grouping
+  // tags + paired serials; Gree/Bosch have no warranty window so show no badge. ----
+  const DEMO_EQUIPMENT = {
+    deadlines: { maytag_rheem: 60, mitsubishi: 90, mitsubishi_cutoff: "03-31", fujitsu: 60 },
+    units: [
+      { customer: "Havermark, Petra", brand: "Fujitsu", model: "AOU12RLFW", serial: "FUJ-8823-C", installDate: D(-55), status: "Needs registration", stEquipmentId: "EQ-102", groupTag: "", pairedSerial: "" },
+      { customer: "Brandvold, Roald", brand: "Maytag", model: "PSA4BF", serial: "MAY-3391-B", installDate: D(-48), status: "Needs registration", stEquipmentId: "EQ-103", groupTag: "", pairedSerial: "" },
+      { customer: "Sorvaag, Ingrid", brand: "Rheem", model: "RA1436AJ1NB", serial: "RHE-2210-D", installDate: D(-65), status: "Needs registration", stEquipmentId: "EQ-104", groupTag: "", pairedSerial: "" },
+      { customer: "Eikland, Britta", brand: "Mitsubishi", model: "MSZ-GL15NA", serial: "MIT-9902-J", installDate: D(-88), status: "Needs registration", stEquipmentId: "EQ-110", groupTag: "", pairedSerial: "" },
+      { customer: "Ruonala, Greta", brand: "", model: "", serial: "", installDate: D(0), status: "Needs registration", stEquipmentId: "INV-3315", groupTag: "", pairedSerial: "" },
+      { customer: "Nordling, Elin & Gus", brand: "Mitsubishi", model: "MSZ-FS12NA", serial: "MIT-4471-A", installDate: D(-3), status: "Queued for Registration", stEquipmentId: "EQ-101", groupTag: "", pairedSerial: "" },
+      { customer: "Kolstad, Mabel", brand: "Gree", model: "GWH18AC", serial: "GRE-5541-K", installDate: D(-4), status: "Queued for Registration", stEquipmentId: "EQ-111", groupTag: "Kolstad main", pairedSerial: "GRE-5542-K" },
+      { customer: "Holmquist, Otto & Signe", brand: "Gree", model: "GWH12QC", serial: "GRE-1180-G", installDate: D(-2), status: "Queued for ST", stEquipmentId: "EQ-107", groupTag: "Holmquist upstairs", pairedSerial: "" },
+      { customer: "Tarvainen, Freya", brand: "Mitsubishi", model: "MUZ-GL18NA", serial: "MIT-7719-E", installDate: D(-20), status: "Registration Verified", stEquipmentId: "EQ-105", groupTag: "", pairedSerial: "" },
+      { customer: "Lindstrand, Astrid", brand: "Bosch", model: "BOVA-36", serial: "BOS-4402-H", installDate: D(-5), status: "Registration Verified by Human", stEquipmentId: "EQ-108", groupTag: "", pairedSerial: "" },
+      { customer: "Kettunen, Nils", brand: "Maytag", model: "M1200", serial: "MAY-6653-F", installDate: D(-30), status: "Registered", stEquipmentId: "EQ-106", groupTag: "", pairedSerial: "" },
+      { customer: "Holmquist, Otto & Signe", brand: "Gree", model: "GWH09QB", serial: "", installDate: D(-1), status: "Ignore", stEquipmentId: "INV-2207", groupTag: "", pairedSerial: "" },
+    ],
+  };
+
+  // ---- change-history popover: a couple of synthetic rows, for polish ----
+  const DEMO_HISTORY = {
+    "1": [
+      { ts: D(-2) + "T14:32:00", source: "web", column: "permit", old: "pending", new: "received" },
+      { ts: D(-1) + "T09:15:00", source: "tls-auto", column: "tls", old: "pending", new: "done" },
+    ],
+    "4": [
+      { ts: D(-3) + "T11:02:00", source: "sync", column: "equip", old: "pending", new: "done" },
+      { ts: D(-2) + "T16:48:00", source: "web", column: "payment", old: "pending", new: "done" },
+    ],
+  };
+
   const TYPE = { full_system: "Full System", mini_split: "Mini Split", plumbing: "Plumbing", water_heater: "Water Heater", ac: "AC", furnace: "Furnace", boiler: "Boiler" };
-  const CYCLE = { pending: "done", done: "na", na: "pending" };
-  // tick boxes (two states); permit / rebate / inspection stay 3-state pills
+  // Per-column toggle sequences. Tap a pill to advance to the next value, wrapping
+  // back to the first. The LAST value in each list renders green (terminal/complete);
+  // "pending" is amber, "na" is a grey ghost, everything between is teal (in-progress).
+  const SEQ = {
+    permit:     ["pending", "na", "yes", "submitted", "received"],
+    subs:       ["pending", "na", "yes", "scheduled"],
+    rebate:     ["pending", "na", "yes", "submitted"],
+    inspection: ["pending", "na", "yes", "scheduled", "done"],
+  };
+  const STEPLABEL = { pending: "Pending", na: "N/A", yes: "Yes", submitted: "Submitted",
+    received: "Received", scheduled: "Scheduled", done: "Done" };
+  // tick boxes (two states); the SEQ columns above are multi-state pills
   const CHECKBOX = new Set(["tls", "equip", "registered", "payment", "thankyou"]);
-  const COLNAME = { permit: "Permit", rebate: "Rebate", inspection: "Inspection" };
   const CB_TITLE = {
     tls: "Truck load sheet",
     equip: "Equipment in ST · auto from ServiceTitan, click to set by hand",
@@ -351,18 +1043,36 @@
     thankyou: "Thank-you note sent",
   };
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const CLOCK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg>';
+  // human labels for the history popover: column names + the values a cell can hold
+  const COLLABEL = { tls: "TLS", permit: "Permit", subs: "Subs", rebate: "Rebate", inspection: "Inspection",
+    equip: "Equip in ST", registered: "Registered", payment: "Payment", thankyou: "Thank You", notes: "Notes", status: "Done" };
 
   let board = null;
   let sort = JSON.parse(localStorage.getItem("wbSort") || "null"); // {key, dir} or null = board order
   let filter = "all";
 
-  const steps = (r) => ["tls", "permit", "rebate", "inspection", "equip", "registered", "payment", "thankyou"].filter((k) => r[k] !== null && r[k] !== undefined);
+  const steps = (r) => ["tls", "permit", "subs", "rebate", "inspection", "equip", "registered", "payment", "thankyou"].filter((k) => r[k] !== null && r[k] !== undefined);
   const closed = (v) => v === "done" || v === "na";
   const progress = (r) => steps(r).filter((k) => closed(r[k])).length;
   const age = (r) => (r.sched ? Math.floor((Date.now() - new Date(r.sched + "T12:00:00")) / 864e5) : null);
   const stalled = (r) => !r.done && progress(r) === 0 && age(r) >= 5;
   const needs = (r, k) => !r.done && r[k] === "pending";
-  const fmtDate = (s) => (s ? new Date(s + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "-");
+  // ONE shared date parser: accepts ISO YYYY-MM-DD AND sheet-faithful US M/D/YYYY (the
+  // DB deliberately keeps the sheet's own strings so the mirror + db-sheet-diff stay
+  // faithful; only the page normalizes for display and deadline math). Returns local
+  // noon so a date never slips a day across the timezone. Null on anything unparseable.
+  function parseDate(s) {
+    if (!s) return null;
+    const t = String(s).trim();
+    let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3], 12);
+    m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return new Date(+m[3], +m[1] - 1, +m[2], 12);
+    const d = new Date(t);
+    return isNaN(d) ? null : d;
+  }
+  const fmtDate = (s) => { const d = parseDate(s); return d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "-"; };
   const fmtMoney = (n) => "$" + (n || 0).toLocaleString("en-US");
   const $ = (id) => document.getElementById(id);
   const tbody = document.querySelector("#tbl tbody");
@@ -375,12 +1085,16 @@
       if (v === "na") return `<span class="pill na">N/A</span>`;
       return `<input type="checkbox" class="donebox" data-row="${esc(r.rowId)}" data-col="${col}" ${v === "done" ? "checked" : ""} title="${CB_TITLE[col]}">`;
     }
-    // permit / rebate / inspection cycle Pending -> Done -> N/A -> Pending. N/A MUST
-    // stay clickable or the cell is stranded there forever (bit us 2026-07-14).
-    const cls = CLS[v] || "pend";
+    // multi-state pill: tap cycles through the column's own SEQ, wrapping at the end.
+    // N/A MUST stay clickable or the cell is stranded there forever (bit us 2026-07-14).
+    const seq = SEQ[col] || ["pending", "na", "done"];
+    const val = seq.includes(v) ? v : "pending"; // stray value -> render pending, still clickable
+    const last = seq[seq.length - 1];
+    const cls = val === "pending" ? "pend" : val === "na" ? "na" : val === last ? "done" : "auto";
     const click = ` click" role="button" tabindex="0" data-row="${esc(r.rowId)}" data-col="${col}`;
-    const dot = v === "na" ? "" : `<span class="dot"></span>`;
-    return `<span class="pill ${cls}${click}" title="Click to cycle: Pending, Done, N/A">${dot}${LABEL[v] || esc(v)}</span>`;
+    const dot = val === "na" ? "" : `<span class="dot"></span>`;
+    const tip = "Click to cycle: " + seq.map((s) => STEPLABEL[s]).join(", ");
+    return `<span class="pill ${cls}${click}" title="${tip}">${dot}${STEPLABEL[val] || esc(val)}</span>`;
   }
   function notes(r) {
     return `<input type="text" class="notebox" data-row="${esc(r.rowId)}" data-col="notes" maxlength="500"
@@ -407,7 +1121,7 @@
       const tr = document.createElement("tr");
       tr.className = (r.done ? "complete " : "") + (stalled(r) ? "stalled" : "");
       tr.dataset.done = r.done ? "1" : "0";
-      for (const k of ["permit", "inspection", "registered", "payment"]) tr.dataset[k] = needs(r, k) ? "1" : "0";
+      for (const k of ["permit", "subs", "inspection", "registered", "payment"]) tr.dataset[k] = needs(r, k) ? "1" : "0";
       const nameHtml = r.stUrl ? `<a href="${esc(r.stUrl)}" target="_blank">${esc(r.name)}</a>` : esc(r.name);
       const sub = [
         r.mapsUrl ? `<a href="${esc(r.mapsUrl)}" target="_blank">${esc(r.city)}</a>` : esc(r.city),
@@ -415,7 +1129,7 @@
       ].filter(Boolean).join(" · ");
       const paid = r.payment === "done";
       tr.innerHTML = `
-        <td class="job"><div class="cust">${nameHtml}</div><div class="sub">${sub}</div>${stalled(r) ? `<span class="flag">OPEN ${age(r)}d · 0 STEPS</span>` : ""}</td>
+        <td class="job"><div class="cust">${nameHtml}<button class="histbtn" data-hist="${esc(r.rowId)}" title="Change history" aria-label="Change history">${CLOCK}</button></div><div class="sub">${sub}</div>${stalled(r) ? `<span class="flag">OPEN ${age(r)}d · 0 STEPS</span>` : ""}</td>
         <td class="meta">${fmtDate(r.sched)}</td>
         <td class="meta">${TYPE[r.type] || esc(r.type) || "-"}</td>
         <td class="meta">${esc(r.advisor) || "-"}</td>
@@ -423,6 +1137,7 @@
         <td class="meta price${paid ? " paid" : ""}" title="${paid ? "collected, out of WIP" : ""}">${fmtMoney(r.price)}</td>
         <td class="st">${pill(r, "tls")}</td>
         <td class="st">${pill(r, "permit")}</td>
+        <td class="st">${pill(r, "subs")}</td>
         <td class="st">${pill(r, "rebate")}</td>
         <td class="st">${pill(r, "inspection")}</td>
         <td class="st">${pill(r, "equip")}</td>
@@ -442,13 +1157,76 @@
     $("k-wip").textContent = fmtMoney(wip);
     $("wip-tab").textContent = `${fmtMoney(wip)} WIP`;
     $("k-stalled").textContent = rows.filter(stalled).length;
-    for (const k of ["permit", "inspection", "registered", "payment"])
+    for (const k of ["permit", "subs", "inspection", "registered", "payment"])
       $("c-" + k).textContent = rows.filter((r) => needs(r, k)).length;
     document.querySelectorAll("th.sortable").forEach((th) => {
       th.querySelector(".arrow").textContent = sort && sort.key === th.dataset.key ? (sort.dir === "asc" ? "▲" : "▼") : "";
     });
     applyFilter();
     applyWidths();
+    renderBooking();
+  }
+
+  // ---- install booking board: per lead installer, next 15 weekdays ----
+  // Answers "who's free next" from the same rows the table shows. Weekdays only,
+  // starting tomorrow (today is dropped). A day is booked for a lead when an active
+  // install is scheduled that day with the lead on the crew; the first OPEN weekday
+  // is that lead's next available install. OFF_DAY marks a standing day off per lead.
+  const LEADS = ["Eli", "Owen", "Miguel"];
+  const OFF_DAY = { Eli: 1 }; // Eli takes Mondays (0 Sun .. 6 Sat); others have none
+  const BOOK_DAYS = 15; // weekdays shown
+  const localYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const crew = (r) => (r.installers || "").split(",").map((s) => s.trim());
+
+  function renderBooking() {
+    const host = $("booking-lanes");
+    if (!host || !board) return;
+    const start = new Date(); start.setHours(12, 0, 0, 0);
+    const todayKey = localYMD(start);
+    const d = new Date(start); d.setDate(d.getDate() - 1); // first +1 lands on today (today included)
+    const days = [];
+    while (days.length < BOOK_DAYS) {
+      d.setDate(d.getDate() + 1);
+      const dow = d.getDay();
+      if (dow === 0 || dow === 6) continue; // weekdays only
+      days.push({ key: localYMD(d), dowNum: dow, today: localYMD(d) === todayKey,
+        dow: d.toLocaleDateString("en-US", { weekday: "narrow" }),
+        dowFull: d.toLocaleDateString("en-US", { weekday: "short" }),
+        dom: d.getDate(), md: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) });
+    }
+    // group into Mon-Fri blocks (a new block starts each Monday); flex-weight each
+    // block by its day count so a 1-day partial week keeps day cells the same width
+    const weeks = [];
+    for (const day of days) { if (day.dowNum === 1 || !weeks.length) weeks.push([]); weeks[weeks.length - 1].push(day); }
+    const active = (board.rows || []).filter((r) => !r.done && r.sched);
+    host.innerHTML = LEADS.map((lead) => {
+      const off = OFF_DAY[lead] ?? -1;
+      const byDay = {};
+      for (const r of active) if (crew(r).includes(lead)) (byDay[r.sched] ||= []).push(r);
+      let nextKey = null;
+      for (const day of days) if (!byDay[day.key] && day.dowNum !== off && !nextKey) nextKey = day.key;
+      const nextDay = days.find((x) => x.key === nextKey);
+      const nextLine = nextKey
+        ? `next open: <b>${nextDay.dowFull} ${nextDay.md}</b>`
+        : `<span class="full">booked out <b>3 weeks</b></span>`;
+      const cellFor = (day) => {
+        const jobs = byDay[day.key] || [];
+        const booked = jobs.length > 0;
+        const blocked = !booked && day.dowNum === off;
+        const isNext = day.key === nextKey;
+        const cls = ["day", booked ? "booked" : blocked ? "blocked" : "open", isNext ? "next" : "", day.today ? "today" : ""].filter(Boolean).join(" ");
+        const name = booked ? jobs.map((r) => (r.name || "").split(",")[0].trim()).join(" · ") : "";
+        const city = booked ? jobs.map((r) => r.city).filter(Boolean).join(" · ") : "";
+        const tip = booked
+          ? `${day.dowFull} ${day.md}${day.today ? " (today)" : ""}: ${jobs.map((r) => `${r.name}${r.city ? " - " + r.city : ""} (${TYPE[r.type] || r.type || ""})`).join("; ")}`
+          : blocked ? `${day.dowFull} ${day.md}${day.today ? " (today)" : ""}: ${lead} off`
+          : `${day.dowFull} ${day.md}${day.today ? " (today)" : ""}: ${isNext ? "open - next available" : "open"}`;
+        const tag = isNext ? "open" : blocked ? "off" : day.today ? "today" : "";
+        return `<div class="${cls}" title="${esc(tip)}"><span class="dow">${day.dow}</span><span class="dom">${day.dom}</span>${name ? `<span class="who2">${esc(name)}</span>` : ""}${city ? `<span class="city2">${esc(city)}</span>` : ""}${tag ? `<span class="tag">${tag}</span>` : ""}</div>`;
+      };
+      const daysHtml = weeks.map((wk) => `<div class="week" style="flex:${wk.length} 1 0">${wk.map(cellFor).join("")}</div>`).join("");
+      return `<div class="lane"><div class="lane-name"><span class="who">${lead}</span><span class="next ${nextKey ? "" : "full"}">${nextLine}</span></div><div class="days">${daysHtml}</div></div>`;
+    }).join("");
   }
 
   function applyFilter() {
@@ -475,21 +1253,22 @@
     setTimeout(() => { $("error").style.display = "none"; }, 8000);
   }
   tbody.addEventListener("click", (ev) => {
+    const hb = ev.target.closest(".histbtn");
+    if (hb) { openHistory(hb); return; }
     const p = ev.target.closest(".pill.click");
     if (!p) return;
     const row = board.rows.find((r) => r.rowId === p.dataset.row);
     if (!row) return;
-    const col = p.dataset.col; // only 3-state pills carry .click
-    const next = CYCLE[row[col]] || "done"; // Prepared/Scheduled advance to Done
-    // N/A says "this job never needs a permit/rebate/inspection" and drops it out of
-    // the outstanding counts, so make it deliberate. Done and Pending flip freely.
-    if (next === "na" && !confirm(`Mark ${COLNAME[col]} as N/A for ${row.name}?\n\nThat means this job never needs one. It stops showing as outstanding.`)) return;
+    const col = p.dataset.col; // only pills carry .click
+    const seq = SEQ[col] || ["pending", "na", "done"];
+    const cur = seq.indexOf(row[col]); // -1 (unknown) -> +1 lands on pending
+    const next = seq[(cur + 1) % seq.length];
     row[col] = next; render(); // optimistic; fail() reloads truth
     flip(row.rowId, col, next).catch(fail);
   });
   tbody.addEventListener("change", (ev) => {
     const note = ev.target.closest("input.notebox");
-    if (note) { // fires on blur / Enter, no render(), that would blow away the caret
+    if (note) { // fires on blur / Enter - no render(), that would blow away the caret
       const row = board.rows.find((r) => r.rowId === note.dataset.row);
       if (!row || row.notes === note.value) return;
       row.notes = note.value;
@@ -523,8 +1302,8 @@
   // ---- column resize (drag the edge; double-click resets) ----
   // key bumped with every column-order change: widths are stored by column INDEX,
   // so an old map would smear across the wrong columns
-  let widths = JSON.parse(localStorage.getItem("wbWidths4") || "{}");
-  const ths = [...document.querySelectorAll("thead th")];
+  let widths = JSON.parse(localStorage.getItem("wbWidths5") || "{}");
+  const ths = [...document.querySelectorAll("#tbl thead th")]; // board table only; sales table is untouched
   function applyWidths() { ths.forEach((th, i) => { th.style.width = widths[i] ? widths[i] + "px" : ""; }); }
   ths.forEach((th, i) => {
     const grip = document.createElement("span");
@@ -536,12 +1315,12 @@
       const move = (m) => { widths[i] = Math.max(46, startW + m.pageX - startX); applyWidths(); };
       const up = () => {
         document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up);
-        localStorage.setItem("wbWidths4", JSON.stringify(widths));
+        localStorage.setItem("wbWidths5", JSON.stringify(widths));
       };
       document.addEventListener("mousemove", move); document.addEventListener("mouseup", up);
     });
     grip.addEventListener("dblclick", () => { delete widths[i]; applyWidths();
-      localStorage.setItem("wbWidths4", JSON.stringify(widths)); });
+      localStorage.setItem("wbWidths5", JSON.stringify(widths)); });
   });
 
   // ---- theme: auto -> dark -> light ----
@@ -579,5 +1358,429 @@
     applyFilter();
   });
 
-  load();
+  // ---- change history popover ----
+  let histpop = null;
+  function closePop() { if (histpop) histpop.hidden = true; }
+  const histLabel = (col, v) => {
+    if (v == null || v === "") return "-";
+    if (col === "notes") return esc('"' + String(v).slice(0, 40) + (String(v).length > 40 ? "…" : "") + '"');
+    if (col === "status") return v === "done" ? "Done" : "Active";
+    return STEPLABEL[v] || esc(v);
+  };
+  const histTime = (ts) => new Date(ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  async function openHistory(btn) {
+    const rowId = btn.dataset.hist;
+    const row = board?.rows.find((r) => r.rowId === rowId);
+    if (!histpop) { histpop = document.createElement("div"); histpop.className = "histpop"; document.body.appendChild(histpop); }
+    const pop = histpop;
+    const head = `<h4>${esc(row?.name || "History")}</h4>`;
+    pop.hidden = false;
+    pop.innerHTML = head + `<div class="hempty">Loading…</div>`;
+    // position under the button, clamped into the viewport
+    const rect = btn.getBoundingClientRect();
+    const cw = document.documentElement.clientWidth;
+    let left = rect.left + window.scrollX;
+    if (left + 300 > window.scrollX + cw - 8) left = window.scrollX + cw - 308;
+    pop.style.left = Math.max(8, left) + "px";
+    pop.style.top = rect.bottom + window.scrollY + 6 + "px";
+    try {
+      const entries = DEMO_HISTORY[rowId] || []; // demo: inlined synthetic history
+      if (pop.hidden) return; // closed while loading
+      if (!entries.length) { pop.innerHTML = head + `<div class="hempty">No changes recorded yet.</div>`; return; }
+      pop.innerHTML = head + entries.slice().reverse().map((e) => `
+        <div class="hrow">
+          <div class="htop"><span class="htime">${esc(histTime(e.ts))}</span><span class="hsrc">${esc(e.source || "web")}</span></div>
+          <div class="hchange"><span class="col">${esc(COLLABEL[e.column] || e.column)}</span>: ${histLabel(e.column, e.old)} <span class="to">→ ${histLabel(e.column, e.new)}</span></div>
+        </div>`).join("");
+    } catch (e) {
+      if (!pop.hidden) pop.innerHTML = head + `<div class="hempty">Couldn't load history.</div>`;
+    }
+  }
+  document.addEventListener("click", (ev) => {
+    if (histpop && !histpop.hidden && !ev.target.closest(".histpop") && !ev.target.closest(".histbtn")) closePop();
+  });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closePop(); });
+
+  // ---- tabs (Board | Sales) ----
+  function selectTab(name) {
+    document.querySelectorAll(".tabbtn").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false"));
+    document.querySelectorAll(".tabpanel").forEach((p) => { p.hidden = p.id !== "tab-" + name; });
+    closePop();
+  }
+  document.querySelectorAll(".tabbtn").forEach((b) => b.addEventListener("click", () => selectTab(b.dataset.tab)));
+
+  // ---- sales tab ----
+  const fmtK = (n) => {
+    n = Number(n) || 0;
+    if (Math.abs(n) >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+    if (Math.abs(n) >= 1e3) return "$" + Math.round(n / 1e3) + "k";
+    return "$" + n;
+  };
+  const pct = (x) => (x == null || isNaN(x) ? "-" : Math.round(x * 100) + "%");
+  let salesData = null, salesReady = false;
+
+  async function loadSales() { // demo: inlined synthetic summary, no server
+    salesData = DEMO_SALES;
+    if (!salesReady) { salesReady = true; $("tabnav").hidden = false; $("tab-btn-sales").hidden = false; }
+    renderSales();
+  }
+
+  function renderSales() {
+    if (!salesData) return;
+    const d = salesData, rev = d.revenue || {}, est = d.estimates || {}, wip = d.wip || {};
+    const roll = rev.rolling7 ?? rev.rev7 ?? 0, prev = rev.prev7 ?? 0;
+    $("s-mtd").textContent = fmtK(rev.mtd); $("s-mtd").title = fmtMoney(rev.mtd);
+    $("s-r7").textContent = fmtK(roll); $("s-r7").title = fmtMoney(roll);
+    const deltaEl = $("s-r7d");
+    if (prev > 0) {
+      const chg = (roll - prev) / prev;
+      deltaEl.textContent = (chg >= 0 ? "▲ " : "▼ ") + Math.abs(Math.round(chg * 100)) + "% vs prev 7";
+      deltaEl.className = "delta " + (chg >= 0 ? "up" : "down");
+    } else { deltaEl.textContent = ""; deltaEl.className = "delta"; }
+    $("s-wip").textContent = fmtK(wip.value);
+    $("s-wip").title = fmtMoney(wip.value) + (wip.count != null ? ` · ${wip.count} jobs` : "");
+    const closeRate = est.closeRate != null ? est.closeRate : ((est.sold + est.dismissed) ? est.sold / (est.sold + est.dismissed) : null);
+    $("s-close").textContent = pct(closeRate);
+    if (d.generatedAt) {
+      const mins = Math.round((Date.now() - new Date(d.generatedAt)) / 60000);
+      $("sales-stamp").textContent = `as of ${new Date(d.generatedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` + (mins > 0 ? ` · ${mins}m ago` : "");
+    }
+    $("s-rev-sub").textContent = `MTD ${fmtK(rev.mtd)} · prior mo ${fmtK(rev.priorMonthTotal)}`;
+    renderSpark(rev.daily || []);
+    renderFunnel(est);
+    renderPeople(d);
+  }
+
+  function renderSpark(daily) {
+    const host = $("s-spark");
+    if (!daily.length) { host.innerHTML = `<div class="hempty">No revenue data.</div>`; return; }
+    const W = 680, H = 130, pl = 6, pr = 6, pt = 14, pb = 20;
+    const iw = W - pl - pr, ih = H - pt - pb, n = daily.length;
+    const max = Math.max(...daily.map((p) => p.value), 1);
+    const X = (i) => pl + (n < 2 ? iw / 2 : (i / (n - 1)) * iw);
+    const Y = (v) => pt + ih - (v / max) * ih;
+    const pts = daily.map((p, i) => [X(i), Y(p.value)]);
+    const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+    const area = `M${pts[0][0].toFixed(1)} ${(pt + ih).toFixed(1)} ` + pts.map((p) => `L${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ") + ` L${pts[n - 1][0].toFixed(1)} ${(pt + ih).toFixed(1)} Z`;
+    host.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily revenue for the last 30 days">
+        <line class="base" x1="${pl}" y1="${pt + ih}" x2="${W - pr}" y2="${pt + ih}"></line>
+        <path class="sarea" d="${area}"></path>
+        <path class="sline" d="${line}"></path>
+        <circle class="send" cx="${pts[n - 1][0].toFixed(1)}" cy="${pts[n - 1][1].toFixed(1)}" r="3"></circle>
+        <line class="cross" x1="0" y1="${pt}" x2="0" y2="${pt + ih}"></line>
+        <circle class="focus" r="4"></circle>
+        <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"></rect>
+      </svg>
+      <div class="sptip"></div>`;
+    const svg = host.querySelector("svg"), hit = host.querySelector("rect");
+    const cross = host.querySelector(".cross"), focus = host.querySelector(".focus"), tip = host.querySelector(".sptip");
+    const move = (evt) => {
+      const rect = svg.getBoundingClientRect();
+      const cx = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      let i = Math.round((((cx - rect.left) / rect.width) * W - pl) / iw * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      const p = pts[i];
+      cross.setAttribute("x1", p[0]); cross.setAttribute("x2", p[0]); cross.style.opacity = 1;
+      focus.setAttribute("cx", p[0]); focus.setAttribute("cy", p[1]); focus.style.opacity = 1;
+      tip.style.left = (p[0] / W) * rect.width + "px";
+      tip.style.top = (p[1] / H) * rect.height + "px";
+      tip.style.opacity = 1;
+      const dt = new Date(daily[i].date + "T12:00:00");
+      tip.textContent = `${dt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${fmtMoney(daily[i].value)}`;
+    };
+    const leave = () => { cross.style.opacity = 0; focus.style.opacity = 0; tip.style.opacity = 0; };
+    hit.addEventListener("mousemove", move);
+    hit.addEventListener("mouseleave", leave);
+    hit.addEventListener("touchmove", move, { passive: true });
+    hit.addEventListener("touchend", leave);
+  }
+
+  function renderFunnel(est) {
+    const sold = est.sold || 0, open = est.open || 0, dismissed = est.dismissed || 0;
+    const tot = sold + open + dismissed || 1;
+    const segs = [
+      { label: "Sold", n: sold, cls: "sold", sw: "var(--done)" },
+      { label: "Open", n: open, cls: "open", sw: "var(--gold)" },
+      { label: "Dismissed", n: dismissed, cls: "dismissed", sw: "var(--na)" },
+    ];
+    $("s-funnel").innerHTML = `
+      <div class="funnel">
+        ${segs.map((s) => `<div class="seg ${s.cls}" style="flex:${s.n} 1 0" title="${s.label}: ${s.n}">${s.n / tot > 0.08 ? s.n : ""}</div>`).join("")}
+      </div>
+      <div class="funnel-legend">
+        ${segs.map((s) => `<span class="k"><span class="sw" style="background:${s.sw}"></span>${s.label} <b>${s.n}</b></span>`).join("")}
+      </div>`;
+    const closeRate = est.closeRate != null ? est.closeRate : (sold + dismissed ? sold / (sold + dismissed) : null);
+    $("s-funnel-sub").textContent = `${est.total ?? tot} total · ${pct(closeRate)} close`;
+    const pipe = $("s-pipeline");
+    pipe.innerHTML = `<span class="pv">${fmtK(est.unsoldPipeline)}</span><span class="pl">Unsold pipeline</span>`;
+    pipe.title = fmtMoney(est.unsoldPipeline || 0);
+  }
+
+  // ---- per-advisor cards, ported from the owner dashboard's Sales role view ----
+  // Reads d.salesRole { reportDate, advisors[], team }. Renders defensively: if
+  // salesRole is absent (an older bake) it synthesizes a minimal one from the existing
+  // advisors[], and any missing per-advisor field (salesRun/cohort/soldWk/opps) hides
+  // just that stat. Opp age is reportDate - created (owner-page convention).
+  let rpReport = null;
+  const fmt$ = (n) => "$" + Math.round(n || 0).toLocaleString("en-US");
+  const fname = (n) => String(n || "").split(" ")[0];
+  const MD = (d) => (+d.slice(5, 7)) + "/" + (+d.slice(8, 10));
+  const pAge = (d) => { const dt = parseDate(d); if (!dt) return null; const ref = parseDate(rpReport) || new Date(); return Math.round((ref - dt) / 864e5); };
+  // delta chip: the arrow tells the truth (up = the number rose), the color follows what
+  // is good for the business (inv = up-is-bad). No prior value = no chip.
+  function delta(cur, prev, label, { inv = false, mini = false } = {}) {
+    if (cur == null || prev == null) return "";
+    if (!prev) { if (!cur) return ""; const u = cur > 0; return `<span class="delta ${u !== !!inv ? "up" : "down"}${mini ? " mini" : ""}">${u ? "▲" : "▼"} ${u ? "up" : "down"} from 0 ${esc(label)}</span>`; }
+    const dd = cur - prev, dir = dd > 0 ? 1 : dd < 0 ? -1 : 0;
+    const cls = !dir ? "flat" : (dir > 0) !== !!inv ? "up" : "down";
+    const mag = prev < 0 ? "" : cur >= 0 && Math.abs(dd) / prev >= 2 ? (cur / prev).toFixed(1) + "x " : Math.round(Math.abs(dd) / prev * 100) + "% ";
+    return `<span class="delta ${cls}${mini ? " mini" : ""}">${dir > 0 ? "▲" : dir < 0 ? "▼" : "•"} ${mag}${esc(label)}</span>`;
+  }
+  const nameA = (o) => o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener" style="color:var(--auto);text-decoration:none;font-weight:600">${esc(o.customer)}</a>` : `<span style="color:var(--ink);font-weight:600">${esc(o.customer)}</span>`;
+  function barChart(entries, W = 460, H = 120, color = "var(--teal)") {
+    const P = { l: 4, r: 4, t: 14, b: 18 }, iw = W - P.l - P.r, ih = H - P.t - P.b;
+    const mx = Math.max(...entries.map((e) => e.v), 1), bw = iw / entries.length * .62;
+    let out = "";
+    entries.forEach((e, i) => {
+      const h = e.v / mx * ih, x = P.l + (i + .5) / entries.length * iw - bw / 2;
+      out += `<rect x="${x.toFixed(1)}" y="${(P.t + ih - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(h, 1).toFixed(1)}" rx="2.5" fill="${e.c || color}"><title>${esc(e.tip || e.l)}</title></rect>`
+        + (e.v && e.vl !== "" ? `<text x="${(x + bw / 2).toFixed(1)}" y="${(P.t + ih - h - 4).toFixed(1)}" text-anchor="middle" font-size="11">${e.vl ?? e.v}</text>` : "")
+        + (e.l ? `<text x="${(x + bw / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="10.5">${esc(e.l)}</text>` : "");
+    });
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%">${out}</svg>`;
+  }
+  const teamCard = (c) => `<div class="card"><div class="kpi-label"><span class="wire"></span>${c.label}</div><div class="kpi-num">${c.num}</div><div class="kpi-sub">${c.sub}</div>${c.d || ""}</div>`;
+  const personCard = (name, big, bigSub, rows, bigDelta = "") => `<div class="panel">
+    <h3><span class="wire"></span>${esc(name)}</h3>
+    <div class="big">${big}</div><div class="kpi-sub">${bigSub}</div>${bigDelta}
+    <div style="margin-top:10px">${rows}</div></div>`;
+  const statRow = (ps) => `<div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:14px">${ps.map(([v, l, d]) =>
+    `<div class="cmp"><div class="lbl">${l}</div><div class="v">${v}</div>${d || ""}</div>`).join("")}</div>`;
+  const oppRows = (rs) => rs.map((o) => `<div class="prow lrow"><span>${nameA(o)}</span><b>${fmt$(o.value)} <span style="color:var(--ink-faint)">${pAge(o.created)}d</span></b></div>`).join("");
+  function oppList(a) {
+    if (!a.opps) return ""; // not provided yet -> hide the section
+    const head = `<div class="kpi-sub" style="margin-top:12px;margin-bottom:2px">Unsold opportunities <span style="text-transform:none">· best option per customer</span></div>`;
+    if (!a.opps.length) return head + `<div class="prow"><span style="color:var(--ink-faint)">Nothing open right now.</span></div>`;
+    // "+N more" reveals the rest inline (the board has no modal); rows past 4 start hidden
+    const rows = a.opps.map((o, i) => `<div class="prow lrow${i >= 4 ? " opp-hidden" : ""}"><span>${nameA(o)}</span><b>${fmt$(o.value)} <span style="color:var(--ink-faint)">${pAge(o.created)}d</span></b></div>`).join("");
+    return head + `<div class="opps">${rows}${a.opps.length > 4 ? `<div class="more-row" data-more>+${a.opps.length - 4} more · click for the list</div>` : ""}</div>`;
+  }
+  function wkChart(a) {
+    if (!a.soldWk || !Object.keys(a.soldWk).length) return ""; // not provided yet -> hide
+    const mon = (dt) => { const t = new Date(dt + "T12:00:00"); t.setDate(t.getDate() - (t.getDay() + 6) % 7); return t; };
+    let t = mon(rpReport || new Date().toISOString().slice(0, 10)); const weeks = [];
+    for (let i = 0; i < 8; i++) { weeks.unshift(t.toISOString().slice(0, 10)); t = new Date(+t - 7 * 864e5); }
+    return `<div class="kpi-sub" style="margin-top:12px;margin-bottom:2px">Sold by week</div>` + barChart(weeks.map((w) => ({
+      l: "wk " + MD(w), v: a.soldWk[w] || 0, vl: a.soldWk[w] ? fmtK(a.soldWk[w]) : "",
+      tip: `week of ${MD(w)}: ${fmt$(a.soldWk[w] || 0)} sold`, c: "var(--gold)",
+    })), 460, 120);
+  }
+  function renderPeople(d) {
+    const host = $("s-people");
+    if (!host) return;
+    let sr = d.salesRole;
+    if (!sr) { // defensive: older bake has no salesRole -> synthesize from advisors[]
+      const est = d.estimates || {};
+      sr = {
+        reportDate: (d.generatedAt || "").slice(0, 10) || null,
+        advisors: (d.advisors || []).map((a) => ({ name: a.name, soldValue: a.soldValue, sold: a.soldCount,
+          openValue: a.openValue, openN: a.openCount, openOldest: a.oldestOpen })),
+        team: { unsoldValue: est.unsoldPipeline },
+      };
+    }
+    rpReport = sr.reportDate;
+    const advisors = sr.advisors || [], team = sr.team || {};
+    const chips = [];
+    const soldSum = advisors.reduce((s, a) => s + (a.soldValue || 0), 0);
+    const soldN = advisors.reduce((s, a) => s + (a.sold || 0), 0);
+    const prevOk = advisors.length && advisors.every((a) => a.soldValuePrev != null);
+    chips.push(teamCard({ label: "Team sold", num: fmt$(soldSum), sub: `${soldN} estimates · 30 days`,
+      d: prevOk ? delta(soldSum, advisors.reduce((s, a) => s + (a.soldValuePrev || 0), 0), "vs prior 30 days") : "" }));
+    if (team.unsoldValue != null) chips.push(teamCard({ label: "Unsold on the table", num: fmt$(team.unsoldValue),
+      sub: team.unsoldGroups != null ? `${team.unsoldGroups} customers, best option each` : "open quotes" }));
+    if (team.todayPresets != null || team.todayTurnovers != null) chips.push(teamCard({ label: "Today's opportunities",
+      num: (team.todayPresets || 0) + (team.todayTurnovers || 0), sub: "presets + turnovers on the books" }));
+    const cards = advisors.map((a) => {
+      const stats = [];
+      if (a.salesRun != null) stats.push([a.salesRun || 0, "sales appts"]);
+      if (a.cohort) { // close rate the owner's way: one cohort, n/a (not 0%) when nothing decided, pending as a suffix, no ticker
+        const c = a.cohort, chances = (c.sold || 0) + (c.dismissed || 0) + (c.missed || 0);
+        const rate = chances ? Math.round((c.sold || 0) / chances * 100) : null;
+        stats.push([rate == null ? "n/a" : `${rate}<small>%</small>`, `close rate · ${c.sold || 0} of ${chances} chances${c.pending ? `, ${c.pending} pending` : ""}`]);
+      }
+      const openN = a.openN ?? 0;
+      stats.push([fmt$(a.openValue || 0), `open · ${openN} customer${openN === 1 ? "" : "s"}${a.openOldest ? `, oldest ${pAge(a.openOldest)}d` : ""}`]);
+      return personCard(fname(a.name), fmt$(a.soldValue || 0), `sold across ${a.sold || 0} estimates · 30 days`,
+        statRow(stats) + wkChart(a) + oppList(a),
+        a.soldValuePrev != null ? delta(a.soldValue || 0, a.soldValuePrev, "vs prior 30 days") : "");
+    }).join("");
+    host.innerHTML = `<div class="rchips">${chips.join("")}</div><div class="rgrid">${cards}</div>`;
+  }
+  // "+N more" reveals the hidden opp rows inline
+  $("s-people").addEventListener("click", (ev) => {
+    const m = ev.target.closest(".more-row[data-more]");
+    if (!m) return;
+    m.closest(".opps").querySelectorAll(".opp-hidden").forEach((el) => el.classList.remove("opp-hidden"));
+    m.remove();
+  });
+
+  // ---- registration tab (2b) ----
+  let regData = null, regReady = false, regFilter = "needs";
+  // same stem test whiteboard-sync uses (isRegisteredStatus): the live pipeline carries
+  // "Registration Verified" and "Registration Verified by Human", not just "Registered".
+  const isRegistered = (s) => /^\s*(registered|registration verified)/i.test(s || "");
+  const isQueued = (s) => /^queued/i.test(s || "");
+  const needsAction = (u) => !isRegistered(u.status) && !isQueued(u.status);
+
+  // brand -> configured window; an absent OR empty window value = no badge (plan 2b:
+  // the truthiness check below makes both "" and undefined fall through to null)
+  function brandWindow(brand, dls) {
+    const b = (brand || "").toLowerCase();
+    if (/maytag|rheem/.test(b) && dls.maytag_rheem) return { days: +dls.maytag_rheem, cutoff: null };
+    if (/mitsubishi/.test(b) && dls.mitsubishi) return { days: +dls.mitsubishi, cutoff: dls.mitsubishi_cutoff || null };
+    if (/fujitsu/.test(b) && dls.fujitsu) return { days: +dls.fujitsu, cutoff: null };
+    return null;
+  }
+  function deadlineFor(installDate, win) {
+    if (!win) return null;
+    const inst = parseDate(installDate);
+    if (!inst) return null;
+    let dl = new Date(inst); dl.setDate(dl.getDate() + win.days);
+    if (win.cutoff) { // annual cutoff (e.g. Mar-31): deadline = min(window end, next cutoff on/after install)
+      const [mm, dd] = win.cutoff.split("-").map(Number);
+      let cut = new Date(inst.getFullYear(), mm - 1, dd, 12);
+      if (cut < inst) cut = new Date(inst.getFullYear() + 1, mm - 1, dd, 12);
+      if (cut < dl) dl = cut;
+    }
+    return dl;
+  }
+  function deadlineBadge(dl) {
+    if (!dl) return `<span class="dl-none">-</span>`;
+    const days = Math.ceil((dl - Date.now()) / 864e5);
+    const cls = days <= 7 ? "red" : days <= 14 ? "amber" : "ok";
+    const label = days < 0 ? `${-days}d overdue` : days === 0 ? "due today" : `${days}d left`;
+    return `<span class="dl-badge ${cls}" title="due ${dl.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}">${label}</span>`;
+  }
+  function statusPill(s) {
+    const cls = isRegistered(s) ? "done" : isQueued(s) ? "auto" : "pend";
+    return `<span class="pill ${cls}"><span class="dot"></span>${esc(s || "-")}</span>`;
+  }
+  // subtle placeholder for a genuinely blank cell (INV-* placeholders have no serial,
+  // sometimes no brand/model, yet) instead of a bare dash
+  const cellOr = (v, ph) => v ? esc(v) : `<span class="cell-none">${ph}</span>`;
+  function regRow(u, dls) {
+    // a registered unit is done - no deadline pressure, so no countdown badge
+    const dl = isRegistered(u.status) ? null : deadlineFor(u.installDate, brandWindow(u.brand, dls));
+    return `<tr data-need="${needsAction(u) ? 1 : 0}" data-reg="${isRegistered(u.status) ? 1 : 0}" data-status="${esc(u.status || "")}">
+      <td class="cust">${esc(u.customer || "-")}</td>
+      <td>${cellOr(u.brand, "not listed")}</td>
+      <td class="mono">${cellOr(u.model, "not listed")}</td>
+      <td class="mono">${cellOr(u.serial, "no serial yet")}</td>
+      <td class="mono">${fmtDate(u.installDate)}</td>
+      <td>${statusPill(u.status)}</td>
+      <td>${deadlineBadge(dl)}</td>
+      <td><input type="text" class="reg-inp" data-eq="${esc(u.stEquipmentId)}" data-act="group_tag" value="${esc(u.groupTag || "")}" placeholder="tag" maxlength="100" title="Gree system grouping tag"></td>
+      <td><input type="text" class="reg-inp" data-eq="${esc(u.stEquipmentId)}" data-act="paired_serial" value="${esc(u.pairedSerial || "")}" placeholder="serial" maxlength="100" title="Pin this head to a condenser serial"></td>
+      <td class="reg-actions">
+        <button class="regbtn" data-eq="${esc(u.stEquipmentId)}" data-act="queue_st">Queue ST</button>
+        <button class="regbtn" data-eq="${esc(u.stEquipmentId)}" data-act="queue_registration">Queue Reg</button>
+      </td>
+    </tr>`;
+  }
+  // Status dropdown: a tickbox per distinct status in the data, controlling visibility
+  // as a layer AFTER the chip/toggle filtering. regHidden = the set of unticked (hidden)
+  // statuses, persisted. First-ever load defaults to hiding "Ignore", showing the rest.
+  let regHidden = (() => { const s = localStorage.getItem("wbRegHidden"); return s ? new Set(JSON.parse(s)) : null; })();
+  const saveRegHidden = () => localStorage.setItem("wbRegHidden", JSON.stringify([...(regHidden || [])]));
+  function renderStatusMenu(units) {
+    const statuses = [...new Set(units.map((u) => u.status).filter(Boolean))].sort();
+    if (regHidden === null) { regHidden = new Set(statuses.filter((s) => s.toLowerCase() === "ignore")); saveRegHidden(); }
+    $("reg-status-menu").innerHTML = statuses.length
+      ? statuses.map((s) => `<label><input type="checkbox" data-status="${esc(s)}" ${regHidden.has(s) ? "" : "checked"}>${esc(s)}</label>`).join("")
+      : `<label style="color:var(--ink-faint)">No statuses</label>`;
+    const shownN = statuses.filter((s) => !regHidden.has(s)).length;
+    $("reg-status-summary").textContent = statuses.length && shownN < statuses.length ? `Status (${shownN}/${statuses.length})` : "Status";
+  }
+  function renderRegistration() {
+    if (!regData) return;
+    if (document.activeElement?.classList.contains("reg-inp")) return; // don't nuke an in-progress edit (the 60s poll)
+    const units = regData.units || [], dls = regData.deadlines || {};
+    document.querySelector("#reg-tbl tbody").innerHTML = units.map((u) => regRow(u, dls)).join("");
+    $("rc-needs").textContent = units.filter(needsAction).length;
+    $("rc-registered").textContent = units.filter((u) => isRegistered(u.status)).length;
+    $("reg-stamp").textContent = `${units.length} unit${units.length === 1 ? "" : "s"}`;
+    renderStatusMenu(units);
+    applyRegFilter();
+  }
+  function applyRegFilter() {
+    const showReg = $("showReg").checked;
+    let shown = 0, statusHid = 0;
+    document.querySelectorAll("#reg-tbl tbody tr").forEach((tr) => {
+      const isReg = tr.dataset.reg === "1";
+      // Needs Action excludes registered by definition; the Registered chip overrides
+      // the toggle and always shows them; All hides registered unless the toggle is on.
+      let hide = regFilter === "needs" ? tr.dataset.need !== "1"
+        : regFilter === "registered" ? !isReg
+        : isReg && !showReg;
+      // status dropdown is the visibility layer applied AFTER chip/toggle filtering
+      if (!hide && regHidden && regHidden.has(tr.dataset.status)) { hide = true; statusHid++; }
+      tr.style.display = hide ? "none" : "";
+      if (!hide) shown++;
+    });
+    $("reg-empty").style.display = shown === 0 ? "block" : "none";
+    const parts = [`${shown} shown`];
+    if (regFilter !== "all") parts.push("filtered");
+    if (!showReg && regFilter !== "registered") parts.push("registered hidden");
+    if (statusHid) parts.push("status filtered");
+    $("reg-count").textContent = parts.join(" · ");
+  }
+  $("reg-status-menu").addEventListener("change", (ev) => {
+    const cb = ev.target.closest("input[data-status]");
+    if (!cb) return;
+    regHidden ||= new Set();
+    if (cb.checked) regHidden.delete(cb.dataset.status); else regHidden.add(cb.dataset.status);
+    saveRegHidden();
+    if (regData) renderStatusMenu(regData.units || []);
+    applyRegFilter();
+  });
+  async function loadRegistration() { // demo: inlined synthetic equipment, no server
+    regData = DEMO_EQUIPMENT;
+    if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
+    renderRegistration();
+  }
+  async function equipAction(stEquipmentId, action, value) { // demo: edits live in-page, reset on reload
+    const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
+    if (u) {
+      if (action === "group_tag") u.groupTag = value || "";
+      else if (action === "paired_serial") u.pairedSerial = value || "";
+      else if (action === "queue_st") u.status = "Queued for ST";
+      else if (action === "queue_registration") u.status = "Queued for Registration";
+    }
+    renderRegistration();
+  }
+  document.querySelectorAll(".regf").forEach((btn) => btn.addEventListener("click", () => {
+    regFilter = btn.dataset.regf;
+    document.querySelectorAll(".regf").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+    applyRegFilter();
+  }));
+  // Show-registered toggle: OFF by default so registered/verified units are hidden in
+  // the Needs Action / All views (the Registered chip still shows them). Same pattern
+  // and visual style as the Board tab's Show-completed toggle; own localStorage key.
+  $("showReg").checked = localStorage.getItem("wbShowReg") === "1";
+  $("showReg").addEventListener("change", () => {
+    localStorage.setItem("wbShowReg", $("showReg").checked ? "1" : "0");
+    applyRegFilter();
+  });
+  document.querySelector("#reg-tbl tbody").addEventListener("click", (ev) => {
+    const b = ev.target.closest(".regbtn");
+    if (b) equipAction(b.dataset.eq, b.dataset.act);
+  });
+  document.querySelector("#reg-tbl tbody").addEventListener("change", (ev) => {
+    const inp = ev.target.closest(".reg-inp");
+    if (inp) equipAction(inp.dataset.eq, inp.dataset.act, inp.value);
+  });
+
+  load(); loadSales(); loadRegistration();
 </script>

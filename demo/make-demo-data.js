@@ -178,6 +178,11 @@ for (const name of SELLERS) {
   const co = mine.filter(e => e.created >= addDays(R, -29));
   s.cohort = { sold: co.filter(e => e.status === 'Sold').length, dismissed: co.filter(e => e.status === 'Dismissed').length, pending: co.filter(e => e.status === 'Open').length, missed: ri(0, 3) };
 }
+// Demo coverage: a selling service tech who closes jobs on service calls but has no
+// sales-appt cohort. ns-dash-bake emits cohort:null for them and the Sales card renders
+// the "n/a close rate" variant. Marcus is our selling tech (reliably sold>0 at .15 weight),
+// so this deterministically exercises both the tech-card and cohort-null variants.
+if (stats['Marcus Vellen']) stats['Marcus Vellen'].cohort = null;
 // service techs: run volume + service revenue
 for (const name of ROSTER.service) {
   const s = stats[name];

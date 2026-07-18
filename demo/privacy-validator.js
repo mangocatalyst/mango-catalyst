@@ -24,6 +24,13 @@ hit('north star', 'company string');
 hit('484604814', 'real ST tenant id');
 hit('slack.com/archives', 'live Slack link');
 hit('go.servicetitan.com', 'live ServiceTitan link');
+// belt-and-suspenders: the whiteboard demo must inline these feeds, never fetch them.
+// A surviving endpoint string means a fetch was left un-stubbed.
+hit('sales-summary.json', 'live feed filename');
+hit('/api/equipment', 'live endpoint');
+hit('/api/equip', 'live endpoint');
+hit('/api/history', 'live endpoint');
+hit('/api/flip', 'live endpoint');
 for (const ch of ['–', '—']) if (html.includes(ch)) problems.push('em/en dash in artifact');
 
 /* ---------- live-data checks (need the NS data dir on this machine) ---------- */

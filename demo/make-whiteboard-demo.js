@@ -17,6 +17,13 @@ const SRC = path.join(os.homedir(), 'Projects', 'northstar-owner-dashboard', 'in
 const OUT = path.join(__dirname, 'build', 'whiteboard.html');
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
+// The Sales tab feed is the real ns-dash-bake output run against synthetic Boreal data
+// (bake-demo.sh step 3, before this script) so it stays name-consistent with the board
+// and the owner dashboard. Inlined below; no server behind the static demo.
+const SALES_PATH = path.join(__dirname, 'build', 'sales-summary.json');
+if (!fs.existsSync(SALES_PATH)) throw new Error('build/sales-summary.json missing; run ns-dash-bake (bake-demo.sh step 3) before this script');
+const SALES_JSON = fs.readFileSync(SALES_PATH, 'utf8').trim();
+
 let html = fs.readFileSync(SRC, 'utf8');
 
 // replace exactly n occurrences (default 1); throw if the count is off
@@ -39,7 +46,7 @@ swap("@import url('https://fonts.googleapis.com/css2?family=Passion+One:wght@700
   `@font-face{font-family:'Big Shoulders';font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,${bs}) format('woff2')}`);
 swap(".display { font-family: 'Passion One', 'Arial Narrow', system-ui, sans-serif; }",
   ".display { font-family: 'Big Shoulders', 'Arial Narrow', system-ui, sans-serif; font-weight: 700; }");
-swap('"Passion One"', '"Big Shoulders"', 2);
+swap('"Passion One"', '"Big Shoulders"', 8);
 
 /* ---------- palette: NorthStar cream/teal -> Mango Catalyst tokens ---------- */
 // status colors (done/pend/warn greens, ambers, reds) are semantic and stay
@@ -66,7 +73,7 @@ for (const [from, to] of colors) {
 // stalled flag, and the schedule stay plausible no matter when this was baked.
 // Names and stories match make-demo-data.js (the Slack digests on /dashboards
 // mention the Nordling wiring, the Brandvold permit, the Sorvaag rebate...).
-swap('<script>\n  const CLS = {', `<script>
+swap('<script>\n  const TYPE = {', `<script>
   // ---- demo board: every name, dollar, and note is synthetic (Boreal Comfort Co) ----
   const D = (n) => { const x = new Date(); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
   const row = (rowId, name, sched, type, advisor, installers, price, city, cells, notes = "", done = false) => ({
@@ -104,7 +111,45 @@ swap('<script>\n  const CLS = {', `<script>
       { rebate: "na", registered: "na" }),
   ] };
 
-  const CLS = {`);
+  // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
+  const DEMO_SALES = ${SALES_JSON};
+
+  // ---- registration tab: synthetic equipment. installDate uses D() so warranty
+  // deadlines (amber <=14d, red <=7d, overdue) stay plausible whenever this is baked.
+  // Statuses cover every pipeline state incl Ignore (hidden by default) and INV-*
+  // placeholders (no serial, sometimes no brand/model). Gree units carry grouping
+  // tags + paired serials; Gree/Bosch have no warranty window so show no badge. ----
+  const DEMO_EQUIPMENT = {
+    deadlines: { maytag_rheem: 60, mitsubishi: 90, mitsubishi_cutoff: "03-31", fujitsu: 60 },
+    units: [
+      { customer: "Havermark, Petra", brand: "Fujitsu", model: "AOU12RLFW", serial: "FUJ-8823-C", installDate: D(-55), status: "Needs registration", stEquipmentId: "EQ-102", groupTag: "", pairedSerial: "" },
+      { customer: "Brandvold, Roald", brand: "Maytag", model: "PSA4BF", serial: "MAY-3391-B", installDate: D(-48), status: "Needs registration", stEquipmentId: "EQ-103", groupTag: "", pairedSerial: "" },
+      { customer: "Sorvaag, Ingrid", brand: "Rheem", model: "RA1436AJ1NB", serial: "RHE-2210-D", installDate: D(-65), status: "Needs registration", stEquipmentId: "EQ-104", groupTag: "", pairedSerial: "" },
+      { customer: "Eikland, Britta", brand: "Mitsubishi", model: "MSZ-GL15NA", serial: "MIT-9902-J", installDate: D(-88), status: "Needs registration", stEquipmentId: "EQ-110", groupTag: "", pairedSerial: "" },
+      { customer: "Ruonala, Greta", brand: "", model: "", serial: "", installDate: D(0), status: "Needs registration", stEquipmentId: "INV-3315", groupTag: "", pairedSerial: "" },
+      { customer: "Nordling, Elin & Gus", brand: "Mitsubishi", model: "MSZ-FS12NA", serial: "MIT-4471-A", installDate: D(-3), status: "Queued for Registration", stEquipmentId: "EQ-101", groupTag: "", pairedSerial: "" },
+      { customer: "Kolstad, Mabel", brand: "Gree", model: "GWH18AC", serial: "GRE-5541-K", installDate: D(-4), status: "Queued for Registration", stEquipmentId: "EQ-111", groupTag: "Kolstad main", pairedSerial: "GRE-5542-K" },
+      { customer: "Holmquist, Otto & Signe", brand: "Gree", model: "GWH12QC", serial: "GRE-1180-G", installDate: D(-2), status: "Queued for ST", stEquipmentId: "EQ-107", groupTag: "Holmquist upstairs", pairedSerial: "" },
+      { customer: "Tarvainen, Freya", brand: "Mitsubishi", model: "MUZ-GL18NA", serial: "MIT-7719-E", installDate: D(-20), status: "Registration Verified", stEquipmentId: "EQ-105", groupTag: "", pairedSerial: "" },
+      { customer: "Lindstrand, Astrid", brand: "Bosch", model: "BOVA-36", serial: "BOS-4402-H", installDate: D(-5), status: "Registration Verified by Human", stEquipmentId: "EQ-108", groupTag: "", pairedSerial: "" },
+      { customer: "Kettunen, Nils", brand: "Maytag", model: "M1200", serial: "MAY-6653-F", installDate: D(-30), status: "Registered", stEquipmentId: "EQ-106", groupTag: "", pairedSerial: "" },
+      { customer: "Holmquist, Otto & Signe", brand: "Gree", model: "GWH09QB", serial: "", installDate: D(-1), status: "Ignore", stEquipmentId: "INV-2207", groupTag: "", pairedSerial: "" },
+    ],
+  };
+
+  // ---- change-history popover: a couple of synthetic rows, for polish ----
+  const DEMO_HISTORY = {
+    "1": [
+      { ts: D(-2) + "T14:32:00", source: "web", column: "permit", old: "pending", new: "received" },
+      { ts: D(-1) + "T09:15:00", source: "tls-auto", column: "tls", old: "pending", new: "done" },
+    ],
+    "4": [
+      { ts: D(-3) + "T11:02:00", source: "sync", column: "equip", old: "pending", new: "done" },
+      { ts: D(-2) + "T16:48:00", source: "web", column: "payment", old: "pending", new: "done" },
+    ],
+  };
+
+  const TYPE = {`);
 
 // no server behind the static demo: edits are optimistic-only and stick in-page
 swap(`  async function flip(rowId, column, value) {
@@ -135,21 +180,94 @@ swap(`  function stamp() {
     $("live").classList.toggle("stale", mins > 45);
   }`,
   '  function stamp() { $("stamp").textContent = "demo · fictional data · edits reset on reload"; }');
-swap(`  load();
-  setInterval(load, 60_000);
-  setInterval(stamp, 30_000);`,
-  '  load();');
+/* ---------- sales + registration + history: inline synthetic feeds, no server ---------- */
+swap(`  async function loadSales() {
+    try {
+      const r = await fetch("sales-summary.json", { cache: "no-store" });
+      if (!r.ok) return; // crew instance 404s it -> Sales tab stays hidden, board unaffected
+      salesData = await r.json();
+      if (!salesReady) { salesReady = true; $("tabnav").hidden = false; $("tab-btn-sales").hidden = false; }
+      renderSales();
+    } catch (e) { /* leave tab hidden; the board does not depend on this */ }
+  }`,
+  `  async function loadSales() { // demo: inlined synthetic summary, no server
+    salesData = DEMO_SALES;
+    if (!salesReady) { salesReady = true; $("tabnav").hidden = false; $("tab-btn-sales").hidden = false; }
+    renderSales();
+  }`);
+swap(`  async function loadRegistration() {
+    try {
+      const r = await fetch("/api/equipment", { cache: "no-store" });
+      if (!r.ok) return; // crew instance 404s it -> Registration tab stays hidden
+      regData = await r.json();
+      if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
+      renderRegistration();
+    } catch (e) { /* leave hidden; board unaffected */ }
+  }`,
+  `  async function loadRegistration() { // demo: inlined synthetic equipment, no server
+    regData = DEMO_EQUIPMENT;
+    if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
+    renderRegistration();
+  }`);
+swap(`  async function equipAction(stEquipmentId, action, value) {
+    try {
+      const r = await fetch("/api/equip", { method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stEquipmentId, action, value }) });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || \`HTTP \${r.status}\`);
+      const { unit } = await r.json();
+      const i = regData.units.findIndex((u) => u.stEquipmentId === stEquipmentId);
+      if (i >= 0 && unit) regData.units[i] = unit;
+      renderRegistration();
+    } catch (e) {
+      $("reg-error").textContent = \`Registration edit didn't save: \${e.message}\`;
+      $("reg-error").style.display = "block";
+      loadRegistration();
+      setTimeout(() => { $("reg-error").style.display = "none"; }, 8000);
+    }
+  }`,
+  `  async function equipAction(stEquipmentId, action, value) { // demo: edits live in-page, reset on reload
+    const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
+    if (u) {
+      if (action === "group_tag") u.groupTag = value || "";
+      else if (action === "paired_serial") u.pairedSerial = value || "";
+      else if (action === "queue_st") u.status = "Queued for ST";
+      else if (action === "queue_registration") u.status = "Queued for Registration";
+    }
+    renderRegistration();
+  }`);
+swap(`      const r = await fetch(\`/api/history?rowId=\${encodeURIComponent(rowId)}\`, { cache: "no-store" });
+      const entries = r.ok ? await r.json() : [];`,
+  '      const entries = DEMO_HISTORY[rowId] || []; // demo: inlined synthetic history');
 
-/* ---------- copy: demo semantics ---------- */
-swap('Tap a pill to cycle it, tick a box, type a note: it saves for everyone.',
-  'Tap a pill to cycle it, tick a box, type a note. In this demo edits stay on this page and reset on reload; the real board saves for the whole crew, from any phone.');
+/* ---------- init: no polling behind the static demo; keep the tab feature-detect ---------- */
+swap(`  load(); loadSales(); loadRegistration();
+  setInterval(() => { load(); loadSales(); loadRegistration(); }, 60_000);
+  setInterval(stamp, 30_000);`,
+  '  load(); loadSales(); loadRegistration();');
+
+/* ---------- copy: neutralize code comments that name live feed files ---------- */
+swap(`the Sales tab is revealed only when the owner
+     instance serves sales-summary.json (the crew instance 404s it) ---- */`,
+  `the Sales tab is revealed only when the owner
+     instance provides the sales feed ---- */`);
+swap(`"who's the next one free" at a glance. Fed by the same whiteboard.json the
+     table uses.`,
+  `"who's the next one free" at a glance. Fed by the same board data the
+     table uses.`);
+
+/* ---------- booking board: real lead installers -> fictional Boreal crew ---------- */
+swap('const LEADS = ["Corey", "Scott", "Zack"];', 'const LEADS = ["Eli", "Owen", "Miguel"];');
+swap('const OFF_DAY = { Zack: 1 }; // Zack takes Mondays (0 Sun .. 6 Sat); others have none',
+  'const OFF_DAY = { Eli: 1 }; // Eli takes Mondays (0 Sun .. 6 Sat); others have none');
+swap('Zack is off Mondays.', 'Eli is off Mondays.');
 
 // em dashes in the source's code comments; the site bans them everywhere
 html = html.split(' — ').join(', ');
 
 /* ---------- guardrails ---------- */
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
-if (/servicetitan\.com|slack\.com|\/api\/flip|whiteboard\.json/i.test(html)) throw new Error('live endpoint survived the transform');
+if (/servicetitan\.com|slack\.com|\/api\/flip|\/api\/equipment|\/api\/equip|\/api\/history|whiteboard\.json|sales-summary\.json/i.test(html)) throw new Error('live endpoint survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
 
 fs.writeFileSync(OUT, html);
