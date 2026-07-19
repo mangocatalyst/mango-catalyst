@@ -42,7 +42,7 @@ export function CredibilityBar() {
           alt="Illustrated portrait of Bryan, founder of Mango Catalyst"
           width={192}
           height={192}
-          className="size-24 shrink-0 rounded-full bg-white"
+          className="size-[6.3rem] shrink-0 rounded-full bg-white"
         />
         <p className="max-w-[44rem] leading-relaxed text-body">
           <strong className="font-semibold text-ink">{"I'm Bryan."}</strong>{" "}
