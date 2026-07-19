@@ -819,9 +819,11 @@ body {
   }
 }
 
-/* Waypoint acknowledgment: quick flare to bright amber with a soft halo, a
-   ~4s lit hold, then fade. Short enough that all four sit dark for a beat
-   before the tracer's next lap -- the lap visibly resets. */
+/* Waypoint acknowledgment: quick flare to bright amber, a ~4s lit hold, then
+   fade. Short enough that all four sit dark for a beat before the tracer's
+   next lap -- the lap visibly resets. The halo is NOT a filter: a drop-shadow
+   under the 0.8 veil nets out to ~3 RGB points, invisible (measured
+   2026-07-19). The sibling ring carries the halo instead (hb-ringhalo). */
 /* The infinite glow cycle also owns opacity, overriding hb-nodein's forward
    fill while motion is on: dots REST DIM (0.3) and only reach full presence
    while the tracer acknowledges them. Static contexts keep the plain 0.95
@@ -831,26 +833,39 @@ body {
     opacity: 0.3;
     stroke: #f6a328;
     stroke-width: 1.2;
-    filter: none;
   }
   3% {
     opacity: 1;
     stroke: #ffb84d;
     stroke-width: 2.2;
-    filter: drop-shadow(0 0 5px rgba(246, 163, 40, 0.85));
   }
   25% {
     opacity: 1;
     stroke: #ffb84d;
     stroke-width: 2;
-    filter: drop-shadow(0 0 4px rgba(246, 163, 40, 0.6));
   }
   40%,
   100% {
     opacity: 0.3;
     stroke: #f6a328;
     stroke-width: 1.2;
-    filter: none;
+  }
+}
+
+/* Per-lap halo: the ring re-fires a softer version of its draw-time flash
+   each time the tracer passes (same 16s cycle + delays as hb-nodeglow).
+   Pure opacity/transform -- reads through the veil like the draw flash,
+   no flaky SVG filter repaints. 7.5% of 16s = 1.2s pulse. */
+@keyframes hb-ringhalo {
+  0% {
+    opacity: 0.75;
+    transform: scale(1);
+    animation-timing-function: ease-out;
+  }
+  7.5%,
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
   }
 }
 
@@ -932,17 +947,28 @@ body {
       hb-nodein 0.35s ease-out 6.9s forwards,
       hb-nodeglow 16s linear 14.51s infinite;
   }
+  /* One-shot draw flash + the infinite per-lap halo pulse. No conflict:
+     the halo applies nothing during its 9s+ delay (fill none), the flash
+     applies nothing once finished. */
   .hb-ring1 {
-    animation: hb-ringflash 0.7s ease-out 2.2s 1;
+    animation:
+      hb-ringflash 0.7s ease-out 2.2s 1,
+      hb-ringhalo 16s linear 9s infinite;
   }
   .hb-ring2 {
-    animation: hb-ringflash 0.7s ease-out 3.7s 1;
+    animation:
+      hb-ringflash 0.7s ease-out 3.7s 1,
+      hb-ringhalo 16s linear 10.75s infinite;
   }
   .hb-ring3 {
-    animation: hb-ringflash 0.7s ease-out 5.4s 1;
+    animation:
+      hb-ringflash 0.7s ease-out 5.4s 1,
+      hb-ringhalo 16s linear 12.77s infinite;
   }
   .hb-ring4 {
-    animation: hb-ringflash 0.7s ease-out 6.9s 1;
+    animation:
+      hb-ringflash 0.7s ease-out 6.9s 1,
+      hb-ringhalo 16s linear 14.51s infinite;
   }
 
   /* Ambient: the job rides the link every 16s, the navy now-line creeps,
