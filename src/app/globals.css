@@ -855,17 +855,23 @@ body {
 /* Per-lap halo: the ring re-fires a softer version of its draw-time flash
    each time the tracer passes (same 16s cycle + delays as hb-nodeglow).
    Pure opacity/transform -- reads through the veil like the draw flash,
-   no flaky SVG filter repaints. 7.5% of 16s = 1.2s pulse. */
+   no flaky SVG filter repaints. 7.5% of 16s = 1.2s pulse.
+   stroke-width is load-bearing: opacity+transform alone get compositor-run,
+   and Chromium left a stuck scale-1 ring after iteration boundaries on some
+   GPUs (Bryan's machine, 2026-07-19). A non-compositable property forces
+   the whole animation main-thread, same reliable path as hb-nodeglow. */
 @keyframes hb-ringhalo {
   0% {
     opacity: 0.75;
     transform: scale(1);
+    stroke-width: 1.2;
     animation-timing-function: ease-out;
   }
   7.5%,
   100% {
     opacity: 0;
     transform: scale(2.6);
+    stroke-width: 0.5;
   }
 }
 
@@ -1238,20 +1244,22 @@ body {
 
   /* Plumbing: the amber dot rides the pipe centerline (hb-run, the hero
      tracer's keyframes). transform: none clears the static valve-outlet
-     position so offset-path alone places the dot. */
+     position so offset-path alone places the dot. Path retraced 2026-07-19
+     against the drafted pipe-run.webp (700x448): along the main run, up the
+     elbow, then right along the top into the heater. */
   .ta-flow {
     transform: none;
-    offset-path: path("M40 102H242A16 16 0 0 1 258 118V200A16 16 0 0 0 274 216H338");
+    offset-path: path("M62 225H405Q425 225 425 205V50Q425 30 445 30H556");
     offset-rotate: 0deg;
     animation: hb-run 14s linear infinite;
   }
 }
 
-/* No offset-path: put the dot back at the valve and let it drip instead. */
+/* No offset-path: put the dot back at the gate valve and let it drip. */
 @supports not (offset-path: path("M0 0H8")) {
   @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
     .ta-flow {
-      transform: translate(142px, 120px);
+      transform: translate(235px, 225px);
       animation: ta-drip 7s ease-in infinite;
     }
   }
