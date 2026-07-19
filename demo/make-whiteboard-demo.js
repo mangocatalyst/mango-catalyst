@@ -35,18 +35,31 @@ const swap = (from, to, n = 1) => {
 
 /* ---------- identity ---------- */
 swap(`  /* Branding: northstarheatcool.com. Navy #002D3F, teal #006385, red-orange
-     #F0533F, cream #FFF0C3, gold #FAA54E, Passion One display headings. */`,
+     #F0533F, cream #FFF0C3, gold #FAA54E. Typography mirrors the owner dashboard:
+     Passion One display + Inter body, served locally (no Google Fonts). */`,
   '  /* Branding: Mango Catalyst demo skin (brand-guidelines.md). */');
 swap('<title>Install White Board (live)</title>',
   '<title>Boreal Comfort Co · Install Whiteboard Demo</title>');
 
 /* ---------- fonts: Google-hosted Passion One -> inline Big Shoulders ---------- */
 const bs = fs.readFileSync(path.join(__dirname, '..', 'src', 'app', 'fonts', 'BigShoulders-Variable-latin.woff2')).toString('base64');
-swap("@import url('https://fonts.googleapis.com/css2?family=Passion+One:wght@700&display=swap');",
-  `@font-face{font-family:'Big Shoulders';font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,${bs}) format('woff2')}`);
+const interVar = fs.readFileSync(path.join(__dirname, '..', 'src', 'app', 'fonts', 'Inter-Variable-latin.woff2')).toString('base64');
+swap(`  @font-face{font-family:'Passion One';font-weight:400;font-display:swap;src:url(font-passion-400.woff2) format('woff2')}
+  @font-face{font-family:'Passion One';font-weight:700;font-display:swap;src:url(font-passion-700.woff2) format('woff2')}
+  @font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(font-inter-400.woff2) format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(font-inter-600.woff2) format('woff2')}
+  @font-face{font-family:'Inter';font-weight:800;font-display:swap;src:url(font-inter-800.woff2) format('woff2')}`,
+  `@font-face{font-family:'Big Shoulders';font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,${bs}) format('woff2')}
+  @font-face{font-family:'Inter';font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,${interVar}) format('woff2')}`);
 swap(".display { font-family: 'Passion One', 'Arial Narrow', system-ui, sans-serif; }",
   ".display { font-family: 'Big Shoulders', 'Arial Narrow', system-ui, sans-serif; font-weight: 700; }");
-swap('"Passion One"', '"Big Shoulders"', 8);
+swap('"Passion One"', '"Big Shoulders"', 3);
+swap("'Passion One','Arial Narrow'", "'Big Shoulders','Arial Narrow'"); // masthead h1
+swap('(not Passion One numerals)', '(not display-face numerals)'); // KPI comment
+
+/* ---------- registration: no ST deep links behind the demo ---------- */
+swap('const stUrl = b?.stUrl || (u.locationId ? `https://go.servicetitan.com/#/Location/${encodeURIComponent(u.locationId)}` : null);',
+  'const stUrl = b?.stUrl || null; // demo: no ST behind the page');
 
 /* ---------- palette: NorthStar cream/teal -> Mango Catalyst tokens ---------- */
 // status colors (done/pend/warn greens, ambers, reds) are semantic and stay
@@ -55,7 +68,7 @@ const colors = [
   ['#14303d', '#1E2C4A'], ['#46606c', '#516079'], ['#7d919b', '#7E8BA6'],
   ['#e6ddc8', '#DCE1EC'], ['#f3edda', '#EDF0F7'], ['#fbf4e1', '#F4F6FB'],
   ['#fcfbf3', '#F7F9FC'], ['#002D3F', '#0E1729'], ['#006385', '#2F6BD8'],
-  ['#FAA54E', '#F6A328'], ['#e1eff5', '#E3EDFC'], ['#FFF0C3', '#FDEBCB'],
+  ['#FAA54E', '#F6A328'], ['#e1eff5', '#E3EDFC'], // cream #FFF0C3 left with the old chrome bar (2026-07-19)
   // dark theme (media-query block + data-theme block, hence 2x each)
   ['#10242e', '#101B31'], ['#0a1a22', '#0A1120'], ['#142c38', '#16213A'],
   ['#24404c', '#2C3A57'], ['#1b333e', '#1C2843'], ['#dceaf1', '#C9D6EE'],
@@ -167,6 +180,7 @@ swap(`  async function load() {
       generatedAt = board.generatedAt;
       $("error").style.display = "none";
       render(); stamp();
+      if (regData) renderRegistration(); // reg rows join city/Slack from the board
     } catch (e) {
       $("error").textContent = \`Can't reach the board (\${e.message}).\`;
       $("error").style.display = "block";
@@ -230,9 +244,12 @@ swap(`  async function equipAction(stEquipmentId, action, value) {
     const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
     if (u) {
       if (action === "group_tag") u.groupTag = value || "";
-      else if (action === "paired_serial") u.pairedSerial = value || "";
       else if (action === "queue_st") u.status = "Queued for ST";
       else if (action === "queue_registration") u.status = "Queued for Registration";
+      else if (action === "brand") u.brand = (value || "").trim();
+      else if (action === "model") u.model = (value || "").trim();
+      else if (action === "serial") u.serial = (value || "").trim();
+      else if (action === "install_date") u.installDate = (value || "").trim();
     }
     renderRegistration();
   }`);
