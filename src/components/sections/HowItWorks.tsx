@@ -3,6 +3,62 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 /** Home section 5, copy verbatim from build/out/copy/home.md. */
 
+/**
+ * The chalk process strip (Night Shift Drafting rollout, 2026-07-19): call
+ * log -> schedule -> job ticket -> invoice, left to right, with the amber
+ * chain threading them. It illustrates the WORK that ends up running itself,
+ * which is why it sits under the steps rather than beside them: the numbered
+ * steps are how we get there, this is what "it" is.
+ *
+ * Same construction as the trade art: the drawing is a lazy raster, amber is
+ * an SVG layer on top in the asset's own pixel space (1100x255), so it can
+ * carry motion the raster cannot. Per Bryan's rule the call log, schedule and
+ * ticket live on screens; only the invoice is paper.
+ */
+function ProcessStrip() {
+  const nodes = [155, 477, 770, 1000];
+  return (
+    <div aria-hidden className="hiw-art">
+      <div className="hiw-sheet relative">
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative asset already webp at final size */}
+        <img
+          src="/home/process-strip.webp"
+          alt=""
+          width={1100}
+          height={255}
+          decoding="async"
+          loading="lazy"
+          fetchPriority="low"
+          className="block h-auto w-full"
+        />
+        <svg
+          viewBox="0 0 1100 255"
+          fill="none"
+          className="absolute inset-0 h-full w-full"
+        >
+          <path
+            d="M120 245H1020"
+            stroke="#F6A328"
+            strokeOpacity=".28"
+            strokeWidth="1.4"
+          />
+          {nodes.map((x, i) => (
+            <circle
+              key={x}
+              className={`hiw-node hiw-n${i + 1}`}
+              cx={x}
+              cy="245"
+              r="4.5"
+              fill="#F6A328"
+            />
+          ))}
+          <circle className="hiw-tracer" cx="0" cy="0" r="4" fill="#F6A328" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 const STEPS: { title: string; body: string }[] = [
   {
     title: "We talk (15 minutes).",
@@ -50,6 +106,8 @@ export function HowItWorks() {
           </li>
         ))}
       </ol>
+
+      <ProcessStrip />
 
       <p className="mt-12 max-w-[44rem] text-[1.1rem] font-medium leading-[1.6] text-ink lg:max-w-[52rem] lg:text-[1.25rem]">
         {
