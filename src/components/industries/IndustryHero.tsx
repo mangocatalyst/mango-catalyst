@@ -1,15 +1,18 @@
 import type { ReactNode } from "react";
 import { Section } from "@/components/layout/Section";
+import { TradeArtTilt } from "@/components/industries/TradeArtTilt";
 
 /**
  * Shared opener for /industries pages: answer-first H1 + intro on the left,
- * the trade's blueprint line drawing behind it as a right-of-center backdrop
+ * the trade's hand-drafted drawing behind it as a right-of-center backdrop
  * with the home hero's treatment: same scale ladder, same 25%-in-context
- * dimming, same ambient-motion gate (see .trade-art in globals.css). The
+ * dimming, same ambient-motion gate, and since 2026-07-19 the hero's drift-in
+ * entrance plus a slighter pointer parallax (see .trade-art / .ta-par /
+ * .ta-sheet in globals.css, driven by TradeArtTilt). The
  * dimming is plain opacity, not the hero's .hb-veil: the veil exists only
  * because opacity would flatten the hero's preserve-3d stack, and over a
  * glow-less flat section it composites as a visible box. Art is decorative
- * (aria-hidden) and ships zero JS.
+ * (aria-hidden) and ships zero JS beyond the tilt enhancer, which no-ops on touch and reduced motion.
  */
 export function IndustryHero({
   title,
@@ -28,6 +31,7 @@ export function IndustryHero({
     >
       <div aria-hidden className="hero-glow" />
       <div aria-hidden className="trade-art">{art}</div>
+      <TradeArtTilt />
       <div className="relative">
         <div aria-hidden className="h-[3px] w-10 bg-amber" />
         <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-balance text-ink">
