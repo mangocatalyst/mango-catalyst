@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
 import { HeroTilt } from "@/components/sections/HeroTilt";
+import { HaloPulser } from "@/components/sections/HaloPulser";
 
 /**
  * Hero backdrop: "Night Shift Drafting", raster-hybrid (Bryan's lock,
@@ -142,6 +143,7 @@ export function HeroBackdrop() {
         <div className="hb-veil" />
       </div>
       <HeroTilt />
+      <HaloPulser />
     </>
   );
 }
