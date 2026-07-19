@@ -26,7 +26,7 @@ export function Hero() {
       className="hero-reveal relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-base"
     >
       {/* Backdrop: matte navy glow (three drifting layers, see
-          .hero-glow-b/-c) plus the Missing Link light-table artwork
+          .hero-glow-b/-c) plus the Night Shift Drafting artwork
           right-of-center (see HeroBackdrop). */}
       <div aria-hidden className="hero-glow" />
       <div aria-hidden className="hero-glow-b" />

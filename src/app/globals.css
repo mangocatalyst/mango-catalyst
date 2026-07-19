@@ -295,17 +295,17 @@ body {
   );
 }
 
-/* Retuned 2026-07-16: the original 5%/0.25-swing drift measured near-zero
-   visible change (Bryan: "I do not see that"). Bigger travel and a wider
-   opacity swing keep it ambient but perceptible. */
+/* Locked middle ground (2026-07-19): the 2026-07-16 tune was imperceptible
+   on Bryan's machines, the diagnostic level was confirmed visible; this
+   sits between them. */
 @keyframes hero-glow-drift-b {
   0%,
   100% {
     transform: translate(0, 0) scale(1);
-    opacity: 0.45;
+    opacity: 0.25;
   }
   50% {
-    transform: translate(9%, 6%) scale(1.14);
+    transform: translate(15%, 10%) scale(1.24);
     opacity: 1;
   }
 }
@@ -313,21 +313,21 @@ body {
 @keyframes hero-glow-drift-c {
   0%,
   100% {
-    transform: translate(0, 0) scale(1.1);
+    transform: translate(0, 0) scale(1.2);
     opacity: 1;
   }
   50% {
-    transform: translate(-8%, -7%) scale(1);
-    opacity: 0.4;
+    transform: translate(-14%, -11%) scale(0.95);
+    opacity: 0.22;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
   .hero-glow-b {
-    animation: hero-glow-drift-b 16s ease-in-out infinite;
+    animation: hero-glow-drift-b 11s ease-in-out infinite;
   }
   .hero-glow-c {
-    animation: hero-glow-drift-c 22s ease-in-out infinite;
+    animation: hero-glow-drift-c 15s ease-in-out infinite;
   }
 }
 
@@ -457,11 +457,11 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Hero backdrop artwork: "The Missing Link" (Bryan's round-5 pick).
-   A CSS-3D light table: call log, dispatch board, job ticket, and invoice
-   acetates layered in depth, threaded by ONE amber link line that draws
-   itself through the job's real-world flow (call, dispatch, ticket,
-   invoice) with a ring flash at each stop. Rendered by HeroBackdrop as an
+   Hero backdrop artwork: "Night Shift Drafting" (Bryan's lock, 2026-07-19).
+   Four hand-drafted raster cutouts (desk phone, dispatch monitor, field
+   tablet, crumpled invoice) layered in CSS-3D depth, threaded by ONE live
+   amber SVG line that draws itself through the job's real-world flow with
+   a ring flash at each stop and a blooming tracer that walks it. Rendered by HeroBackdrop as an
    aria-hidden layer anchored right; dimming to hero strength is a solid
    bg-base veil on top because opacity on a 3D ancestor flattens
    preserve-3d.
@@ -479,7 +479,7 @@ body {
   width: 660px;
   height: 430px;
   translate: 0 -50%;
-  scale: 0.8;
+  scale: 0.88;
   transform-origin: center right;
   pointer-events: none;
 }
@@ -490,20 +490,20 @@ body {
   .hero-art {
     top: 53%;
     right: -1rem;
-    scale: 0.9;
+    scale: 1;
   }
 }
 
 @media (min-width: 64rem) {
   .hero-art {
-    scale: 1;
+    scale: 1.1;
     right: 0;
   }
 }
 
 @media (min-width: 80rem) {
   .hero-art {
-    scale: 1.15;
+    scale: 1.26;
   }
 }
 
@@ -535,28 +535,9 @@ body {
   top: 0;
 }
 
-/* Depth stack, back to front. --hb-px/--hb-py come from the tilt script;
-   each layer rides them at its own rate for parallax between sheets. */
-.hb-l1 {
-  left: 12px;
-  top: 24px;
-  transform: translate3d(calc(var(--hb-px, 0px) * 0.12), calc(var(--hb-py, 0px) * 0.12), -44px) rotate(-2.5deg);
-}
-.hb-l2 {
-  left: 352px;
-  top: 196px;
-  transform: translate3d(calc(var(--hb-px, 0px) * 0.34), calc(var(--hb-py, 0px) * 0.34), -12px) rotate(2.5deg);
-}
-.hb-l3 {
-  left: 96px;
-  top: 252px;
-  transform: translate3d(calc(var(--hb-px, 0px) * 0.58), calc(var(--hb-py, 0px) * 0.58), 22px) rotate(-2deg);
-}
-.hb-l4 {
-  left: 150px;
-  top: 52px;
-  transform: translate3d(calc(var(--hb-px, 0px) * 0.85), calc(var(--hb-py, 0px) * 0.85), 60px) rotate(1.2deg);
-}
+/* Depth stack: the four raster cutout layers carry their left/top/parallax
+   inline in HeroBackdrop (Night Shift Drafting, 2026-07-19); only the link
+   layer keeps a class. */
 .hb-l5 {
   width: 660px;
   height: 430px;
@@ -598,6 +579,8 @@ body {
   transform-origin: center;
 }
 
+/* The tracer got its bloom (2026-07-19): amber core + two soft light halos,
+   the "job moving through the system" reads as a glow instead of a bare dot. */
 .hb-tracer {
   position: absolute;
   left: 0;
@@ -606,9 +589,13 @@ body {
   height: 7px;
   background: #f6a328;
   transform: rotate(45deg);
+  box-shadow:
+    0 0 6px 2px rgba(246, 163, 40, 0.55),
+    0 0 20px 7px rgba(246, 163, 40, 0.22);
   display: none;
   opacity: 0;
-  offset-path: path("M208 96 L208 182 L306 182 L306 310 L258 310 L258 356 L420 356 L420 264 L481 264");
+  /* offset-path comes inline from HeroBackdrop's LINK_ROUTE so the tracer
+     can never drift from the drawn thread again. */
   offset-rotate: 0deg;
 }
 
@@ -616,7 +603,7 @@ body {
   position: absolute;
   inset: -120px;
   background: var(--color-base);
-  opacity: 0.75;
+  opacity: 0.8;
   /* Feathered edges (2026-07-06): the drifting hero glows pass under the art;
      a hard-edged veil chopped them with a visible seam. Full dim from the
      plane boundary inward, 120px fade outside it. */
@@ -653,13 +640,10 @@ body {
 @keyframes hb-in1 {
   0% {
     opacity: 0;
-    transform: translate(-120px, 34px) rotate(-6deg);
+    transform: translate(-44px, 14px) rotate(-2deg);
   }
-  5% {
+  6% {
     opacity: 1;
-  }
-  11% {
-    transform: translate(5px, -3px) rotate(0.5deg);
   }
   14%,
   100% {
@@ -672,13 +656,10 @@ body {
   0%,
   1% {
     opacity: 0;
-    transform: translate(130px, 44px) rotate(5deg);
+    transform: translate(48px, 16px) rotate(1.6deg);
   }
-  6% {
+  7% {
     opacity: 1;
-  }
-  12% {
-    transform: translate(-4px, 2px) rotate(-0.4deg);
   }
   15%,
   100% {
@@ -691,13 +672,10 @@ body {
   0%,
   2% {
     opacity: 0;
-    transform: translate(-36px, 120px) rotate(-4deg);
+    transform: translate(-14px, 46px) rotate(-1.4deg);
   }
-  7% {
+  8% {
     opacity: 1;
-  }
-  13% {
-    transform: translate(3px, -4px) rotate(0.5deg);
   }
   16%,
   100% {
@@ -710,18 +688,62 @@ body {
   0%,
   3% {
     opacity: 0;
-    transform: translate(96px, -110px) rotate(4deg);
+    transform: translate(36px, -40px) rotate(1.4deg);
   }
-  8% {
+  9% {
     opacity: 1;
-  }
-  13% {
-    transform: translate(-5px, 4px) rotate(-0.5deg);
   }
   16%,
   100% {
     opacity: 1;
     transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/* Per-object ambient drift (2026-07-19): each cutout floats independently
+   around its thread anchor — four distinct cycles, phases and directions so
+   no two objects ever move together. Amplitudes stay small enough that the
+   anchored amber thread keeps reading as attached. */
+@keyframes hb-drift-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(6px, -9px) rotate(0.7deg);
+  }
+}
+@keyframes hb-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(-8px, 5px) rotate(-0.6deg);
+  }
+  66% {
+    transform: translate(4px, 8px) rotate(0.4deg);
+  }
+}
+@keyframes hb-drift-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-6px, -8px) rotate(-0.6deg);
+  }
+}
+@keyframes hb-drift-4 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  40% {
+    transform: translate(8px, 6px) rotate(0.8deg);
+  }
+  75% {
+    transform: translate(-4px, 9px) rotate(-0.5deg);
   }
 }
 
@@ -731,7 +753,7 @@ body {
     transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translate3d(0, -7px, 0) rotate(0.4deg);
+    transform: translate3d(0, -4px, 0) rotate(0.2deg);
   }
 }
 
@@ -765,6 +787,9 @@ body {
   }
 }
 
+/* The tracer sweeps the thread continuously; each waypoint circle flares
+   and REMAINS lit as it passes (hb-nodeglow below), so acknowledgment never
+   depends on the dot stopping pixel-perfect on a circle (2026-07-19). */
 @keyframes hb-run {
   0% {
     offset-distance: 0%;
@@ -794,6 +819,41 @@ body {
   }
 }
 
+/* Waypoint acknowledgment: quick flare to bright amber with a soft halo, a
+   ~4s lit hold, then fade. Short enough that all four sit dark for a beat
+   before the tracer's next lap -- the lap visibly resets. */
+/* The infinite glow cycle also owns opacity, overriding hb-nodein's forward
+   fill while motion is on: dots REST DIM (0.3) and only reach full presence
+   while the tracer acknowledges them. Static contexts keep the plain 0.95
+   dots from the base composition. */
+@keyframes hb-nodeglow {
+  0% {
+    opacity: 0.3;
+    stroke: #f6a328;
+    stroke-width: 1.2;
+    filter: none;
+  }
+  3% {
+    opacity: 1;
+    stroke: #ffb84d;
+    stroke-width: 2.2;
+    filter: drop-shadow(0 0 5px rgba(246, 163, 40, 0.85));
+  }
+  25% {
+    opacity: 1;
+    stroke: #ffb84d;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 4px rgba(246, 163, 40, 0.6));
+  }
+  40%,
+  100% {
+    opacity: 0.3;
+    stroke: #f6a328;
+    stroke-width: 1.2;
+    filter: none;
+  }
+}
+
 @keyframes hb-blip {
   0%,
   100% {
@@ -807,6 +867,19 @@ body {
 @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
   .hb-float {
     animation: hb-float 9s ease-in-out infinite;
+  }
+
+  .hb-f1 {
+    animation: hb-drift-1 9s ease-in-out infinite;
+  }
+  .hb-f2 {
+    animation: hb-drift-2 17s ease-in-out 1.5s infinite;
+  }
+  .hb-f3 {
+    animation: hb-drift-3 11.5s ease-in-out 3s infinite;
+  }
+  .hb-f4 {
+    animation: hb-drift-4 13s ease-in-out 5s infinite;
   }
 
   .hb-e1 {
@@ -832,35 +905,44 @@ body {
   }
 
   /* Node pops + ring flashes at the pen's arrival at each stop. Path length
-     721px; fractions 0 / .255 / .563 / 1.0 of the 5.5s draw. */
+     459px; measured junction fractions 0 / .273 / .589 / .861 of the 5.5s
+     draw (the thread has a short trailing tail past waypoint 4). */
   .hb-node {
     opacity: 0;
     transform-box: fill-box;
     transform-origin: center;
   }
   .hb-n1 {
-    animation: hb-nodein 0.35s ease-out 2.2s forwards;
+    animation:
+      hb-nodein 0.35s ease-out 2.2s forwards,
+      hb-nodeglow 16s linear 9s infinite;
   }
   .hb-n2 {
-    animation: hb-nodein 0.35s ease-out 3.6s forwards;
+    animation:
+      hb-nodein 0.35s ease-out 3.7s forwards,
+      hb-nodeglow 16s linear 10.75s infinite;
   }
   .hb-n3 {
-    animation: hb-nodein 0.35s ease-out 5.3s forwards;
+    animation:
+      hb-nodein 0.35s ease-out 5.4s forwards,
+      hb-nodeglow 16s linear 12.77s infinite;
   }
   .hb-n4 {
-    animation: hb-nodein 0.35s ease-out 7.7s forwards;
+    animation:
+      hb-nodein 0.35s ease-out 6.9s forwards,
+      hb-nodeglow 16s linear 14.51s infinite;
   }
   .hb-ring1 {
     animation: hb-ringflash 0.7s ease-out 2.2s 1;
   }
   .hb-ring2 {
-    animation: hb-ringflash 0.7s ease-out 3.6s 1;
+    animation: hb-ringflash 0.7s ease-out 3.7s 1;
   }
   .hb-ring3 {
-    animation: hb-ringflash 0.7s ease-out 5.3s 1;
+    animation: hb-ringflash 0.7s ease-out 5.4s 1;
   }
   .hb-ring4 {
-    animation: hb-ringflash 0.7s ease-out 7.7s 1;
+    animation: hb-ringflash 0.7s ease-out 6.9s 1;
   }
 
   /* Ambient: the job rides the link every 16s, the navy now-line creeps,
@@ -877,15 +959,6 @@ body {
   }
   .hb-blip2 {
     animation: hb-blip 3.4s ease-in-out 1.7s infinite;
-  }
-  .hb-wave rect {
-    animation: hb-blip 2.8s ease-in-out infinite;
-  }
-  .hb-wave rect:nth-child(2n) {
-    animation-delay: 0.7s;
-  }
-  .hb-wave rect:nth-child(3n) {
-    animation-delay: 1.4s;
   }
 }
 

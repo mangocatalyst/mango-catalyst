@@ -33,6 +33,10 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  /* Dev-only: Next blocks cross-origin requests to dev assets, which silently
+     killed hydration (and every JS-driven effect) when browsing the dev
+     server over the tailnet from another machine (2026-07-19). */
+  allowedDevOrigins: ["mango.tail31d948.ts.net", "mango.local"],
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },

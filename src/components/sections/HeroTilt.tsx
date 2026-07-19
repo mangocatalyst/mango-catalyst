@@ -36,15 +36,25 @@ export function HeroTilt() {
       let ty = 0;
       if (!home && px !== null && sec && plane) {
         const r = sec.getBoundingClientRect();
-        tx = ((px - r.left) / r.width - 0.5) * 8;
-        ty = (0.5 - (py - r.top) / r.height) * 8;
+        // Tuned 2026-07-19 round 2: whole-plane lean dialed back (+/-4deg),
+        // per-layer separation dialed UP via the px/py multipliers below --
+        // the depth reads from elements sliding, not the card tilting.
+        // Fractions clamped: after a scroll the cursor can sit far outside
+        // the section rect and would otherwise fling the plane.
+        const fx = Math.min(1, Math.max(0, (px - r.left) / r.width));
+        const fy = Math.min(1, Math.max(0, (py - r.top) / r.height));
+        tx = (fx - 0.5) * 6;
+        ty = (0.5 - fy) * 6;
       }
-      cx += (tx - cx) * 0.09;
-      cy += (ty - cy) * 0.09;
+      // Homing (cursor left the hero, e.g. mid-scroll) drifts back at a
+      // quarter of the tracking rate -- a settle, not a snap-back.
+      const ease = home ? 0.022 : 0.055;
+      cx += (tx - cx) * ease;
+      cy += (ty - cy) * ease;
       if (plane) {
         plane.style.transform = `rotateX(${(26 + cy).toFixed(2)}deg) rotateY(${cx.toFixed(2)}deg) rotateZ(-4deg)`;
-        plane.style.setProperty("--hb-px", `${(cx * 6).toFixed(1)}px`);
-        plane.style.setProperty("--hb-py", `${(cy * -4).toFixed(1)}px`);
+        plane.style.setProperty("--hb-px", `${(cx * 10).toFixed(1)}px`);
+        plane.style.setProperty("--hb-py", `${(cy * -7).toFixed(1)}px`);
       }
       if (Math.abs(tx - cx) > 0.004 || Math.abs(ty - cy) > 0.004)
         raf = requestAnimationFrame(frame);
