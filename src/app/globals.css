@@ -507,6 +507,16 @@ body {
   }
 }
 
+/* Fluid scale (2026-07-19): a line through the approved step anchors
+   (1.0 @ 768px, 1.1 @ 1024, 1.26 @ 1280), growing to a 1.6 cap on big
+   displays instead of freezing at 1.26. Declared after the steps so
+   browsers without calc length-division keep the stepped fallback. */
+@media (min-width: 48rem) {
+  .hero-art {
+    scale: clamp(1, calc(0.61 + 100vw / 1970px), 1.6);
+  }
+}
+
 .hb-persp {
   position: absolute;
   inset: 0;
