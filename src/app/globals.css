@@ -788,7 +788,7 @@ body {
 }
 
 /* The tracer sweeps the thread continuously; each waypoint circle flares
-   and REMAINS lit as it passes (hb-nodeglow below), so acknowledgment never
+   and REMAINS lit as it passes (HaloPulser flare), so acknowledgment never
    depends on the dot stopping pixel-perfect on a circle (2026-07-19). */
 @keyframes hb-run {
   0% {
@@ -819,36 +819,19 @@ body {
   }
 }
 
-/* Waypoint acknowledgment: quick flare to bright amber, a ~4s lit hold, then
-   fade. Short enough that all four sit dark for a beat before the tracer's
-   next lap -- the lap visibly resets. The halo is NOT a filter: a drop-shadow
-   under the 0.8 veil nets out to ~3 RGB points, invisible (measured
-   2026-07-19). The sibling ring carries the halo instead (hb-ringhalo). */
-/* The infinite glow cycle also owns opacity, overriding hb-nodein's forward
-   fill while motion is on: dots REST DIM (0.3) and only reach full presence
-   while the tracer acknowledges them. Static contexts keep the plain 0.95
-   dots from the base composition. */
-@keyframes hb-nodeglow {
-  0% {
+/* Waypoint acknowledgment (flare + halo) lives in HaloPulser.tsx as one-shot
+   WAAPI animations per tracer pass. It was an infinite 16s CSS cycle
+   (hb-nodeglow, git history): Bryan's renderer let the cycle go visually
+   stale in its long dead tail, exposing hb-nodein's 0.95 forward fill as a
+   stuck-bright node until the next iteration boundary (2026-07-19, four
+   fix rounds). Do NOT reintroduce long-dead-tail infinite CSS animations
+   here; hb-run survives only because its dead tail is opacity 0 either way.
+   hb-nodedim is the one-shot handoff: at each node's FIRST tracer arrival
+   it drops the underlying value to the 0.3 rest state, so flares composite
+   over dim, never over bright. Static contexts keep the plain 0.95 dots. */
+@keyframes hb-nodedim {
+  to {
     opacity: 0.3;
-    stroke: #f6a328;
-    stroke-width: 1.2;
-  }
-  3% {
-    opacity: 1;
-    stroke: #ffb84d;
-    stroke-width: 2.2;
-  }
-  25% {
-    opacity: 1;
-    stroke: #ffb84d;
-    stroke-width: 2;
-  }
-  40%,
-  100% {
-    opacity: 0.3;
-    stroke: #f6a328;
-    stroke-width: 1.2;
   }
 }
 
@@ -918,22 +901,22 @@ body {
   .hb-n1 {
     animation:
       hb-nodein 0.35s ease-out 2.2s forwards,
-      hb-nodeglow 16s linear 9s infinite;
+      hb-nodedim 0.45s linear 9s forwards;
   }
   .hb-n2 {
     animation:
       hb-nodein 0.35s ease-out 3.7s forwards,
-      hb-nodeglow 16s linear 10.75s infinite;
+      hb-nodedim 0.45s linear 10.75s forwards;
   }
   .hb-n3 {
     animation:
       hb-nodein 0.35s ease-out 5.4s forwards,
-      hb-nodeglow 16s linear 12.77s infinite;
+      hb-nodedim 0.45s linear 12.77s forwards;
   }
   .hb-n4 {
     animation:
       hb-nodein 0.35s ease-out 6.9s forwards,
-      hb-nodeglow 16s linear 14.51s infinite;
+      hb-nodedim 0.45s linear 14.51s forwards;
   }
   /* One-shot draw flash only; per-lap halo pulses come from HaloPulser. */
   .hb-ring1 {
@@ -1010,6 +993,33 @@ body {
 @media (min-width: 80rem) {
   .trade-art {
     width: 720px;
+  }
+}
+
+/* Trade art depth stack (2026-07-19). Three elements, one transform each, so
+   nothing fights: .trade-art owns the ambient float (hb-float), .ta-par owns
+   the pointer parallax, .ta-sheet owns the one-shot entrance. Stacking them
+   on a single element would mean the last animation in the list silently
+   wins the transform.
+   Parallax moves the raster and its amber overlay TOGETHER on purpose: the
+   amber node is pinned to a feature in the drawing underneath, so any
+   differential shift between the two layers would slide it off its anchor. */
+.ta-par {
+  transform: translate3d(var(--ta-px, 0px), var(--ta-py, 0px), 0);
+  will-change: transform;
+}
+
+/* Entrance mirrors the hero's hb-in family: drift in from off-axis and
+   settle. Opacity is 0 -> 1 here and multiplies with .trade-art's 0.25, so
+   the art still lands at the same in-context dimming. */
+@keyframes ta-in {
+  0% {
+    opacity: 0;
+    transform: translate(34px, 12px) rotate(0.7deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
   }
 }
 
@@ -1138,10 +1148,22 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
-  /* Ambient only, no entrance: the whole sheet floats like the hero plane,
-     the one amber node breathes, plus one thematic touch per trade. */
+  /* The sheet floats like the hero plane, drifts in on load, leans slightly
+     toward the pointer, the one amber node breathes, plus one thematic touch
+     per trade. (Entrance + parallax added 2026-07-19; before that the trade
+     art was ambient-only and the comment here said so.) */
   .trade-art {
     animation: hb-float 11s ease-in-out infinite;
+  }
+
+  .ta-sheet {
+    animation: ta-in 1.15s cubic-bezier(0.22, 0.85, 0.3, 1) 1 both;
+  }
+
+  /* Smoothing lives in a transition, not a rAF homing loop: the lean is
+     slight enough that the extra machinery would not show. */
+  .ta-par {
+    transition: transform 420ms cubic-bezier(0.22, 0.85, 0.3, 1);
   }
 
   .ta-amber {
