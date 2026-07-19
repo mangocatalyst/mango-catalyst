@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { Section } from "@/components/layout/Section";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { Card } from "@/components/ui/Card";
@@ -34,12 +36,14 @@ export function CredibilityBar() {
         }
       />
 
-      {/* ponytail: photo is a plain placeholder box (no next/image, no asset
-          yet); swap the div for the real headshot when Bryan supplies it. */}
       <div className="mt-8 flex items-center gap-5">
-        <div className="flex size-24 shrink-0 items-center justify-center rounded-full border border-dashed border-body/40 p-2 text-center text-[0.7rem] leading-tight text-body/60">
-          {"Photo coming soon"}
-        </div>
+        <Image
+          src="/bryan-koop-mango-catalyst.webp"
+          alt="Illustrated portrait of Bryan, founder of Mango Catalyst"
+          width={192}
+          height={192}
+          className="size-24 shrink-0 rounded-full bg-white"
+        />
         <p className="max-w-[44rem] leading-relaxed text-body">
           <strong className="font-semibold text-ink">{"I'm Bryan."}</strong>{" "}
           {"Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself."}
