@@ -509,7 +509,7 @@
     </div>
   </div><!-- /#tab-registration -->
 
-  <div class="foot">Install White Board · <span id="ver">v2026-07-19.2</span></div>
+  <div class="foot">Install White Board · <span id="ver">v2026-07-20.1</span></div>
 </div>
 
 <script>
@@ -1549,12 +1549,18 @@
     if (document.querySelector(".selbox:checked") || document.activeElement?.classList.contains("fld")) return;
     const units = regData.units || [];
     document.querySelector("#reg-tbl tbody").innerHTML = units.map(regRow).join("");
-    $("rc-needs").textContent = units.filter(needsAction).length;
-    $("rc-registered").textContent = units.filter((u) => isRegistered(u.status)).length;
     $("reg-stamp").textContent = `${units.length} unit${units.length === 1 ? "" : "s"}`;
-    renderStatusMenu(units);
+    renderStatusMenu(units); // initializes regHidden on first load; must run before counting
+    updateRegCounts(units);
     applyRegFilter();
     updateQueueBtn(); // fresh tbody = no ticks; reset the button
+  }
+  // chip counts skip statuses hidden by the dropdown (Ignore by default), so the
+  // badge only ever counts rows that are actually findable in the table
+  function updateRegCounts(units) {
+    const vis = units.filter((u) => !(regHidden && regHidden.has(u.status || "")));
+    $("rc-needs").textContent = vis.filter(needsAction).length;
+    $("rc-registered").textContent = vis.filter((u) => isRegistered(u.status)).length;
   }
   function applyRegFilter() {
     const showReg = $("showReg").checked;
@@ -1584,7 +1590,7 @@
     regHidden ||= new Set();
     if (cb.checked) regHidden.delete(cb.dataset.status); else regHidden.add(cb.dataset.status);
     saveRegHidden();
-    if (regData) renderStatusMenu(regData.units || []);
+    if (regData) { renderStatusMenu(regData.units || []); updateRegCounts(regData.units || []); }
     applyRegFilter();
   });
   async function loadRegistration() { // demo: inlined synthetic equipment, no server
