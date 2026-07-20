@@ -4,12 +4,9 @@ import { useEffect } from "react";
 
 /* Per-lap waypoint acknowledgment (node flare + ring halo), driven as fresh
    one-shot WAAPI animations off the tracer's animationstart/animationiteration
-   events. This was infinite 16s CSS twice (hb-ringhalo, then the original
-   hb-nodeglow): Bryan's renderer lets long-dead-tail infinite CSS animations
-   go visually stale after the first active window, exposing whatever value
-   sits underneath (2026-07-19, four fix rounds). One-shot Animations have no
-   iteration boundary to go stale at, and sync can't drift because the
-   tracer's own clock is the event source. */
+   events. The targets are recurring-only overlay circles: the initial CSS
+   draw and the resting nodes use separate SVG elements, avoiding the
+   CSS-to-WAAPI compositor handoff that could stick on the second pass. */
 
 const STAGGERS = [0, 1750, 3770, 5510]; // tracer arrival at n1..n4 within a lap
 const LAP_MS = 16000;
@@ -21,23 +18,25 @@ const PULSE: Keyframe[] = [
 ];
 
 /* Node flare: the old hb-nodeglow active window (3%/25%/40% of 16s) as a
-   6.4s one-shot. fill none returns the node to hb-nodedim's 0.3 rest. */
+   6.4s one-shot. The transparent overlay reveals the dim resting node when
+   it finishes instead of animating that node directly. */
 const FLARE: Keyframe[] = [
-  { opacity: 0.3, stroke: "#f6a328", strokeWidth: "1.2", offset: 0 },
+  { opacity: 0, stroke: "#f6a328", strokeWidth: "1.2", offset: 0 },
   { opacity: 1, stroke: "#ffb84d", strokeWidth: "2.2", offset: 0.075 },
   { opacity: 1, stroke: "#ffb84d", strokeWidth: "2", offset: 0.625 },
-  { opacity: 0.3, stroke: "#f6a328", strokeWidth: "1.2", offset: 1 },
+  { opacity: 0, stroke: "#f6a328", strokeWidth: "1.2", offset: 1 },
 ];
 
 export function HaloPulser() {
   useEffect(() => {
-    const tracer = document.querySelector<HTMLElement>(".hb-tracer");
-    if (!tracer) return;
+    const hero = document.getElementById("top");
+    const tracer = hero?.querySelector<HTMLElement>(".hb-tracer");
+    if (!hero || !tracer) return;
     const rings = [1, 2, 3, 4].map((i) =>
-      document.querySelector<SVGCircleElement>(`.hb-ring${i}`)
+      hero.querySelector<SVGCircleElement>(`.hb-ring-pulse${i}`)
     );
     const nodes = [1, 2, 3, 4].map((i) =>
-      document.querySelector<SVGCircleElement>(`.hb-n${i}`)
+      hero.querySelector<SVGCircleElement>(`.hb-node-flare${i}`)
     );
     const timers: number[] = [];
 

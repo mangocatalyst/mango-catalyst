@@ -121,21 +121,72 @@ export function HeroBackdrop() {
                 </div>
               </div>
               <div className="hb-layer hb-l5">
-                <svg className="hb-link" width="660" height="430" viewBox="0 0 660 430">
+                <svg
+                  className="hb-link hb-link-path-layer"
+                  width="660"
+                  height="430"
+                  viewBox="0 0 660 430"
+                >
                   <path className="hb-link-path" d={LINK_ROUTE} pathLength="100" />
-                  {POINTS.map(([x, y], i) => (
-                    <circle key={`r${i}`} className={`hb-ring hb-ring${i + 1}`} cx={x} cy={y} r="5" />
-                  ))}
-                  {POINTS.map(([x, y], i) => (
-                    <circle key={`n${i}`} className={`hb-node hb-n${i + 1}`} cx={x} cy={y} r="4" />
-                  ))}
                 </svg>
-                {/* offset-path inline from LINK_ROUTE: one source of truth,
-                    the CSS copy drifted out of sync once already. */}
+                {/* The tracer sits between the thread and node layers so the
+                    opaque node centers interrupt it at every waypoint. */}
                 <div
                   className="hb-tracer"
                   style={{ offsetPath: `path("${LINK_ROUTE}")` }}
                 />
+                <svg
+                  className="hb-link hb-link-node-layer"
+                  width="660"
+                  height="430"
+                  viewBox="0 0 660 430"
+                >
+                  {POINTS.map(([x, y], i) => (
+                    <circle
+                      key={`m${i}`}
+                      className="hb-node-mask"
+                      cx={x}
+                      cy={y}
+                      r="5"
+                    />
+                  ))}
+                  {POINTS.map(([x, y], i) => (
+                    <circle
+                      key={`d${i}`}
+                      className={`hb-ring hb-ring-draw${i + 1}`}
+                      cx={x}
+                      cy={y}
+                      r="5"
+                    />
+                  ))}
+                  {POINTS.map(([x, y], i) => (
+                    <circle
+                      key={`n${i}`}
+                      className={`hb-node hb-n${i + 1}`}
+                      cx={x}
+                      cy={y}
+                      r="4"
+                    />
+                  ))}
+                  {POINTS.map(([x, y], i) => (
+                    <circle
+                      key={`p${i}`}
+                      className={`hb-ring hb-ring-pulse${i + 1}`}
+                      cx={x}
+                      cy={y}
+                      r="5"
+                    />
+                  ))}
+                  {POINTS.map(([x, y], i) => (
+                    <circle
+                      key={`f${i}`}
+                      className={`hb-node-flare hb-node-flare${i + 1}`}
+                      cx={x}
+                      cy={y}
+                      r="4"
+                    />
+                  ))}
+                </svg>
               </div>
             </div>
           </div>
