@@ -551,6 +551,7 @@ body {
 .hb-l5 {
   width: 660px;
   height: 430px;
+  isolation: isolate;
   transform: translate3d(calc(var(--hb-px, 0px) * 0.5), calc(var(--hb-py, 0px) * 0.5), 70px);
 }
 
@@ -561,7 +562,17 @@ body {
 
 .hb-link {
   display: block;
+  position: absolute;
+  inset: 0;
   overflow: visible;
+}
+
+.hb-link-path-layer {
+  z-index: 0;
+}
+
+.hb-link-node-layer {
+  z-index: 2;
 }
 
 /* The one amber element: link line + junction nodes + tracer. Base state is
@@ -578,6 +589,23 @@ body {
   stroke: #f6a328;
   stroke-width: 1.2;
   opacity: 0.95;
+}
+
+/* Opaque centers sit above both the thread and tracer. The rings remain
+   transparent, while the amber stroke reads as a real junction rather than
+   a line passing through a hollow circle. */
+.hb-node-mask {
+  fill: var(--color-base);
+  stroke: none;
+}
+
+.hb-node-flare {
+  fill: none;
+  stroke: #f6a328;
+  stroke-width: 1.2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .hb-ring {
@@ -604,6 +632,7 @@ body {
     0 0 20px 7px rgba(246, 163, 40, 0.22);
   display: none;
   opacity: 0;
+  z-index: 1;
   /* offset-path comes inline from HeroBackdrop's LINK_ROUTE so the tracer
      can never drift from the drawn thread again. */
   offset-rotate: 0deg;
@@ -836,9 +865,9 @@ body {
    stuck-bright node until the next iteration boundary (2026-07-19, four
    fix rounds). Do NOT reintroduce long-dead-tail infinite CSS animations
    here; hb-run survives only because its dead tail is opacity 0 either way.
-   hb-nodedim is the one-shot handoff: at each node's FIRST tracer arrival
-   it drops the underlying value to the 0.3 rest state, so flares composite
-   over dim, never over bright. Static contexts keep the plain 0.95 dots. */
+   hb-nodedim resets all four resting nodes together after the initial draw,
+   before hb-run starts at 9s. That gives the first recurring pass the same
+   0.3 base state as every later pass. Static contexts keep the 0.95 dots. */
 @keyframes hb-nodedim {
   to {
     opacity: 0.3;
@@ -902,7 +931,8 @@ body {
 
   /* Node pops + ring flashes at the pen's arrival at each stop. Path length
      459px; measured junction fractions 0 / .273 / .589 / .861 of the 5.5s
-     draw (the thread has a short trailing tail past waypoint 4). */
+     draw (the thread has a short trailing tail past waypoint 4). These are
+     initial-draw elements only; HaloPulser owns separate recurring overlays. */
   .hb-node {
     opacity: 0;
     transform-box: fill-box;
@@ -911,34 +941,34 @@ body {
   .hb-n1 {
     animation:
       hb-nodein 0.35s ease-out 2.2s forwards,
-      hb-nodedim 0.45s linear 9s forwards;
+      hb-nodedim 0.5s linear 8.35s forwards;
   }
   .hb-n2 {
     animation:
       hb-nodein 0.35s ease-out 3.7s forwards,
-      hb-nodedim 0.45s linear 10.75s forwards;
+      hb-nodedim 0.5s linear 8.35s forwards;
   }
   .hb-n3 {
     animation:
       hb-nodein 0.35s ease-out 5.4s forwards,
-      hb-nodedim 0.45s linear 12.77s forwards;
+      hb-nodedim 0.5s linear 8.35s forwards;
   }
   .hb-n4 {
     animation:
       hb-nodein 0.35s ease-out 6.9s forwards,
-      hb-nodedim 0.45s linear 14.51s forwards;
+      hb-nodedim 0.5s linear 8.35s forwards;
   }
   /* One-shot draw flash only; per-lap halo pulses come from HaloPulser. */
-  .hb-ring1 {
+  .hb-ring-draw1 {
     animation: hb-ringflash 0.7s ease-out 2.2s 1;
   }
-  .hb-ring2 {
+  .hb-ring-draw2 {
     animation: hb-ringflash 0.7s ease-out 3.7s 1;
   }
-  .hb-ring3 {
+  .hb-ring-draw3 {
     animation: hb-ringflash 0.7s ease-out 5.4s 1;
   }
-  .hb-ring4 {
+  .hb-ring-draw4 {
     animation: hb-ringflash 0.7s ease-out 6.9s 1;
   }
 
