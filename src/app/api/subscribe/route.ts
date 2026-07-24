@@ -11,16 +11,24 @@ import {
  * honeypot, same advisory fast-fill flag, same per-IP limiter, same log-only
  * fallback when delivery is not configured.
  *
- * Delivery (Resend Audiences):
+ * Delivery (Resend Contacts + Segments):
  * - CONTACT_DELIVERY_KEY: the Resend API key, shared with the contact route.
- * - RESEND_AUDIENCE_ID: which audience to add the address to.
+ * - RESEND_SEGMENT_ID: which segment the new contact joins.
  * Either one absent means log-only: the address is logged and success is
  * reported, so a preview deploy without secrets behaves like the real thing.
  *
- * A duplicate address is a success, not an error: someone signing up twice
- * has done nothing wrong and should not be told they have. When Resend
- * rejects a real send, the address is logged so the signup is recoverable
- * from the Vercel logs, and the visitor is told honestly that it failed.
+ * Contacts are GLOBAL now and keyed by email; audiences became segments, and
+ * POST /audiences/{id}/contacts is the old shape. The current call is
+ * POST /contacts with a segments array (resend.com/docs/api-reference/contacts/
+ * create-contact), answering 201 with {object:"contact", id}.
+ *
+ * A duplicate address is a success, not an error: someone signing up twice has
+ * done nothing wrong and should not be told they have. Resend documents no
+ * dedicated duplicate error, and its only documented 409s are about idempotency
+ * keys, so this classifies on the RESPONSE BODY rather than on the status: a
+ * body that names the contact as already existing is a success, anything else
+ * that is not 2xx is a real failure. When it does fail, the address is logged so
+ * the signup is recoverable from the Vercel logs and the visitor is told plainly.
  */
 
 /** This route's own bucket, separate from the contact form's. */
@@ -31,10 +39,12 @@ const MAX_EMAIL_LENGTH = 254;
 function respond(request: NextRequest, ok: boolean): NextResponse {
   const wantsJson = request.headers.get("accept")?.includes("application/json");
   if (wantsJson) return NextResponse.json({ ok }, { status: ok ? 200 : 400 });
-  // No-JS fallback: the contact page is the one place with server-rendered
-  // notices, so a native post lands there rather than nowhere.
+  // No-JS fallback. It used to land on /contact?sent=1, which promises "I'll get
+  // back to you within one business day" -- the wrong promise entirely for
+  // someone who just joined a mailing list. /subscribed says what actually
+  // happened.
   return NextResponse.redirect(
-    new URL(`/contact?sent=${ok ? "1" : "0"}#note`, request.url),
+    new URL(`/subscribed${ok ? "" : "?failed=1"}`, request.url),
     303,
   );
 }
@@ -75,11 +85,11 @@ export async function POST(request: NextRequest) {
   }
 
   const deliveryKey = process.env.CONTACT_DELIVERY_KEY;
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (!deliveryKey || !audienceId) {
-    if (deliveryKey && !audienceId) {
+  const segmentId = process.env.RESEND_SEGMENT_ID;
+  if (!deliveryKey || !segmentId) {
+    if (deliveryKey && !segmentId) {
       console.warn(
-        "[subscribe] CONTACT_DELIVERY_KEY set but no RESEND_AUDIENCE_ID; log only",
+        "[subscribe] CONTACT_DELIVERY_KEY set but no RESEND_SEGMENT_ID; log only",
       );
     }
     console.log("[subscribe] signup (delivery not configured, log only)", {
@@ -89,7 +99,7 @@ export async function POST(request: NextRequest) {
     return respond(request, true);
   }
 
-  const added = await addToAudience(deliveryKey, audienceId, email);
+  const added = await addContact(deliveryKey, segmentId, email);
   if (!added) {
     console.error("[subscribe] delivery failed; signup follows", { email, fastFill });
     return respond(request, false);
@@ -97,32 +107,43 @@ export async function POST(request: NextRequest) {
   return respond(request, true);
 }
 
+/** A Resend error body: {name, message}, per its documented error list. */
+function readsAsDuplicate(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const { name, message } = body as { name?: unknown; message?: unknown };
+  return /already[\s_-]?exists|already[\s_-]?(?:a )?(?:subscribed|contact)|duplicate/i.test(
+    `${typeof name === "string" ? name : ""} ${typeof message === "string" ? message : ""}`,
+  );
+}
+
 /**
- * Adds the address to a Resend audience. Plain fetch, no SDK: one endpoint,
- * one JSON body. A 409 (already a contact) counts as added.
+ * Creates the contact and puts it in the configured segment. Plain fetch, no
+ * SDK: one endpoint, one JSON body.
  */
-async function addToAudience(
+async function addContact(
   apiKey: string,
-  audienceId: string,
+  segmentId: string,
   email: string,
 ): Promise<boolean> {
   try {
-    const res = await fetch(
-      `https://api.resend.com/audiences/${encodeURIComponent(audienceId)}/contacts`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, unsubscribed: false }),
+    const res = await fetch("https://api.resend.com/contacts", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-    );
-    if (res.ok || res.status === 409) return true;
+      body: JSON.stringify({
+        email,
+        unsubscribed: false,
+        segments: [{ id: segmentId }],
+      }),
+    });
+    if (res.ok) return true;
+    const body = await res.json().catch(() => null);
+    // Already on the list is not a failure to the person who just signed up.
+    if (readsAsDuplicate(body)) return true;
     console.error(
-      `[subscribe] Resend rejected the contact: ${res.status} ${await res
-        .text()
-        .catch(() => "")}`,
+      `[subscribe] Resend rejected the contact: ${res.status} ${JSON.stringify(body)}`,
     );
     return false;
   } catch (error) {

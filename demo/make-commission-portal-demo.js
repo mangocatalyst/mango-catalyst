@@ -12,6 +12,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { scrubNames, assertNoRealNames } = require('./scrub-names.js');
 
 const SRC = path.join(os.homedir(), 'Projects', 'commission-tracker', 'portal.html');
 const OUT = path.join(__dirname, 'build', 'commission-portal.html');
@@ -139,6 +140,18 @@ swap(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The compute
     + ' Question a line by ticking Dispute on your portal, or tell the office.</div>'`);
 swap(`<!-- TEMPORARY (Bryan, 2026-07-23): this person's unpaid StarClub sales from before the`,
   `<!-- TEMPORARY: this person's unpaid StarClub sales from before the`);
+// This comment carries a real earner's real backlog: their name, their dollars, and
+// their marker count on the day it was written. The name scrub would swap the name
+// and leave the figures sitting next to a fictional person, which is worse than
+// either. Asserted, so a reworded donor comment stops the bake instead of shipping.
+swap(`  // BOTH verbs confirm, and the sentence is the master's (commission.html): count, dollars,
+  // earners. Every row on this preview starts ticked, so Pay used to move the whole of one
+  // person's backlog — $195 and 31 durable markers on Ron today — on a single unconfirmed
+  // click, with no undo verb anywhere. This preview is one person's block, so "1 earner".`,
+  `  // BOTH verbs confirm, and the sentence is the master's (commission.html): count, dollars,
+  // earners. Every row on this preview starts ticked, so Pay used to move the whole of one
+  // person's backlog on a single unconfirmed click, with no undo verb anywhere.
+  // This preview is one person's block, so "1 earner".`);
 
 html = html.split('StarClub').join('Comfort Club');
 swap('<span class="name">Star backlog</span>', '<span class="name">Comfort Club backlog</span>');
@@ -154,8 +167,12 @@ html = html.split(' — ').join(', ');
 html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n');
 
+/* ---------- names: the catch-all, after every anchored swap ---------- */
+html = scrubNames(html);
+
 /* ---------- guardrails ---------- */
-if (/northstar|passion one|bryan/i.test(html)) throw new Error('NS identity survived the transform');
+assertNoRealNames(html, 'the commission portal demo');
+if (/northstar|passion one/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');

@@ -15,6 +15,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { scrubNames, assertNoRealNames } = require('./scrub-names.js');
 
 const SRC = path.join(os.homedir(), 'Projects', 'commission-tracker', 'commission.html');
 const OUT = path.join(__dirname, 'build', 'commission.html');
@@ -243,8 +244,12 @@ html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n'); // a comment clause that runs on to the next line
 swap('<span class="muted">—</span>', '<span class="muted">not recorded</span>');
 
+/* ---------- names: the catch-all, after every anchored swap ---------- */
+html = scrubNames(html);
+
 /* ---------- guardrails ---------- */
-if (/northstar|passion one|bryan/i.test(html)) throw new Error('NS identity survived the transform');
+assertNoRealNames(html, 'the commission demo');
+if (/northstar|passion one/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');

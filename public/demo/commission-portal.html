@@ -293,6 +293,26 @@ const DEMO_COMPUTED_AT = new Date(Date.now() - 5 * 3600e3).toISOString();
 
 const demoPerson = (id) => DEMO_DB.people.filter((x) => x.id === id)[0] || { id, name: 'Unknown', note: null };
 
+/**
+ * Which of a period's two weeks a line belongs to. Normally the Monday of the
+ * week its invoice paid into; explicitly placed for a manual line (no invoice to
+ * derive from) or a moved one (being in a week its invoice did not pay into is
+ * the whole point of a move). Clamped to the period so no data change can put a
+ * row in a week the period does not own.
+ */
+function placeInWeek(l, weeks) {
+  // An explicit week still cannot be one that has not started: on the first
+  // Monday of a period, week two has not happened, and the tracker puts a manual
+  // line in the newest week that HAS begun.
+  const begun = weeks.filter((w) => w <= DEMO_TODAY);
+  const explicit = weeks[l.week_slot] && weeks[l.week_slot] <= DEMO_TODAY
+    ? weeks[l.week_slot]
+    : (begun[begun.length - 1] || weeks[0]);
+  if (l.source === 'manual' || l.deferred_from_slot != null || !l.paid_on) return explicit;
+  const derived = dMonday(l.paid_on);
+  return weeks.includes(derived) ? derived : explicit;
+}
+
 // Sign-off tooltips carry who set the mark and when, the way the server's audit join does.
 function demoStampMarks(l) {
   const at = (l.paid_on || DEMO_TODAY) + 'T09:12:00';
@@ -308,15 +328,23 @@ for (const p of DEMO_DB.periods) {
   const day = (off) => dAdd(id, off > 0 ? Math.round(off * scale) : off);
   p.id = id;
   for (const l of p.lines) {
-    l.week_id = weeks[l.week_slot] || weeks[0];
     l.person = demoPerson(l.person_id).name;
     l.paid_on = l.paid_day == null ? null : day(l.paid_day);
     l.job_completed_on = l.done_day == null ? null : day(l.done_day);
+    // A line sits in the week its invoice PAID into, which is how the tracker
+    // derives week_id. Taking the baked week_slot instead put current-period rows
+    // in the second week while their squeezed paid_on was still in the first, so
+    // a row could claim a week that has not happened yet. Only the rows that are
+    // somewhere else on purpose keep an explicit week: a manual line the office
+    // added, and a line somebody moved.
+    l.week_id = placeInWeek(l, weeks);
     if (l.deferred_from_slot != null) {
-      const src = dAdd(id, l.deferred_from_slot * 14);
-      l.deferred_from = dWeeks(src)[1];
-      l.deferred_from_label = dLabel(src);
-    } else { l.deferred_from = null; l.deferred_from_label = null; }
+      // The exact week it came from, so an undo can put it back there rather
+      // than at the top of the period, the way the tracker's marker does.
+      l.moved = { from_week: dWeeks(dAdd(id, l.deferred_from_slot * 14))[1], to_week: l.week_id };
+      l.deferred_from = l.moved.from_week;
+      l.deferred_from_label = dLabel(dPeriodOf(l.moved.from_week));
+    } else { l.moved = null; l.deferred_from = null; l.deferred_from_label = null; }
     demoStampMarks(l);
   }
   for (const u of p.unmatched.concat(p.dismissed)) u.paid_on = day(u.paid_day);
@@ -396,7 +424,7 @@ function demoNewLine(period, o) {
     note: null, flag: null, customer_name: null, job_id: null, invoice_id: null,
     paid_on: null, job_completed_on: null, job_type: null, rule_kind: null, rule_job_type: null,
     tnfr_scope: null, spiff_event: null, above_tier: null, attributed_person_id: null,
-    counterpart: null, deferred_from: null, deferred_from_label: null,
+    counterpart: null, moved: null, deferred_from: null, deferred_from_label: null,
     pulled_forward_invoice: null, paid_ahead_advance: null, releasable: 0,
   };
   const l = Object.assign(blank, o);
@@ -479,22 +507,46 @@ function demoWrite(route, body) {
   }
 
   if (route === '/api/attribute') {
-    const row = p.unmatched.filter((u) => u.invoice_id === Number(body.invoice_id))[0];
-    if (!row) throw new Error('that row is no longer waiting');
-    if (body.person_id == null) { row.attributed_person_id = null; return {}; }
-    // The real tracker records the seller and the next nightly recompute derives the
-    // line from it. The demo does both at once, so the strip and the card move together.
-    row.attributed_person_id = Number(body.person_id);
-    p.unmatched.splice(p.unmatched.indexOf(row), 1);
+    // Attribution is per INVOICE, not per strip row. Looking only in the pending
+    // strip meant that once a sale had been attributed the row was gone, and
+    // changing your mind or clearing it answered "that row is no longer waiting" --
+    // which is the one thing the control exists to let you do. The tracker stores
+    // one invoice_seller row per invoice and re-derives from it, so the demo keeps
+    // the attributed rows to one side and rebuilds the line the same way.
+    const invoiceId = Number(body.invoice_id);
+    const personId = body.person_id == null || body.person_id === '' ? null : Number(body.person_id);
+    p.attributed = p.attributed || [];
+    const pending = p.unmatched.filter((u) => u.invoice_id === invoiceId)[0];
+    const settled = p.attributed.filter((a) => a.row.invoice_id === invoiceId)[0];
+    if (!pending && !settled) throw new Error('that invoice is not in this pay period');
+
+    // Changing or clearing: the line the last attribution derived goes away first.
+    if (settled) {
+      const i = p.lines.findIndex((l) => l.id === settled.lineId);
+      if (i >= 0) p.lines.splice(i, 1);
+      p.attributed.splice(p.attributed.indexOf(settled), 1);
+    }
+    const row = pending || settled.row;
+    row.attributed_person_id = personId;
+    if (pending) p.unmatched.splice(p.unmatched.indexOf(pending), 1);
+
+    if (personId == null) {
+      // Cleared: the sale goes back to needing a look, exactly where it started.
+      p.unmatched.push(row);
+      p.unmatched.sort((a, b) => b.total - a.total);
+      return {};
+    }
     const rate = 5;
-    p.lines.push(demoNewLine(p, {
-      person_id: Number(body.person_id), kind: 'job_type', source: 'auto',
+    const line = demoNewLine(p, {
+      person_id: personId, kind: 'job_type', source: 'auto',
       rule_kind: 'job_type', rule_job_type: row.job_type, basis: row.total, pct: rate,
       computed_amount: dRound(row.total * rate / 100), customer_name: row.customer_name,
       job_id: row.job_id, invoice_id: row.invoice_id, job_type: row.job_type,
       paid_on: row.paid_on, job_completed_on: row.paid_on,
-      attributed_person_id: Number(body.person_id),
-    }));
+      attributed_person_id: personId,
+    });
+    p.lines.push(line);
+    p.attributed.push({ row, lineId: line.id });
     return {};
   }
 
@@ -526,17 +578,47 @@ function demoWrite(route, body) {
   if (route === '/api/defer') {
     const l = find(body.id);
     if (!l) throw new Error('unknown line');
-    const toId = body.undo
-      ? (l.deferred_from ? dPeriodOf(l.deferred_from) : null)
-      : dAdd(CURRENT, body.back ? -14 : 14);
-    if (!toId) throw new Error('this line has not been moved');
+    if (l.pulled_forward_invoice != null) {
+      throw new Error('this line was pulled forward to be paid THIS period; undo that instead of moving it');
+    }
+
+    if (body.undo) {
+      // Back to the EXACT week it left, from the marker, the way the tracker's
+      // deferred_lines row does it. Sending it to the top of the old period would
+      // quietly move money between that period's two weeks.
+      if (!l.moved) throw new Error('this line was not moved');
+      const home = DEMO_STORE.get(dPeriodOf(l.moved.from_week));
+      if (!home) throw new Error('the pay period it came from is not loaded');
+      if (home.status !== 'open') {
+        throw new Error('the ' + dLabel(home.id) + ' pay period is ' + home.status + '; reopen it first');
+      }
+      p.lines.splice(p.lines.indexOf(l), 1);
+      l.week_id = l.moved.from_week;
+      l.moved = null;
+      l.deferred_from = null;
+      l.deferred_from_label = null;
+      // Only the marker's own flag clears; anything more urgent raised since is
+      // somebody else's question.
+      if (l.flag === 'deferred') l.flag = null;
+      home.lines.push(l);
+      return {};
+    }
+
+    if (l.moved) throw new Error('this line has already been moved once; undo that first');
+    const toId = dAdd(CURRENT, body.back ? -14 : 14);
     const to = DEMO_STORE.get(toId);
     if (!to) throw new Error('there is no ' + dLabel(toId) + ' pay period to move it into');
     if (to.status !== 'open') throw new Error('the ' + dLabel(toId) + ' pay period is ' + to.status + '; reopen it first');
+    // Forward lands in the FIRST week of the next period (the way a manual line
+    // does); backward lands in the NEWEST week of the last one (the way a
+    // pull-forward does), because that is the week payroll is still working on.
+    const target = body.back ? dWeeks(toId)[1] : dWeeks(toId)[0];
     p.lines.splice(p.lines.indexOf(l), 1);
-    if (body.undo) { l.deferred_from = null; l.deferred_from_label = null; }
-    else { l.deferred_from = dWeeks(CURRENT)[0]; l.deferred_from_label = dLabel(CURRENT); }
-    l.week_id = dWeeks(toId)[0];
+    l.moved = { from_week: l.week_id, to_week: target };
+    l.deferred_from = l.week_id;
+    l.deferred_from_label = dLabel(CURRENT);
+    l.week_id = target;
+    if (!l.flag) l.flag = 'deferred';
     to.lines.push(l);
     return {};
   }
@@ -776,8 +858,8 @@ document.addEventListener('click', async (ev) => {
   if (!ids.length) { toast('Tick at least one Comfort Club sale', 'err'); return; }
   // BOTH verbs confirm, and the sentence is the master's (commission.html): count, dollars,
   // earners. Every row on this preview starts ticked, so Pay used to move the whole of one
-  // person's backlog, $195 and 31 durable markers on Ron today, on a single unconfirmed
-  // click, with no undo verb anywhere. This preview is one person's block, so "1 earner".
+  // person's backlog on a single unconfirmed click, with no undo verb anywhere.
+  // This preview is one person's block, so "1 earner".
   const sum = picked.reduce((tot, c) => tot + Number(c.dataset.amount || 0), 0);
   const what = ids.length + ' Comfort Club sale' + (ids.length === 1 ? '' : 's') + ' across 1 earner';
   if (!confirm(pay

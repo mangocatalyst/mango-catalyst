@@ -12,6 +12,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { scrubNames, assertNoRealNames } = require('./scrub-names.js');
 
 const SRC = path.join(os.homedir(), 'Projects', 'northstar-owner-dashboard', 'install-whiteboard-mockup.html');
 const OUT = path.join(__dirname, 'build', 'whiteboard.html');
@@ -282,7 +283,11 @@ swap('Zack is off Mondays.', 'Eli is off Mondays.');
 // em dashes in the source's code comments; the site bans them everywhere
 html = html.split(' — ').join(', ');
 
+/* ---------- names: the catch-all, after every anchored swap ---------- */
+html = scrubNames(html);
+
 /* ---------- guardrails ---------- */
+assertNoRealNames(html, 'the whiteboard demo');
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
 if (/servicetitan\.com|slack\.com|\/api\/flip|\/api\/equipment|\/api\/equip|\/api\/history|whiteboard\.json|sales-summary\.json/i.test(html)) throw new Error('live endpoint survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');

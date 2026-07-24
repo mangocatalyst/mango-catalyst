@@ -175,7 +175,7 @@ export default function DashboardsPage() {
             ],
           },
           /* The commission tracker carries NO offers node. Its price is a setup fee
-             plus a small monthly, quoted on the call (Bryan, 2026-07-24), and schema
+             plus a small monthly, quoted on the call (owner's call, 2026-07-24), and schema
              that invents a number is worse than schema that omits one. */
           serviceLd({
             name: "Commission Tracker",
@@ -413,7 +413,7 @@ export default function DashboardsPage() {
               </li>
             ))}
           </ul>
-          {/* PRICING: Bryan decision, 2026-07-24. Never invent dollars here. */}
+          {/* PRICING: the owner's decision, 2026-07-24. Never invent dollars here. */}
           <p className="mt-12 max-w-[44rem] leading-[1.65] text-body">
             {
               "Pricing works the way the dashboard's does: a one-time setup to wire it to your ServiceTitan and encode your actual pay agreements, then a small monthly to keep it running. The setup is the real work, because every shop's agreements are different, so the number comes out of a fifteen-minute call rather than off a price list. "

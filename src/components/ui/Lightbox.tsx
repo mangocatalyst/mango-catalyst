@@ -86,6 +86,9 @@ export function ScreenshotRow({
 
       <dialog
         ref={dialog}
+        /* A modal dialog is announced by its own name, and this one had none, so
+           it opened as an unlabelled group. The shot's alt text is what it is. */
+        aria-label={open ? open.alt : undefined}
         onClose={() => setOpenIndex(null)}
         /* A click landing on the dialog element itself is a click on the backdrop:
            everything visible is inside the figure. */

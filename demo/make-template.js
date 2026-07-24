@@ -11,6 +11,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { scrubNames, assertNoRealNames } = require('./scrub-names.js');
 
 const SRC = path.join(os.homedir(), 'Projects', 'northstar-owner-dashboard', 'index.template.html');
 const OUT_DIR = path.join(__dirname, 'build');
@@ -146,7 +147,21 @@ swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap fr
    the pull, Scott + Corey 8s and Zack four 10s). Charts below reuse these. */`,
   '/* booked-capacity math (service: 8h per tech-day; install: per-day cap from the pull). Charts below reuse these. */');
 
+/* ---------- rendered copy that names the real service team ----------
+   This one is not a comment: it is the note printed under the Service tab
+   heading, which a 2026-07-24 review found shipped in public/demo/dashboard.html.
+   Asserted rather than left to the name scrub below, because the sentence has to
+   read as a sentence about the fictional shop, not as two substituted words. */
+swap(`note = 'Russ and Ron run service and sell. Service revenue is invoiced work attributed to their calls; company-wide service revenue lives on the Financial tab. Sold installs count tickets of $2,500 and up (Bryan 2026-07-11); smaller service quotes show under all estimates. Tickers compare the last 30 days to the 30 before.'`,
+  `note = 'Two of the service techs sell as well as run calls. Service revenue is invoiced work attributed to their calls; company-wide service revenue lives on the Financial tab. Sold installs count tickets of $2,500 and up; smaller service quotes show under all estimates. Tickers compare the last 30 days to the 30 before.'`);
+
+/* ---------- names: the catch-all, after every anchored swap ----------
+   Runs last so the swaps above still find anchors containing the real names.
+   Rewrites what is mapped, then throws on anything that is not. */
+html = scrubNames(html);
+
 /* ---------- guardrails ---------- */
+assertNoRealNames(html, 'the demo template');
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
 if (/go\.servicetitan\.com/.test(html)) throw new Error('live ServiceTitan link survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo template');

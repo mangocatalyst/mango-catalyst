@@ -557,7 +557,7 @@
 
   // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
   const DEMO_SALES = {
- "generatedAt": "2026-07-24T15:17:08.559Z",
+ "generatedAt": "2026-07-24T16:39:29.431Z",
  "revenue": {
   "daily": [
    {
@@ -1125,7 +1125,7 @@
     const rows = (board.rows || []).filter((r) => !r.cancelled);
     $("k-active").textContent = rows.filter((r) => !r.done).length;
     $("k-done").textContent = rows.filter((r) => r.done).length;
-    // Bryan's rule: collected payments leave the WIP
+    // the owner's rule: collected payments leave the WIP
     const wip = rows.reduce((s, r) => s + (!r.done && r.payment !== "done" ? r.price || 0 : 0), 0);
     $("k-wip").textContent = fmtMoney(wip);
     $("wip-tab").textContent = `${fmtMoney(wip)} WIP`;
