@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// make-commission-data.js — fully synthetic commission-tracker data for the
+// make-commission-data.js: fully synthetic commission-tracker data for the
 // mangocatalyst /dashboards demo. Same fictional company as make-demo-data.js
 // (Boreal Comfort Co) and the same invented crew, so the owner dashboard, the
 // install whiteboard and the commission tracker read as one shop. Every name,

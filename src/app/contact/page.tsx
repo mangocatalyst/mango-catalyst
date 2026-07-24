@@ -6,6 +6,7 @@ import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
 import { CalInline } from "@/components/booking/CalInline";
+import { ContactForm } from "@/components/forms/ContactForm";
 
 /**
  * Contact: booking-first (seo-spec 2.6), copy verbatim from
@@ -13,11 +14,12 @@ import { CalInline } from "@/components/booking/CalInline";
  *
  * Booking: the Cal.com embed renders automatically once NEXT_PUBLIC_CAL_URL
  * exists; until then the honest fallback state points at the message form.
- * The form posts natively to /api/contact (no client JS), which answers with
- * a 303 back to ?sent=1|0#note; ?booked=1 (the Cal.com post-booking redirect)
- * renders the confirmation state. Reading searchParams makes this page
- * dynamic, so the formLoadedAt stamp for the minimum-fill-time spam check is
- * fresh per request.
+ * The form is the shared ContactForm, which posts natively to /api/contact
+ * with no client JS; the route answers a native post with a 303 back to
+ * ?sent=1|0#note, and this page renders those notices. ?booked=1 (the Cal.com
+ * post-booking redirect) renders the confirmation state. Reading searchParams
+ * keeps this page dynamic; the formLoadedAt stamp now comes from the form's
+ * own mount effect, so nothing here depends on that.
  */
 
 const TITLE = "Book a 15-Minute Fit Call";
@@ -46,12 +48,6 @@ export const metadata: Metadata = {
   },
 };
 
-/** Field skin for the light conversion band (option-B pairing: navy on white). */
-const FIELD_CLASSES =
-  "mt-2 w-full rounded-lg border border-border-lt bg-surface-lt px-4 py-3 text-navy placeholder:text-muted-lt";
-
-const LABEL_CLASSES = "block text-sm font-semibold text-navy";
-
 export default async function ContactPage({
   searchParams,
 }: {
@@ -63,11 +59,6 @@ export default async function ContactPage({
   const calUrl = process.env.NEXT_PUBLIC_CAL_URL;
   // Widened so the empty-until-decided constant does not dead-code the branch.
   const email: string = SITE.email;
-  // Per-request render stamp (this page is dynamic) for the route handler's
-  // minimum-fill-time bot check. Deliberately impure: it must differ per
-  // request, and a server component renders exactly once per request.
-  // eslint-disable-next-line react-hooks/purity
-  const formLoadedAt = String(Date.now());
 
   return (
     <main className="flex-1">
@@ -154,90 +145,7 @@ export default async function ContactPage({
           ) : null}
 
           <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8 lg:max-w-[52rem]">
-            <form
-              action="/api/contact"
-              method="post"
-              className="relative grid gap-5 sm:grid-cols-2"
-            >
-              {/* Honeypot: hidden from humans, skipped by screen readers and
-                  the tab order. Bots that fill it are dropped silently. */}
-              <div
-                aria-hidden="true"
-                className="absolute -left-[9999px] h-px w-px overflow-hidden"
-              >
-                <label htmlFor="contact-website">Website</label>
-                <input
-                  id="contact-website"
-                  type="text"
-                  name="website"
-                  tabIndex={-1}
-                  autoComplete="off"
-                />
-              </div>
-              {/* Server-stamped per request (dynamic page); the route handler
-                  flags (but still delivers) submits that arrive faster than a
-                  human can type, so autofill users are never dropped. */}
-              <input type="hidden" name="formLoadedAt" value={formLoadedAt} />
-
-              <div>
-                <label htmlFor="contact-name" className={LABEL_CLASSES}>
-                  Your name
-                </label>
-                <input
-                  id="contact-name"
-                  type="text"
-                  name="name"
-                  required
-                  autoComplete="name"
-                  className={FIELD_CLASSES}
-                />
-              </div>
-              <div>
-                <label htmlFor="contact-email" className={LABEL_CLASSES}>
-                  Email
-                </label>
-                <input
-                  id="contact-email"
-                  type="email"
-                  name="email"
-                  required
-                  autoComplete="email"
-                  className={FIELD_CLASSES}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="contact-business" className={LABEL_CLASSES}>
-                  Business name
-                </label>
-                <input
-                  id="contact-business"
-                  type="text"
-                  name="business"
-                  autoComplete="organization"
-                  className={FIELD_CLASSES}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="contact-message" className={LABEL_CLASSES}>
-                  What&apos;s eating your week?{" "}
-                  <span className="font-normal text-muted-lt">
-                    (tell me the one task that drives you nuts)
-                  </span>
-                </label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  required
-                  rows={5}
-                  className={FIELD_CLASSES}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <button type="submit" className="btn btn-primary">
-                  Send it over
-                </button>
-              </div>
-            </form>
+            <ContactForm idPrefix="contact" />
           </Card>
 
           {/* Contact details: email line renders once SITE.email is set. */}

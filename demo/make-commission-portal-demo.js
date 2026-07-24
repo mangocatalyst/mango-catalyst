@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// make-commission-portal-demo.js — the tech-facing half of the commission tracker,
+// make-commission-portal-demo.js: the tech-facing half of the commission tracker,
 // baked the same way make-commission-demo.js bakes the office half: same source repo,
 // same fictional Boreal Comfort Co identity, same in-memory engine (which carries the
 // portal projection so there is only ever one copy of the demo server).

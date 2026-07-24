@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { CheckIcon } from "@/components/ui/icons";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
+import { ContactBand } from "@/components/sections/ContactBand";
 
 /**
  * Dashboards product page (added 2026-07-13, st-dashboard-product-plan part 2;
@@ -507,6 +508,13 @@ export default function DashboardsPage() {
             {"."}
           </p>
         </Section>
+
+        {/* pt-0: the band above is light too, so the two read as one zone. */}
+        <ContactBand
+          idPrefix="dashboards"
+          lead="Not ready to book a call? Ask a question about either product, or tell me what your commission spreadsheet looks like now. I reply within one business day."
+          containerClassName="pt-0"
+        />
 
         <Section id="book" tone="deep">
           <div aria-hidden className="h-[3px] w-10 bg-amber" />

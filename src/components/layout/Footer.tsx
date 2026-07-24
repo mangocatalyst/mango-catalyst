@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SITE, INDUSTRY_LINKS, PROGRAM_LINKS } from "@/lib/constants";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { FooterBackdrop } from "@/components/layout/FooterBackdrop";
+import { SubscribeForm } from "@/components/forms/SubscribeForm";
 
 /**
  * Global footer: the crawl safety net (seo-spec section 5). All top-level
@@ -117,7 +118,21 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 pt-6 sm:flex-row sm:items-baseline sm:justify-between">
+        {/* The quiet ask, site-wide: not every visitor is ready to book a call,
+            and the list is the low-commitment way to stay in touch. */}
+        <div className="mt-12 flex flex-col gap-4 border-t border-hairline/60 pt-8 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-ink">
+              One practical automation idea a month.
+            </p>
+            <p className="mt-1 text-sm text-muted">No spam.</p>
+          </div>
+          <div className="w-full max-w-[24rem]">
+            <SubscribeForm idPrefix="footer-subscribe" />
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-col gap-3 pt-6 sm:flex-row sm:items-baseline sm:justify-between">
           {/* data-footer-nap: FooterLive parks the chart's Duluth dot just left of this line. */}
           <p data-footer-nap className="text-sm text-faint">
             {nap}

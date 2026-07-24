@@ -1,5 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SITE } from "@/lib/constants";
+import {
+  clientIp,
+  isFastFill,
+  isHoneypotHit,
+  makeRateLimiter,
+} from "@/lib/formGuards";
 
 /**
  * Contact form handler for /contact.
@@ -18,29 +24,18 @@ import { SITE } from "@/lib/constants";
  * Launch gate: "contact delivery key + provider verified" is on the manual
  * checklist in build/out/verification-report.md.
  *
- * Spam protection:
+ * Spam protection lives in @/lib/formGuards, shared with /api/subscribe:
  * 1. Honeypot: a visually hidden "website" field humans never see. Filled
  *    means bot; we drop the submission but still answer success so the bot
  *    learns nothing. This is the ONLY silent drop.
- * 2. Minimum fill time: the page (dynamically rendered) stamps formLoadedAt
- *    at request time. A submit arriving faster than a human can type, or with
- *    a missing/garbled/future stamp, is NOT dropped (autofill makes fast
- *    legitimate submits real); it is processed normally with a "fast-fill"
- *    flag in the delivery payload and logs, so a human can triage it.
+ * 2. Minimum fill time: the client form stamps formLoadedAt on mount. A submit
+ *    arriving faster than a human can type, or with a missing/garbled/future
+ *    stamp, is NOT dropped (autofill makes fast legitimate submits real, and a
+ *    no-JS visitor sends no stamp at all); it is processed normally with a
+ *    "fast-fill" flag in the delivery payload and logs, so a human can triage.
  * 3. Per-IP rate limit + field length caps: see below. Both reject with the
  *    normal "something went wrong" failure response, not a silent drop.
  */
-
-/** Faster than this between page render and submit reads as autofill or a bot. */
-const MIN_FILL_MS = 4000;
-
-/** Tolerated clock skew before a future formLoadedAt reads as forged. */
-const MAX_FUTURE_SKEW_MS = 60_000;
-
-/** Filled honeypot: the one signal that silently drops the submission. */
-function isHoneypotHit(honeypot: string): boolean {
-  return honeypot.trim() !== "";
-}
 
 /** Field length caps: generous for real use, small enough to stop a paste-bomb. */
 const MAX_LENGTHS = { name: 200, email: 254, business: 200, message: 5000 };
@@ -59,55 +54,8 @@ function isOversized(fields: {
   );
 }
 
-/**
- * Per-IP rate limit: N submissions per window, held in a plain Map.
- * ponytail: in-memory, per-instance only, so a visitor bouncing across
- * serverless instances (or a cold start) gets a fresh bucket; it still caps
- * the common case (one instance, one spammer) with zero new services or
- * deps. Upgrade path if real abuse shows up: Vercel KV/Upstash-backed
- * counter, or a Vercel Firewall rate-limit rule in front of this route.
- */
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT_MAX = 5;
-/** Unique IPs never get removed on their own; bound the Map so a warm
- *  instance can't accumulate one entry per drive-by visitor forever. */
-const RATE_LIMIT_MAX_TRACKED_IPS = 1000;
-const rateLimitHits = new Map<string, { count: number; windowStart: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitHits.get(ip);
-  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    if (rateLimitHits.size >= RATE_LIMIT_MAX_TRACKED_IPS) {
-      // ponytail: cheap bound, not an LRU; an occasional full reset is fine
-      // for an advisory limiter on a low-traffic contact form.
-      rateLimitHits.clear();
-    }
-    rateLimitHits.set(ip, { count: 1, windowStart: now });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > RATE_LIMIT_MAX;
-}
-
-/** Vercel sets x-forwarded-for; first entry is the original client. */
-function clientIp(request: NextRequest): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
-
-/**
- * True when the timing check trips: submitted faster than MIN_FILL_MS, or
- * the formLoadedAt stamp is missing, garbled, or implausibly in the future.
- * Advisory only; the submission is still delivered, flagged as fast-fill.
- */
-function isFastFill(loadedAtRaw: string): boolean {
-  const loadedAt = Number(loadedAtRaw);
-  if (!Number.isFinite(loadedAt) || loadedAt <= 0) return true;
-  const elapsed = Date.now() - loadedAt;
-  if (elapsed < MIN_FILL_MS) return true;
-  if (elapsed < -MAX_FUTURE_SKEW_MS) return true;
-  return false;
-}
+/** This route's own bucket, so a message never spends the subscribe budget. */
+const isRateLimited = makeRateLimiter();
 
 function respond(request: NextRequest, ok: boolean): NextResponse {
   // fetch() clients that ask for JSON get JSON; native form posts get a

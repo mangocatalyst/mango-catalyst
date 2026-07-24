@@ -1,5 +1,5 @@
 #!/bin/zsh
-# capture-screens.sh — the still shots under each demo on /dashboards.
+# capture-screens.sh: the still shots under each demo on /dashboards.
 #
 # Runs headless Chrome over the artifacts bake-demo.sh already shipped into
 # public/demo, so a screenshot can never show anything the privacy validator

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// make-commission-demo.js — derive the mangocatalyst commission-tracker demo from the
+// make-commission-demo.js: derive the mangocatalyst commission-tracker demo from the
 // live NorthStar tracker page (commission-tracker/commission.html). Applies the Mango
 // Catalyst skin and the fictional Boreal Comfort Co identity, swaps the page's three
 // network chokepoints (and its one export navigation) for the in-memory demo engine,
