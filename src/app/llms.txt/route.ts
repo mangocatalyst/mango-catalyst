@@ -39,7 +39,7 @@ const BODY = `# ${SITE.name}
 - [Google Workspace](${u("/programs/google-workspace")})
 - [Everything else](${u("/programs/everything-else")})
 - [MN-ITS](${u("/mn-its")})
-- [Owner Dashboard](${u("/dashboards")}): the whole shop on one page, refreshed hourly from ServiceTitan; includes a clickable fake-data demo. Standalone product: $795 setup, $125 a month, no retainer required.
+- [Dashboards](${u("/dashboards")}): two ServiceTitan-fed products, each with a clickable fake-data demo. The owner dashboard puts the whole shop on one page, refreshed hourly; standalone at $795 setup, $125 a month, no retainer required. The commission tracker computes every tech's pay line from ServiceTitan, gives each tech a portal, and exports approved periods to payroll; setup plus a small monthly, quoted on a call.
 
 ## Guides
 - [HVAC tasks to automate](${u("/guides/hvac-tasks-to-automate")})

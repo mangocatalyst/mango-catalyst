@@ -10,11 +10,19 @@ node make-template.js
 node make-demo-data.js
 NSDASH_DIR="$PWD/build" node ~/Projects/mango-automation/scripts/nsdash/ns-dash-bake.js
 node make-whiteboard-demo.js
+node make-commission-data.js
+node make-commission-demo.js
+node make-commission-portal-demo.js
 node privacy-validator.js
 node privacy-validator.js build/whiteboard.html
+node privacy-validator.js build/commission.html
+node privacy-validator.js build/commission-portal.html
 
 mkdir -p ../public/demo
 cp build/index.html ../public/demo/dashboard.html
 cp build/whiteboard.html ../public/demo/whiteboard.html
-echo "demo baked -> public/demo/dashboard.html ($(du -h ../public/demo/dashboard.html | cut -f1 | tr -d ' '))"
-echo "demo baked -> public/demo/whiteboard.html ($(du -h ../public/demo/whiteboard.html | cut -f1 | tr -d ' '))"
+cp build/commission.html ../public/demo/commission.html
+cp build/commission-portal.html ../public/demo/commission-portal.html
+for f in dashboard whiteboard commission commission-portal; do
+  echo "demo baked -> public/demo/$f.html ($(du -h "../public/demo/$f.html" | cut -f1 | tr -d ' '))"
+done

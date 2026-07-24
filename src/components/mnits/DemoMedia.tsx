@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ShotZoom } from "./ShotZoom";
+import { ScreenshotZoom } from "@/components/ui/Lightbox";
 
 /**
  * Media blocks for the /mn-its tutorial. Server-only: each block checks
@@ -19,6 +19,30 @@ function hasAsset(rel: string): boolean {
     return fs.statSync(path.join(process.cwd(), "public", rel)).size > 0;
   } catch {
     return false;
+  }
+}
+
+/**
+ * The intrinsic size of a screenshot, straight out of the PNG header (IHDR is
+ * always the first chunk, so width and height are two big-endian uint32s at
+ * byte 16). The shared lightbox wants real dimensions so next/image can resize
+ * the full view instead of shipping the original; these are all captures we
+ * ship ourselves, so reading them at build time beats hand-maintaining a table.
+ *
+ * ponytail: PNG only, because every capture here is one. A JPEG would need SOF
+ * parsing; until one exists it renders the same placeholder an unreadable asset
+ * does, which is a loud enough signal to come back and add it.
+ */
+function pngSize(rel: string): { width: number; height: number } | null {
+  try {
+    const fd = fs.openSync(path.join(process.cwd(), "public", rel), "r");
+    const head = Buffer.alloc(24);
+    fs.readSync(fd, head, 0, 24, 0);
+    fs.closeSync(fd);
+    if (head.subarray(0, 8).toString("binary") !== "\x89PNG\r\n\x1a\n") return null;
+    return { width: head.readUInt32BE(16), height: head.readUInt32BE(20) };
+  } catch {
+    return null;
   }
 }
 
@@ -70,8 +94,9 @@ export function DemoVideo({
 }
 
 export function Shot({ src, alt }: { src: string; alt: string }) {
-  if (!hasAsset(src)) {
+  const size = hasAsset(src) ? pngSize(src) : null;
+  if (!size) {
     return <PlaceholderFrame label={`Screenshot coming: ${alt}`} aspect="aspect-[16/10]" />;
   }
-  return <ShotZoom src={`/${src}`} alt={alt} />;
+  return <ScreenshotZoom src={`/${src}`} alt={alt} {...size} />;
 }

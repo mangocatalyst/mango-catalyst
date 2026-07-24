@@ -4,6 +4,7 @@ import { SITE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph } from "@/lib/jsonld";
 import { Card } from "@/components/ui/Card";
+import { SubscribeForm } from "@/components/forms/SubscribeForm";
 
 /**
  * Slim guides index (seo-spec 2.7): one intro paragraph + three descriptive
@@ -12,6 +13,10 @@ import { Card } from "@/components/ui/Card";
  * pagination, and no in-body CTA (the global header carries the fit-call
  * button). It targets no keyword and must not grow content that competes
  * with the guides.
+ *
+ * The one addition (2026-07-24) is the email signup at the bottom: a reader who
+ * came here to read rather than to buy still needs a way to stay in touch, and
+ * it is a form rather than prose, so it competes with nothing for a keyword.
  */
 
 const PAGE_TITLE = "Automation Guides for Small Business Owners";
@@ -106,6 +111,22 @@ export default function GuidesIndexPage() {
             </li>
           ))}
         </ul>
+
+        {/* The fuller version of the footer's one-liner: this is the page a
+            reader lands on when they want to read rather than to buy. */}
+        <Card className="mt-12 max-w-[44rem] p-8 sm:p-9 lg:max-w-[52rem]">
+          <h2 className="font-display text-[clamp(1.45rem,1.15rem+1.1vw,2rem)] font-bold uppercase leading-[1.08] tracking-[0.015em] text-ink">
+            Get the next one by email
+          </h2>
+          <p className="mt-3 max-w-[44rem] leading-[1.65] text-body">
+            One practical automation idea a month: something a service shop can
+            actually put to work, written the same way these guides are. No
+            spam, no drip sequence, and unsubscribe from any of them.
+          </p>
+          <div className="mt-6 max-w-[30rem]">
+            <SubscribeForm idPrefix="guides-subscribe" />
+          </div>
+        </Card>
       </main>
     </>
   );
