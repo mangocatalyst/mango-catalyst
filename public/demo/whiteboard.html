@@ -173,6 +173,11 @@
   tbody tr.complete { background: var(--complete); }
   tbody tr.complete:hover { background: var(--complete-hover); }
   tbody tr.stalled td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+  /* cancelled in ST: greyed out and out of every count, waiting on a human Delete */
+  tbody tr.cancelled { opacity: .55; }
+  .delbtn { margin-left: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+    font: inherit; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 5px; cursor: pointer; }
+  .delbtn:hover, .delbtn[data-armed="1"] { border-color: var(--warn); color: var(--warn); }
 
   .job .cust { font-weight: 700; color: var(--brand); }
   .job .cust a { color: inherit; text-decoration: none; }
@@ -509,7 +514,7 @@
     </div>
   </div><!-- /#tab-registration -->
 
-  <div class="foot">Install White Board · <span id="ver">v2026-07-20.1</span></div>
+  <div class="foot">Install White Board · <span id="ver">v2026-07-23.1</span></div>
 </div>
 
 <script>
@@ -552,44 +557,24 @@
 
   // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
   const DEMO_SALES = {
- "generatedAt": "2026-07-19T13:54:22.900Z",
+ "generatedAt": "2026-07-24T15:17:08.559Z",
  "revenue": {
   "daily": [
    {
-    "date": "2026-06-19",
-    "value": 35218
-   },
-   {
-    "date": "2026-06-20",
-    "value": 4000
-   },
-   {
-    "date": "2026-06-21",
-    "value": 0
-   },
-   {
-    "date": "2026-06-22",
-    "value": 37599
-   },
-   {
-    "date": "2026-06-23",
-    "value": 35377
-   },
-   {
     "date": "2026-06-24",
-    "value": 26004
+    "value": 40945
    },
    {
     "date": "2026-06-25",
-    "value": 52917
+    "value": 35218
    },
    {
     "date": "2026-06-26",
-    "value": 39592
+    "value": 29003
    },
    {
     "date": "2026-06-27",
-    "value": 0
+    "value": 9000
    },
    {
     "date": "2026-06-28",
@@ -597,27 +582,27 @@
    },
    {
     "date": "2026-06-29",
-    "value": 25675
+    "value": 35377
    },
    {
     "date": "2026-06-30",
-    "value": 31135
+    "value": 26004
    },
    {
     "date": "2026-07-01",
-    "value": 76216
+    "value": 52917
    },
    {
     "date": "2026-07-02",
-    "value": 37842
+    "value": 39592
    },
    {
     "date": "2026-07-03",
-    "value": 61438
+    "value": 35828
    },
    {
     "date": "2026-07-04",
-    "value": 7000
+    "value": 0
    },
    {
     "date": "2026-07-05",
@@ -625,27 +610,27 @@
    },
    {
     "date": "2026-07-06",
-    "value": 33779
+    "value": 31135
    },
    {
     "date": "2026-07-07",
-    "value": 28068
+    "value": 76216
    },
    {
     "date": "2026-07-08",
-    "value": 33062
+    "value": 37842
    },
    {
     "date": "2026-07-09",
-    "value": 37113
+    "value": 61438
    },
    {
     "date": "2026-07-10",
-    "value": 39111
+    "value": 36691
    },
    {
     "date": "2026-07-11",
-    "value": 7000
+    "value": 0
    },
    {
     "date": "2026-07-12",
@@ -653,61 +638,81 @@
    },
    {
     "date": "2026-07-13",
-    "value": 40881
+    "value": 31815
    },
    {
     "date": "2026-07-14",
-    "value": 72213
+    "value": 27367
    },
    {
     "date": "2026-07-15",
-    "value": 28550
+    "value": 62630
    },
    {
     "date": "2026-07-16",
-    "value": 35951
+    "value": 39111
    },
    {
     "date": "2026-07-17",
-    "value": 30926
+    "value": 37100
    },
    {
     "date": "2026-07-18",
+    "value": 8000
+   },
+   {
+    "date": "2026-07-19",
     "value": 0
+   },
+   {
+    "date": "2026-07-20",
+    "value": 72213
+   },
+   {
+    "date": "2026-07-21",
+    "value": 28550
+   },
+   {
+    "date": "2026-07-22",
+    "value": 35951
+   },
+   {
+    "date": "2026-07-23",
+    "value": 30926
    }
   ],
-  "rev7": 208521,
-  "mtd": 569150,
-  "priorMonthTotal": 863504,
-  "rolling7": 208521,
-  "prev7": 178133
+  "rev7": 212740,
+  "mtd": 745322,
+  "priorMonthTotal": 852883,
+  "rolling7": 212740,
+  "prev7": 197614
  },
  "estimates": {
-  "sold": 78,
+  "sold": 82,
   "dismissed": 23,
-  "open": 98,
-  "total": 199,
-  "closeRate": 0.45555555555555555,
-  "todaySold": 3,
-  "todayTotal": 1,
-  "unsoldPipeline": 802077
+  "open": 101,
+  "total": 206,
+  "closeRate": 0.4835164835164835,
+  "todaySold": 5,
+  "todayTotal": 11,
+  "unsoldPipeline": 783965
  },
  "wip": {
   "count": 10,
-  "value": 160000,
-  "count30dAgo": 9,
-  "value30dAgo": 160000
+  "value": 162000,
+  "count30dAgo": 11,
+  "value30dAgo": 162000
  },
  "advisors": [
   {
    "name": "Sam",
-   "soldCount": 17,
-   "soldValue": 56197,
+   "soldCount": 12,
+   "soldValue": 55012,
    "installSoldCount": 3,
-   "installSoldValue": 33236,
-   "openCount": 46,
-   "openValue": 239650,
-   "oldestOpen": "2026-05-21"
+   "installSoldValue": 42615,
+   "openCount": 48,
+   "openValue": 256447,
+   "oldestOpen": "2026-05-25"
   },
   {
    "name": "Victor",
@@ -715,29 +720,29 @@
    "soldValue": 45337,
    "installSoldCount": 2,
    "installSoldValue": 41732,
-   "openCount": 27,
-   "openValue": 106742,
-   "oldestOpen": "2026-05-21"
+   "openCount": 29,
+   "openValue": 90798,
+   "oldestOpen": "2026-05-27"
   },
   {
    "name": "Jenna",
-   "soldCount": 5,
-   "soldValue": 20136,
+   "soldCount": 7,
+   "soldValue": 22975,
    "installSoldCount": 1,
    "installSoldValue": 12362,
-   "openCount": 54,
-   "openValue": 227212,
-   "oldestOpen": "2026-05-20"
+   "openCount": 56,
+   "openValue": 241731,
+   "oldestOpen": "2026-05-26"
   },
   {
    "name": "Marcus",
-   "soldCount": 2,
-   "soldValue": 3371,
-   "installSoldCount": 0,
-   "installSoldValue": 0,
-   "openCount": 21,
-   "openValue": 114957,
-   "oldestOpen": "2026-05-23"
+   "soldCount": 4,
+   "soldValue": 10779,
+   "installSoldCount": 1,
+   "installSoldValue": 6098,
+   "openCount": 19,
+   "openValue": 101629,
+   "oldestOpen": "2026-06-01"
   },
   {
    "name": "Dana",
@@ -745,112 +750,112 @@
    "soldValue": 0,
    "installSoldCount": 0,
    "installSoldValue": 0,
-   "openCount": 24,
-   "openValue": 115511,
-   "oldestOpen": "2026-05-25"
+   "openCount": 28,
+   "openValue": 131185,
+   "oldestOpen": "2026-05-26"
   }
  ],
  "salesRole": {
-  "reportDate": "2026-07-18",
+  "reportDate": "2026-07-23",
   "advisors": [
    {
     "name": "Sam Okafor",
-    "soldValue": 56197,
-    "sold": 17,
-    "soldValuePrev": 16435,
+    "soldValue": 55012,
+    "sold": 12,
+    "soldValuePrev": 35227,
     "salesRun": 0,
     "cohort": {
-     "sold": 30,
-     "dismissed": 6,
-     "pending": 26,
-     "missed": 0
+     "sold": 31,
+     "dismissed": 7,
+     "pending": 30,
+     "missed": 1
     },
-    "openValue": 239650,
-    "openN": 46,
-    "openOldest": "2026-05-21",
+    "openValue": 256447,
+    "openN": 48,
+    "openOldest": "2026-05-25",
     "soldWk": {
-     "2026-04-27": 49311,
-     "2026-04-20": 16731,
-     "2026-05-04": 4471,
-     "2026-05-11": 33679,
-     "2026-05-18": 21407,
-     "2026-05-25": 22725,
-     "2026-06-01": 31958,
-     "2026-06-08": 23756,
-     "2026-06-15": 57514,
-     "2026-06-22": 21420,
-     "2026-06-29": 41260,
-     "2026-07-06": 32915,
-     "2026-07-13": 53232
+     "2026-04-27": 19727,
+     "2026-05-04": 46281,
+     "2026-05-11": 4975,
+     "2026-05-18": 39368,
+     "2026-05-25": 64637,
+     "2026-06-01": 20554,
+     "2026-06-08": 29862,
+     "2026-06-15": 23756,
+     "2026-06-22": 57514,
+     "2026-06-29": 21420,
+     "2026-07-06": 41260,
+     "2026-07-13": 32915,
+     "2026-07-20": 46035
     },
     "opps": [
      {
-      "customer": "Nordling, Cliff & Gus",
+      "customer": "Ulvestad, Nils",
       "value": 21193,
-      "created": "2026-06-05",
+      "created": "2026-06-12",
       "link": null
      },
      {
-      "customer": "Byrnes, Sven & Oskar",
+      "customer": "Rustad, Wade",
       "value": 19950,
-      "created": "2026-06-30",
+      "created": "2026-07-07",
       "link": null
      },
      {
-      "customer": "Thorvald, Hank",
+      "customer": "Marek, Britta & Cliff",
       "value": 18619,
-      "created": "2026-06-13",
+      "created": "2026-06-20",
       "link": null
      }
     ]
    },
    {
     "name": "Jenna Marsh",
-    "soldValue": 20136,
-    "sold": 5,
-    "soldValuePrev": 26164,
+    "soldValue": 22975,
+    "sold": 7,
+    "soldValuePrev": 22339,
     "salesRun": 0,
     "cohort": {
-     "sold": 23,
-     "dismissed": 5,
-     "pending": 26,
+     "sold": 24,
+     "dismissed": 6,
+     "pending": 30,
      "missed": 2
     },
-    "openValue": 227212,
-    "openN": 54,
-    "openOldest": "2026-05-20",
+    "openValue": 241731,
+    "openN": 56,
+    "openOldest": "2026-05-26",
     "soldWk": {
-     "2026-04-27": 8120,
-     "2026-04-20": 2016,
-     "2026-05-04": 6570,
-     "2026-05-11": 28746,
-     "2026-05-18": 22594,
-     "2026-05-25": 5022,
-     "2026-06-01": 18640,
-     "2026-06-08": 16512,
-     "2026-06-15": 23810,
-     "2026-06-29": 27382,
-     "2026-06-22": 28495,
-     "2026-07-06": 22398,
-     "2026-07-13": 23610
+     "2026-05-04": 9795,
+     "2026-04-27": 4539,
+     "2026-05-11": 14079,
+     "2026-05-18": 20276,
+     "2026-05-25": 579,
+     "2026-06-01": 22087,
+     "2026-06-08": 18423,
+     "2026-06-15": 16512,
+     "2026-06-22": 23810,
+     "2026-07-06": 27382,
+     "2026-06-29": 28495,
+     "2026-07-13": 22398,
+     "2026-07-20": 7774
     },
     "opps": [
      {
-      "customer": "Vance, Ray & Hank",
-      "value": 20520,
-      "created": "2026-05-20",
-      "link": null
-     },
-     {
-      "customer": "Kolstad, Astrid",
+      "customer": "Ivarson, Signe",
       "value": 20201,
-      "created": "2026-07-12",
+      "created": "2026-07-19",
       "link": null
      },
      {
-      "customer": "Fairwood, Opal",
+      "customer": "Ivarson, Elin",
       "value": 20089,
-      "created": "2026-06-25",
+      "created": "2026-07-02",
+      "link": null
+     },
+     {
+      "customer": "Lindstrand, Nils",
+      "value": 15596,
+      "created": "2026-06-06",
       "link": null
      }
     ]
@@ -859,57 +864,89 @@
     "name": "Victor Reyes",
     "soldValue": 45337,
     "sold": 4,
-    "soldValuePrev": 11594,
+    "soldValuePrev": 33440,
     "salesRun": 0,
     "cohort": {
      "sold": 14,
      "dismissed": 5,
      "pending": 16,
-     "missed": 0
+     "missed": 2
     },
-    "openValue": 106742,
-    "openN": 27,
-    "openOldest": "2026-05-21",
+    "openValue": 90798,
+    "openN": 29,
+    "openOldest": "2026-05-27",
     "soldWk": {
-     "2026-04-20": 6693,
-     "2026-05-04": 4029,
-     "2026-04-27": 30012,
-     "2026-05-11": 42356,
-     "2026-05-18": 16708,
-     "2026-05-25": 2315,
-     "2026-06-01": 2613,
-     "2026-06-08": 12304,
-     "2026-06-15": 4349,
-     "2026-06-22": 45778,
-     "2026-06-29": 57053,
-     "2026-07-13": 24756,
-     "2026-07-06": 33727
+     "2026-04-27": 6693,
+     "2026-05-04": 31215,
+     "2026-05-11": 24589,
+     "2026-05-18": 47531,
+     "2026-05-25": 12059,
+     "2026-06-01": 21943,
+     "2026-06-08": 2613,
+     "2026-06-15": 12304,
+     "2026-06-22": 4349,
+     "2026-06-29": 45778,
+     "2026-07-06": 57053,
+     "2026-07-20": 23204,
+     "2026-07-13": 33727
     },
     "opps": [
      {
-      "customer": "Quimby, Liv",
+      "customer": "Eikland, Wade & Freya",
       "value": 19325,
-      "created": "2026-06-23",
-      "link": null
-     },
-     {
-      "customer": "Pekkala, Emil",
-      "value": 14756,
       "created": "2026-06-30",
       "link": null
      },
      {
-      "customer": "Sorvaag, Ingrid",
-      "value": 13241,
-      "created": "2026-05-21",
+      "customer": "Callahan, Arvid & Vera",
+      "value": 14756,
+      "created": "2026-07-07",
+      "link": null
+     },
+     {
+      "customer": "Eikland, Liv",
+      "value": 8656,
+      "created": "2026-07-06",
+      "link": null
+     }
+    ]
+   },
+   {
+    "name": "Marcus Vellen",
+    "soldValue": 6098,
+    "sold": 1,
+    "soldValuePrev": 0,
+    "salesRun": null,
+    "cohort": null,
+    "openValue": 58937,
+    "openN": 3,
+    "openOldest": "2026-07-16",
+    "soldWk": {},
+    "opps": [
+     {
+      "customer": "Tarvainen, Marta",
+      "value": 21067,
+      "created": "2026-07-16",
+      "link": null
+     },
+     {
+      "customer": "Holmquist, June",
+      "value": 18939,
+      "created": "2026-07-23",
+      "link": null
+     },
+     {
+      "customer": "Jerpbak, June & Marta",
+      "value": 18931,
+      "created": "2026-07-20",
       "link": null
      }
     ]
    }
   ],
   "team": {
-   "unsoldValue": 802077,
-   "unsoldGroups": 171,
+   "unsoldValue": 783965,
+   "unsoldGroups": 172,
    "todayPresets": 7,
    "todayTurnovers": 2
   }
@@ -986,8 +1023,9 @@
   const closed = (v) => v === "done" || v === "na";
   const progress = (r) => steps(r).filter((k) => closed(r[k])).length;
   const age = (r) => (r.sched ? Math.floor((Date.now() - new Date(r.sched + "T12:00:00")) / 864e5) : null);
-  const stalled = (r) => !r.done && progress(r) === 0 && age(r) >= 5;
-  const needs = (r, k) => !r.done && r[k] === "pending";
+  // a cancelled row is a dead row: never stalled, never "needs" anything, never counted
+  const stalled = (r) => !r.done && !r.cancelled && progress(r) === 0 && age(r) >= 5;
+  const needs = (r, k) => !r.done && !r.cancelled && r[k] === "pending";
   // ONE shared date parser: accepts ISO YYYY-MM-DD AND sheet-faithful US M/D/YYYY (the
   // DB deliberately keeps the sheet's own strings so the mirror + db-sheet-diff stay
   // faithful; only the page normalizes for display and deadline math). Returns local
@@ -1049,7 +1087,7 @@
     tbody.innerHTML = "";
     for (const r of sortedRows()) {
       const tr = document.createElement("tr");
-      tr.className = (r.done ? "complete " : "") + (stalled(r) ? "stalled" : "");
+      tr.className = (r.done ? "complete " : "") + (r.cancelled ? "cancelled " : "") + (stalled(r) ? "stalled" : "");
       tr.dataset.done = r.done ? "1" : "0";
       for (const k of ["permit", "subs", "inspection", "registered", "payment"]) tr.dataset[k] = needs(r, k) ? "1" : "0";
       const nameHtml = r.stUrl ? `<a href="${esc(r.stUrl)}" target="_blank">${esc(r.name)}</a>` : esc(r.name);
@@ -1058,8 +1096,12 @@
         r.slackUrl ? `<a href="${esc(r.slackUrl)}" target="_blank">Slack</a>` : "",
       ].filter(Boolean).join(" · ");
       const paid = r.payment === "done";
+      // cancelled in ST (sync-verified): the office removes the row itself, nothing else does
+      const cancelHtml = r.cancelled
+        ? `<span class="flag">CANCELLED</span><button class="delbtn" data-del="${esc(r.rowId)}" title="Cancelled in ServiceTitan · remove this row from the board">Delete</button>`
+        : "";
       tr.innerHTML = `
-        <td class="job"><div class="cust">${nameHtml}<button class="histbtn" data-hist="${esc(r.rowId)}" title="Change history" aria-label="Change history">${CLOCK}</button></div><div class="sub">${sub}</div>${stalled(r) ? `<span class="flag">OPEN ${age(r)}d · 0 STEPS</span>` : ""}</td>
+        <td class="job"><div class="cust">${nameHtml}<button class="histbtn" data-hist="${esc(r.rowId)}" title="Change history" aria-label="Change history">${CLOCK}</button></div><div class="sub">${sub}</div>${stalled(r) ? `<span class="flag">OPEN ${age(r)}d · 0 STEPS</span>` : ""}${cancelHtml}</td>
         <td class="meta">${fmtDate(r.sched)}</td>
         <td class="meta">${TYPE[r.type] || esc(r.type) || "-"}</td>
         <td class="meta">${esc(r.advisor) || "-"}</td>
@@ -1079,7 +1121,8 @@
       tbody.appendChild(tr);
     }
 
-    const rows = board.rows || [];
+    // cancelled rows still render (someone has to Delete them) but count for nothing
+    const rows = (board.rows || []).filter((r) => !r.cancelled);
     $("k-active").textContent = rows.filter((r) => !r.done).length;
     $("k-done").textContent = rows.filter((r) => r.done).length;
     // Bryan's rule: collected payments leave the WIP
@@ -1128,7 +1171,7 @@
     // block by its day count so a 1-day partial week keeps day cells the same width
     const weeks = [];
     for (const day of days) { if (day.dowNum === 1 || !weeks.length) weeks.push([]); weeks[weeks.length - 1].push(day); }
-    const active = (board.rows || []).filter((r) => !r.done && r.sched);
+    const active = (board.rows || []).filter((r) => !r.done && !r.cancelled && r.sched);
     host.innerHTML = LEADS.map((lead) => {
       const off = OFF_DAY[lead] ?? -1;
       const byDay = {};
@@ -1182,9 +1225,29 @@
     load(); // resync with reality
     setTimeout(() => { $("error").style.display = "none"; }, 8000);
   }
+  async function del(rowId) {
+    const r = await fetch("/api/delete", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rowId, source: "web" }) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
+    load(); // the row is gone; re-fetch rather than patch the local copy
+  }
   tbody.addEventListener("click", (ev) => {
     const hb = ev.target.closest(".histbtn");
     if (hb) { openHistory(hb); return; }
+    // Delete (cancelled rows only): two-step inline confirm, since window.confirm blocks
+    // the whole page. The armed state disarms itself after 4s, or on the next 60s render.
+    const dl = ev.target.closest(".delbtn");
+    if (dl) {
+      if (dl.dataset.armed !== "1") {
+        dl.dataset.armed = "1"; dl.textContent = "Really delete?";
+        setTimeout(() => { if (dl.isConnected) { dl.dataset.armed = "0"; dl.textContent = "Delete"; } }, 4000);
+        return;
+      }
+      dl.disabled = true;
+      del(dl.dataset.del).catch(fail);
+      return;
+    }
     const p = ev.target.closest(".pill.click");
     if (!p) return;
     const row = board.rows.find((r) => r.rowId === p.dataset.row);

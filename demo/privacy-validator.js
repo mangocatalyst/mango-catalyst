@@ -8,6 +8,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 const ARTIFACT = process.argv[2] || path.join(__dirname, 'build', 'index.html');
 // base64 font payloads collide with short-name substrings ("Zack"); skip them
@@ -21,6 +22,8 @@ const hit = (needle, why) => { if (lower.includes(String(needle).toLowerCase()))
 /* ---------- static checks (always run) ---------- */
 hit('northstar', 'company string');
 hit('north star', 'company string');
+hit('northstarservices.com', 'real company domain');
+hit('bryanjkoop', 'real operator handle');
 hit('484604814', 'real ST tenant id');
 hit('slack.com/archives', 'live Slack link');
 hit('go.servicetitan.com', 'live ServiceTitan link');
@@ -33,16 +36,19 @@ hit('/api/history', 'live endpoint');
 hit('/api/flip', 'live endpoint');
 for (const ch of ['–', '—']) if (html.includes(ch)) problems.push('em/en dash in artifact');
 
-/* ---------- live-data checks (need the NS data dir on this machine) ---------- */
+/* ---------- live-data checks (need the live data on this machine) ---------- */
+// One name set across both products: whatever a demo artifact leaks, it leaks from
+// somewhere in here.
+const names = new Set();
+// skip dispatch placeholders (OFFICE, STAGING, Tech #4): generic words, not people
+const PLACEHOLDER = /office|staging|unassigned|^tech #/i;
+const addName = n => { const s = String(n || '').trim(); if (s.length > 3 && !PLACEHOLDER.test(s)) names.add(s); };
+
 const NSDATA = path.join(os.homedir(), 'Projects', 'northstar-owner-dashboard', 'data');
 if (!fs.existsSync(path.join(NSDATA, 'raw.json'))) {
-  console.warn('WARN: live NS data not found; only static checks ran');
+  console.warn('WARN: live NS dashboard data not found; those checks did not run');
 } else {
   const raw = JSON.parse(fs.readFileSync(path.join(NSDATA, 'raw.json'), 'utf8'));
-  const names = new Set();
-  // skip dispatch placeholders (OFFICE, STAGING, Tech #4): generic words, not people
-  const PLACEHOLDER = /office|staging|unassigned|^tech #/i;
-  const addName = n => { const s = String(n || '').trim(); if (s.length > 3 && !PLACEHOLDER.test(s)) names.add(s); };
 
   // employees: roster, stats keys, call agents, payroll
   const people = raw.owner?.people || {};
@@ -78,10 +84,33 @@ if (!fs.existsSync(path.join(NSDATA, 'raw.json'))) {
       for (const kind of ['flags', 'wins']) (s[kind] || []).forEach(it => addName(it.title));
     } catch { /* skip unreadable digest */ }
   }
-
-  for (const n of names) hit(n, 'real NS data string');
-  console.log(`checked ${names.size} live NS strings against the artifact`);
 }
+
+/* ---------- the commission tracker's own database ----------
+   Read-only, out of process, through the sqlite3 CLI: this validator must never be
+   able to write to the live pay database, and a `-readonly` connection it does not
+   own is the cheapest way to be sure of that. Every earner, every ServiceTitan staff
+   name it caches, and every customer the tracker has ever billed or sold a membership
+   to goes into the same set the artifact is grepped for. */
+const CDB = path.join(os.homedir(), 'Projects', 'commission-tracker', 'data', 'commission.db');
+if (!fs.existsSync(CDB)) {
+  console.warn('WARN: live commission database not found; those checks did not run');
+} else {
+  const q = (sql) => {
+    const out = execFileSync('sqlite3', ['-readonly', '-json', CDB, sql], { encoding: 'utf8' }).trim();
+    return out ? JSON.parse(out) : [];
+  };
+  for (const sql of [
+    'SELECT name AS v FROM people',
+    'SELECT email AS v FROM people',
+    'SELECT name AS v FROM st_staff',
+    'SELECT DISTINCT customer_name AS v FROM invoices',
+    'SELECT DISTINCT customer_name AS v FROM memberships',
+  ]) for (const r of q(sql)) addName(r.v);
+}
+
+for (const n of names) hit(n, 'real live data string');
+console.log(`checked ${names.size} live strings against the artifact`);
 
 if (problems.length) {
   console.error(`PRIVACY VALIDATOR FAILED (${problems.length}):`);
