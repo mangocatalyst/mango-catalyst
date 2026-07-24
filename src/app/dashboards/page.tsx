@@ -10,28 +10,98 @@ import { BookButton } from "@/components/booking/BookButton";
 import { Card } from "@/components/ui/Card";
 import { CheckIcon } from "@/components/ui/icons";
 import { IndustryHero } from "@/components/industries/IndustryHero";
+import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
 
 /**
- * Owner Dashboard product page (added 2026-07-13, st-dashboard-product-plan
- * part 2). The centerpiece is a LIVE embed of the demo dashboard: a fully
- * functional, self-contained build of the real product running on synthetic
- * data for a fictional company (Boreal Comfort Co). The artifact is baked by
- * demo/bake-demo.sh, which refuses to ship if any real customer or employee
- * string leaks in (demo/privacy-validator.js).
+ * Dashboards product page (added 2026-07-13, st-dashboard-product-plan part 2;
+ * the commission tracker joined it 2026-07-24). Two products, each with a LIVE
+ * embed: a fully functional, self-contained build of the real thing running on
+ * synthetic data for a fictional company (Boreal Comfort Co). Both artifacts,
+ * and the still shots under them, are baked by demo/bake-demo.sh and
+ * demo/capture-screens.sh, which refuse to ship if any real customer or
+ * employee string leaks in (demo/privacy-validator.js).
  *
- * Standalone product since 2026-07-16: $795 setup + $125/month, no full-service
- * retainer required. Pricing rule: state the numbers flat, never justify them.
+ * Owner dashboard: standalone since 2026-07-16, $795 setup + $125/month, no
+ * full-service retainer required. Pricing rule: state the numbers flat, never
+ * justify them.
  */
 
 const PATH = "/dashboards";
 const DESCRIPTION =
+  "Two ServiceTitan-fed products for a service shop: an owner dashboard that puts the whole business on one page at 6 AM, and a commission tracker that computes every tech's pay line and exports the approved period to payroll. Both read-only, both with a clickable demo.";
+const OWNER_DESCRIPTION =
   "One page that shows a service-shop owner the whole business at 6 AM: yesterday's numbers, the next 30 days of booked work, sold installs waiting, uncollected invoices, and red flags pulled nightly from the crew's Slack. Refreshed hourly from ServiceTitan, read-only.";
+const COMMISSION_DESCRIPTION =
+  "Commission tracking for a service shop: every tech's pay line computed from ServiceTitan invoices, a portal where each tech approves or disputes their own lines, and a one-click payroll export once the pay period is approved. Read-only pull, nothing written back.";
 
 export const metadata = pageMetadata({
-  title: "Owner Dashboard: Your Whole Shop on One Page",
+  title: "Dashboards: Your Whole Shop, and Everyone's Commission",
   path: PATH,
   description: DESCRIPTION,
 });
+
+/** 2880x1800 is the capture size in demo/capture-screens.sh (1440x900 at 2x). */
+const SHOT = { width: 2880, height: 1800 } as const;
+
+const OWNER_SHOTS: Screenshot[] = [
+  {
+    ...SHOT,
+    src: "/dashboards/owner-dashboard-operations.png",
+    alt: "The owner dashboard Operations tab: revenue, work in progress, uncollected invoices, and today's appointment counts",
+    caption:
+      "Operations: the 6 AM read. Yesterday's revenue, today's book, and the money already sold or already invoiced.",
+  },
+  {
+    ...SHOT,
+    src: "/dashboards/owner-dashboard-sales.png",
+    alt: "The owner dashboard Sales tab: team sold totals, unsold estimates, and a card per salesperson with close rates",
+    caption:
+      "Sales: what the team sold, what is still on the table, and a card per person with their close rate.",
+  },
+  {
+    ...SHOT,
+    src: "/dashboards/owner-dashboard-financial.png",
+    alt: "The owner dashboard Financial tab: month to date invoiced, collected, and a list of invoices with an open balance",
+    caption:
+      "Financial: invoiced against collected, then the list of open balances oldest first.",
+  },
+];
+
+const WHITEBOARD_SHOTS: Screenshot[] = [
+  {
+    ...SHOT,
+    src: "/dashboards/install-whiteboard.png",
+    alt: "The install whiteboard: one row per sold install, with a shared checkbox for each step from permit to payment",
+    caption:
+      "One row per sold install. The steps ServiceTitan can prove tick themselves; the rest the crew ticks as they go.",
+  },
+];
+
+const COMMISSION_SHOTS: Screenshot[] = [
+  {
+    ...SHOT,
+    src: "/dashboards/commission-master.png",
+    alt: "The commission tracker office view: a card per earner listing every commission line with its basis, rate and amount",
+    caption:
+      "The office view: every earner, every line, and the invoice each one was computed from.",
+  },
+  {
+    ...SHOT,
+    src: "/dashboards/commission-portal.png",
+    alt: "A technician's own commission portal: their lines for the pay period, with approve and dispute checkboxes",
+    caption:
+      "What a tech sees: their own lines and nobody else's, with a tick for approve and a tick for dispute.",
+  },
+];
+
+const COMMISSION_FEATURES: string[] = [
+  "Every line is computed from a paid ServiceTitan invoice, not typed into a spreadsheet: the job, the customer, the basis, the rate, and the dollars, with the qualifying items behind the number one click away.",
+  "Each tech gets their own portal. They see their lines and nobody else's, and they tick approve or dispute before payday instead of arguing about it after.",
+  "Flat rates, percentages, tier gates, turnover splits, membership spiffs, and one-off manual lines all live in the same rule set, so an unusual agreement does not become an unusual spreadsheet.",
+  "You can override a line, zero it, move it to the next pay period, or pay a projected one early. Every edit is recorded with who and when.",
+  "Approve the pay period and export it: one row per person, ready for the payroll import. The tracker names anything blocking the export before you press the button.",
+  "The ServiceTitan pull is read-only, same as the owner dashboard. It computes pay; it never writes to your system.",
+];
 
 const FEATURES: { lead: string; text: string }[] = [
   {
@@ -83,7 +153,7 @@ export default function DashboardsPage() {
           {
             ...serviceLd({
               name: "Owner Dashboard",
-              description: DESCRIPTION,
+              description: OWNER_DESCRIPTION,
               url: `${SITE.url}${PATH}`,
             }),
             offers: [
@@ -103,9 +173,17 @@ export default function DashboardsPage() {
               },
             ],
           },
+          /* The commission tracker carries NO offers node. Its price is a setup fee
+             plus a small monthly, quoted on the call (Bryan, 2026-07-24), and schema
+             that invents a number is worse than schema that omits one. */
+          serviceLd({
+            name: "Commission Tracker",
+            description: COMMISSION_DESCRIPTION,
+            url: `${SITE.url}${PATH}#commission`,
+          }),
           breadcrumbLd([
             { name: "Home", url: SITE.url },
-            { name: "Owner Dashboard", url: `${SITE.url}${PATH}` },
+            { name: "Dashboards", url: `${SITE.url}${PATH}` },
           ]),
         )}
       />
@@ -113,7 +191,7 @@ export default function DashboardsPage() {
       <main>
         <IndustryHero
           title="Your whole shop on one page at 6 AM"
-          intro="The Owner Dashboard answers the question every service-shop owner starts the day with: how are we actually doing? Yesterday's revenue and calls, the next 30 days of booked work, sold installs waiting, invoices not yet collected, and the red flags your crew mentioned in Slack overnight. It refreshes itself hourly from ServiceTitan, read-only, and it was built and battle-tested inside a real heating and cooling shop, not a software lab."
+          intro="Two products, both fed by the ServiceTitan you already pay for, both built and battle-tested inside a real heating and cooling shop rather than a software lab. The owner dashboard answers the question every owner starts the day with: how are we actually doing? The commission tracker answers the one every tech asks on payday: is this number right? Both are read-only, and both have a working demo further down this page."
           art={null}
         />
 
@@ -154,6 +232,7 @@ export default function DashboardsPage() {
                 ". It works on your phone too, because that's where owners actually read it."
               }
             </p>
+            <ScreenshotRow shots={OWNER_SHOTS} />
           </div>
         </Section>
 
@@ -181,8 +260,8 @@ export default function DashboardsPage() {
         <Section id="pricing" tone="light">
           <SectionHeading
             tone="light"
-            title="Buy it on its own"
-            lead="The dashboard is a standalone product. It doesn't require the monthly automation service, and nobody will steer you into one."
+            title="What the owner dashboard costs"
+            lead="The dashboard is a standalone product, priced flat. It doesn't require the monthly automation service, and nobody will steer you into one. The commission tracker is quoted separately, further down."
           />
           <div className="mt-12 max-w-[30rem]">
             <Card tone="light" accent className="p-7 sm:p-9">
@@ -313,6 +392,83 @@ export default function DashboardsPage() {
                 ". The real one lives at a private URL the crew opens on the shop TV and their phones."
               }
             </p>
+            <ScreenshotRow shots={WHITEBOARD_SHOTS} />
+          </div>
+        </Section>
+
+        <Section id="commission" tone="base">
+          <SectionHeading
+            title="The second product: the commission tracker"
+            lead="Same ServiceTitan connection, a different question. Every commission line your techs and comfort advisors earn, computed from paid invoices instead of assembled in a spreadsheet on the Friday before payroll."
+          />
+          <ul className="mt-10 grid max-w-[52rem] gap-6">
+            {COMMISSION_FEATURES.map((point) => (
+              <li key={point.slice(0, 24)} className="flex gap-5">
+                <span
+                  aria-hidden
+                  className="mt-[0.7em] h-[3px] w-6 flex-none bg-amber"
+                />
+                <p className="leading-[1.65] text-body">{point}</p>
+              </li>
+            ))}
+          </ul>
+          {/* PRICING: Bryan decision, 2026-07-24. Never invent dollars here. */}
+          <p className="mt-12 max-w-[44rem] leading-[1.65] text-body">
+            {
+              "Pricing works the way the dashboard's does: a one-time setup to wire it to your ServiceTitan and encode your actual pay agreements, then a small monthly to keep it running. The setup is the real work, because every shop's agreements are different, so the number comes out of a fifteen-minute call rather than off a price list. "
+            }
+            <Link href="/contact#book" className="inline-link">
+              Book the call and I will quote it
+            </Link>
+            {"."}
+          </p>
+        </Section>
+
+        <Section id="commission-demo" tone="light">
+          <SectionHeading
+            tone="light"
+            title="Same deal: drive it yourself"
+            lead="The real tracker, running on the same fictional company as the two demos above, with the same crew and the same customers. Override a line, tick a dispute, approve the pay period, then export the payroll file. Every edit sticks until you reload, and nothing here has ever touched a real person's pay."
+          />
+          <div className="mt-10">
+            <div className="overflow-hidden rounded-lg border border-border-lt bg-white shadow-lg">
+              <div className="flex items-center gap-2 border-b border-border-lt bg-light px-4 py-2.5">
+                <span aria-hidden className="size-2.5 rounded-full bg-border-lt" />
+                <span aria-hidden className="size-2.5 rounded-full bg-border-lt" />
+                <span aria-hidden className="size-2.5 rounded-full bg-border-lt" />
+                <span className="ml-3 truncate text-[0.8rem] text-muted-lt">
+                  Boreal Comfort Co · Commission Tracker · demonstration data
+                </span>
+              </div>
+              <iframe
+                src="/demo/commission.html"
+                title="Commission tracker live demo with fictional data"
+                loading="lazy"
+                className="h-[42rem] w-full"
+              />
+            </div>
+            <p className="mt-4 text-[0.95rem] leading-[1.6] text-navy-2">
+              {"Cramped in a frame? "}
+              <a
+                href="/demo/commission.html"
+                target="_blank"
+                rel="noopener"
+                className="inline-link-light"
+              >
+                Open the commission demo in its own tab
+              </a>
+              {", or see "}
+              <a
+                href="/demo/commission-portal.html"
+                target="_blank"
+                rel="noopener"
+                className="inline-link-light"
+              >
+                {"the tech's own portal"}
+              </a>
+              {", which is all any one earner can reach."}
+            </p>
+            <ScreenshotRow shots={COMMISSION_SHOTS} />
           </div>
         </Section>
 

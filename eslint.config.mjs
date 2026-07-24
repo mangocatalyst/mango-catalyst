@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // demo/ is standalone Node build tooling (CommonJS, run by bake-demo.sh), not
+    // part of the app bundle. Linting it with the Next/TS ruleset only ever produced
+    // no-require-imports noise on files that are correct as they are.
+    "demo/**",
   ]),
 ]);
 

@@ -76,9 +76,7 @@ body{font-family:var(--body);color:var(--ink);background:var(--panel);min-height
 .scroll{overflow-x:auto}
 header{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:6px}
 :root[data-theme=dark] .logo-chip{background:linear-gradient(160deg,#fffdf4,#f3e9d2);border-radius:14px;padding:10px 16px;box-shadow:0 6px 24px rgba(0,0,0,.45),inset 0 0 0 1px rgba(210,152,71,.35)}
-.logo-chip .logo-word{display:block;font-family:var(--disp);font-weight:700;font-size:27px;line-height:1.02;
-  letter-spacing:.03em;text-transform:uppercase;max-width:8.5ch;color:var(--cream)}
-:root[data-theme=dark] .logo-chip .logo-word{color:#0E1729}
+.logo-chip img{height:58px;display:block}
 .masthead h1{font-family:var(--disp);font-weight:700;font-size:44px;letter-spacing:.5px;line-height:1;color:var(--cream);text-transform:uppercase}
 .hdate{font-family:var(--disp);font-weight:400;font-size:24px;letter-spacing:.08em;line-height:1.1;color:var(--ice);text-transform:uppercase;margin:3px 0 5px}
 .hinfo{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--dim);margin-left:auto;align-self:center;text-align:right}
@@ -186,7 +184,7 @@ try {
 <div class="wrap">
 
 <header>
-  <div class="logo-chip"><span class="logo-word">Boreal Comfort Co</span></div>
+  <div class="logo-chip"><img alt="Boreal Comfort Co" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNDAgOTYiPgo8ZyBmaWxsPSJub25lIj48cGF0aCBkPSJNMjggNzYgNDggMjJsMjAgNTQiIHN0cm9rZT0iI0UyOTQxRCIgc3Ryb2tlLXdpZHRoPSI5IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTM4IDU4aDIwIiBzdHJva2U9IiMwRTE3MjkiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8dGV4dCB4PSI4NiIgeT0iNTIiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzQiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwRTE3MjkiIGxldHRlci1zcGFjaW5nPSIxIj5CT1JFQUw8L3RleHQ+Cjx0ZXh0IHg9Ijg3IiB5PSI3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjNTE2MDc5IiBsZXR0ZXItc3BhY2luZz0iNSI+Q09NRk9SVCBDTzwvdGV4dD4KPC9zdmc+"></div>
   <div class="masthead">
     <h1>My Commission</h1>
     <div class="hdate" id="h-week"></div>

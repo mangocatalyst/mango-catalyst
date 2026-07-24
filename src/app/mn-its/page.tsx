@@ -188,13 +188,14 @@ export default function MnItsPage() {
               about five clicks.
             </p>
             <p className="mt-5 max-w-[44rem] leading-[1.65] text-navy-2">
-              Now multiply by every client, every billing cycle. You don't have
+              Now multiply by every client, every billing cycle. You don&apos;t
+              have
               to take the math on faith: the extension keeps its own running
               count of every click and keystroke it types for you, and you can
               watch it grow in its options page.
             </p>
             <p className="mt-4 max-w-[44rem] text-[0.9rem] leading-[1.6] text-muted-lt">
-              Counted the way the extension's productivity counter counts: one
+              Counted the way the extension&apos;s productivity counter counts: one
               click per field, two per dropdown, characters as typed, on a
               Professional Claim with twenty service dates.
             </p>

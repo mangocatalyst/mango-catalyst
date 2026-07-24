@@ -54,13 +54,12 @@ swap(`@font-face{font-family:'Passion One';font-weight:400;font-display:swap;src
 @font-face{font-family:'Inter';font-weight:100 900;font-display:swap;src:url(data:font/woff2;base64,${interVar}) format('woff2')}`);
 swap(`--disp:'Passion One','Arial Narrow',sans-serif;`, `--disp:'Big Shoulders','Arial Narrow',sans-serif;`);
 
-/* ---------- masthead wordmark ---------- */
-swap('.logo-chip img{height:58px;display:block}',
-  `.logo-chip .logo-word{display:block;font-family:var(--disp);font-weight:700;font-size:27px;line-height:1.02;
-  letter-spacing:.03em;text-transform:uppercase;max-width:8.5ch;color:var(--cream)}
-:root[data-theme=dark] .logo-chip .logo-word{color:#0E1729}`);
+/* ---------- masthead: the same Boreal logotype the other two demos wear ---------- */
+const LOGO = path.join(__dirname, 'build', 'data', 'ns-logo.svg');
+if (!fs.existsSync(LOGO)) throw new Error('build/data/ns-logo.svg missing; run make-demo-data.js (bake-demo.sh step 2) first');
+const logoUri = `data:image/svg+xml;base64,${fs.readFileSync(LOGO).toString('base64')}`;
 swap('  <div class="logo-chip"><img alt="NorthStar Heating and Cooling" src="/assets/ns-logo.svg"></div>',
-  '  <div class="logo-chip"><span class="logo-word">Boreal Comfort Co</span></div>');
+  `  <div class="logo-chip"><img alt="Boreal Comfort Co" src="${logoUri}"></div>`);
 
 /* ---------- ServiceTitan deep links: defang the shared builder ---------- */
 swap(`// The techs have ServiceTitan logins, so every row on this page deep-links its OWN work the
