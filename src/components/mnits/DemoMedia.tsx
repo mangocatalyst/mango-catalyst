@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import Image from "next/image";
+import { ShotZoom } from "./ShotZoom";
 
 /**
  * Media blocks for the /mn-its tutorial. Server-only: each block checks
@@ -73,15 +73,5 @@ export function Shot({ src, alt }: { src: string; alt: string }) {
   if (!hasAsset(src)) {
     return <PlaceholderFrame label={`Screenshot coming: ${alt}`} aspect="aspect-[16/10]" />;
   }
-  return (
-    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg shadow-md">
-      <Image
-        src={`/${src}`}
-        alt={alt}
-        fill
-        sizes="(min-width: 1024px) 26rem, 100vw"
-        className="object-contain"
-      />
-    </div>
-  );
+  return <ShotZoom src={`/${src}`} alt={alt} />;
 }
