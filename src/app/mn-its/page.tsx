@@ -22,7 +22,9 @@ import { DemoVideo, Shot } from "@/components/mnits/DemoMedia";
  * TALLY DERIVATION. Counted the same way the extension's own productivity
  * counter counts (mnits-extension fill-flow.js trackStats: text field = 1
  * click, dropdown = 2 clicks, button = 1 click, characters = typed value
- * length), walking the fill flow for a claim with 20 service dates:
+ * length), walking the fill flow for a claim with 14 service dates (the
+ * typical two-week billing cycle, per Bryan 2026-07-24; the demo video is
+ * itself a 14-day claim):
  *   header, pages 2-5: 14 clicks, ~30 characters
  *     p2 Continue(1); p3 subscriber(1)+DOB(1)+Search(1)+Continue(1);
  *     p4 PoS dropdown(2)+PCN(1)+DxType dropdown(2)+DxCode(1)+Add(1)+
@@ -33,8 +35,8 @@ import { DemoVideo, Shot } from "@/components/mnits/DemoMedia";
  *     dx pointer dropdown(2)+charge(1)+units(1)+Save/View(1). Chars:
  *     dates 20 + PoS 2 + procedure 5 + mods 4 + pointer 1 + charge ~6 +
  *     units 1.
- *   20 lines: 14 + 240 = 254 clicks, 30 + 760 = ~790 characters.
- * Copy rounds to "about 250 clicks and 790 keystrokes".
+ *   14 lines: 14 + 168 = 182 clicks, 30 + 532 = ~562 characters.
+ * Copy rounds to "about 180 clicks and 560 keystrokes".
  */
 
 const PATH = "/mn-its";
@@ -75,7 +77,7 @@ const STEPS: Step[] = [
     title: "Click Start and watch it type",
     body: "Pages 2 through 6 fill themselves: subscriber lookup, claim header, diagnosis, then one service line for every day you picked. A status banner narrates each step as it lands.",
     shot: { src: "mn-its/line-fill.png", alt: "a service line mid-fill" },
-    chip: "What you just skipped on a 20-day claim: about 250 clicks and 790 keystrokes.",
+    chip: "What you just skipped on a 14-day claim: about 180 clicks and 560 keystrokes.",
   },
   {
     title: "It stops at review. You submit.",
@@ -135,12 +137,12 @@ export default function MnItsPage() {
           <SectionHeading
             tone="light"
             title="Watch it fill a claim"
-            lead="A real Professional Claim, filled start to review screen. No narration needed: the typing you're not doing is the whole pitch."
+            lead="A real 14-day Professional Claim, filled start to review screen, shown in real time. Not sped up, not edited: what you're watching is exactly the time you get back."
           />
           <DemoVideo
             src="mn-its/demo.mp4"
             poster="mn-its/demo-poster.png"
-            caption="Recorded on a live claim with the extension's built-in demo mask on: client information is blurred by the software before the screen is ever captured."
+            caption="Recorded on a live claim with the extension's built-in privacy mask on: client information is hidden by the software before the screen is ever captured. The mask is a toggle you control, on when you're sharing a screen, off when you're working."
           />
         </Section>
 
@@ -184,7 +186,7 @@ export default function MnItsPage() {
         <Section id="the-math" tone="light" containerClassName="pt-0">
           <div className="max-w-[52rem] border-t border-border-lt pt-12">
             <p className="font-display text-[clamp(1.7rem,1.1rem+2vw,2.6rem)] font-bold uppercase leading-[1.12] tracking-[0.015em] text-balance text-navy">
-              One 20-day claim: about 790 keystrokes and 250 clicks, down to
+              One 14-day claim: about 560 keystrokes and 180 clicks, down to
               about five clicks.
             </p>
             <p className="mt-5 max-w-[44rem] leading-[1.65] text-navy-2">
@@ -196,7 +198,8 @@ export default function MnItsPage() {
             <p className="mt-4 max-w-[44rem] text-[0.9rem] leading-[1.6] text-muted-lt">
               Counted the way the extension's productivity counter counts: one
               click per field, two per dropdown, characters as typed, on a
-              Professional Claim with twenty service dates.
+              Professional Claim with fourteen service dates, the typical
+              two-week billing cycle.
             </p>
           </div>
         </Section>
