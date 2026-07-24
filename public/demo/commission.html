@@ -542,9 +542,21 @@ function demoPeriod(id) {
 /* ---- writes ---- */
 let DEMO_NEXT_ID = 900000;
 function demoNewLine(period, o) {
+  const weeks = dWeeks(period.id);
+  // Where a NEW line lands, by the same rule placeInWeek applies to the baked
+  // ones and compute.js applies to the real ones (mondayOf(inv.paid_on)):
+  //   tied to a paid invoice -> the week that invoice paid into;
+  //   no invoice to derive from (a manual line, a pull-forward stand-in whose
+  //   projection has not been paid at all) -> the newest week that has begun,
+  //   which is where the tracker's own writers put one.
+  // Derived here rather than at each call site so a future caller that carries a
+  // paid_on cannot forget: attributing a sale in the second week of a fortnight
+  // was putting its line in week two while the invoice had paid in week one.
+  const begun = weeks.filter((w) => w <= DEMO_TODAY);
+  const derived = o.paid_on ? dMonday(o.paid_on) : null;
   const blank = {
     id: ++DEMO_NEXT_ID,
-    week_id: dWeeks(period.id).filter((w) => w <= DEMO_TODAY).pop() || dWeeks(period.id)[0],
+    week_id: derived && weeks.includes(derived) ? derived : (begun[begun.length - 1] || weeks[0]),
     person: demoPerson(o.person_id).name, kind: 'manual', source: 'manual',
     share: null, basis: null, pct: null, computed_amount: 0, earned_amount: null,
     override_amount: null, zeroed: 0, tech_approved: 0, office_approved: 0, disputed: 0,
