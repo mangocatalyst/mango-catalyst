@@ -322,6 +322,9 @@ try {
 
 <div class="strip">
   <div class="stat"><div class="k">Company total</div><div class="v" id="s-total">$0</div></div>
+  <!-- Wage pay + commission for everyone on payroll. Sits beside the commission total rather
+       than replacing it: the export is still commission-only. -->
+  <div class="stat"><div class="k">Gross payroll</div><div class="v" id="s-gross">$0</div></div>
   <div class="stat"><div class="k">Earners</div><div class="v" id="s-people">0</div></div>
   <div class="stat"><div class="k">Lines</div><div class="v" id="s-lines">0</div></div>
   <div class="stat"><div class="k">Needs a look</div><div class="v" id="s-attn">0</div></div>
@@ -339,6 +342,14 @@ try {
 
 <h2>By person</h2>
 <div class="people" id="people"></div>
+
+<!-- Wage pay: ServiceTitan's worked hours at our rates, plus the PTO and on-call ST cannot
+     know about, plus commission. Filled by renderPayroll(); hidden when nobody is on it. -->
+<section id="payroll-view" hidden>
+  <h2>Payroll</h2>
+  <div class="card"><div id="payroll-list"></div>
+    <div id="payroll-unlinked"></div></div>
+</section>
 
 <!-- Filled by renderDisputed() from the loaded period; stays hidden while nothing is disputed. -->
 <section id="disputed" hidden>
@@ -365,7 +376,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>Commission tracker</span>
-  <span>demo v2026-07-27 · fictional data · edits reset on reload</span>
+  <span>demo v2026-07-28 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%"></span>
 </footer>
 </div>
@@ -1223,6 +1234,11 @@ function personCard(p, lines, open, tnfrItems, people, upcoming) {
   // id so the Disputed strip can jump straight to the card the questioned line sits on.
   return '<div class="card" id="person-' + p.person_id + '"><div class="who">'
     + '<span class="name">' + esc(p.name) + '</span>'
+    // Why this card can sit at $0.00 with no lines: they are on payroll but earn no commission
+    // automatically. The card exists so a bonus can be added by hand, which is the only money
+    // that ever lands here until somebody confirms them on the settings page.
+    + (p.payroll_only ? '<span class="tag" title="On payroll, earns no commission automatically.'
+      + ' Add a bonus by hand below, or confirm them on the settings page.">bonus only</span>' : '')
     + (badges.length ? '<span class="muted" style="font-size:12px">' + esc(badges.join(' · ')) + '</span>' : '')
     + (p.disputed ? '<span class="badge-disputed" style="font-size:12px">' + p.disputed + ' disputed</span>' : '')
     // Print is deliberately available on a frozen period too: that is when a tech reads it.
@@ -1430,6 +1446,136 @@ function renderDisputed(lines, tnfrItems) {
     + '</tbody></table>';
 }
 
+// The wage half of payroll: ServiceTitan's worked hours priced at our own rates, plus the
+// PTO and on-call ServiceTitan does not carry, plus commission. Everything here is derived
+// server-side at read time (server.js payrollRows), so this renders what it is given and
+// computes no money of its own.
+//
+// PTO hours and the on-call dollars are the only editable cells, and both write per PERIOD
+// rather than per week, which is the granularity they are decided at.
+function renderPayroll(data) {
+  const rows = data.payroll || [];
+  const unlinked = data.payrollUnlinked || [];
+  const open = (data.period.status || 'open') === 'open';
+  document.getElementById('payroll-view').hidden = !rows.length && !unlinked.length;
+  // The headline sums what is KNOWN and says so when something is missing. Summing with
+  // `|| 0` turned every unset rate into a confident zero and dropped that person's commission
+  // out of the total as well, so the number read as complete when it was not.
+  const unpriced = rows.filter((r) => r.gross == null);
+  document.getElementById('s-gross').innerHTML = money(rows.reduce((s, r) => s + (r.gross || 0), 0))
+    + (unpriced.length ? '<small> + ' + unpriced.length + ' unpriced</small>' : '');
+  document.getElementById('s-gross').title = unpriced.length
+    ? 'Incomplete: ' + unpriced.map((r) => r.name).join(', ') + ' have no rate set, so their pay is not in this total'
+    : 'Wage pay plus commission for everyone on payroll this period';
+
+  // A missing rate is not a rate of zero, so the cell says so instead of printing $0.00 and
+  // letting somebody pay it.
+  const need = (r) => (r.pay_type === 'salary' ? 'no salary set' : 'no base rate set');
+  // Which UNIT this person's on-call box is in: what is stored, else what their pay type is
+  // paid in. Stored wins so an entry can never be rendered as blank while it is being paid.
+  const asDollars = (r) => (r.on_call_amount != null ? true
+    : r.on_call_hours != null ? false : r.pay_type === 'salary');
+  const cell = (r, v) => (v == null ? '<span class="muted">' + need(r) + '</span>' : money(v));
+  // ServiceTitan prices the same WORKED hours with its own rate. A gap over a dollar means one
+  // of the two rates is wrong, and the person whose pay it is should hear it from us first.
+  // PTO and on-call are ours alone, ServiceTitan has never heard of either, so both come off
+  // before the comparison, or every PTO entry would read as a rate disagreement.
+  const worked = (r) => r.wage_pay - (r.on_call_pay || 0) - (r.pto_hours || 0) * (r.base_rate || 0);
+  const variance = (r) => (r.pay_type === 'salary' || r.wage_pay == null || !r.st_amount
+    || Math.abs(worked(r) - r.st_amount) <= 1 ? ''
+    : '<span class="flag" title="ServiceTitan prices the same worked hours at ' + money(r.st_amount) + '">ST ' + money(r.st_amount) + '</span>');
+
+  document.getElementById('payroll-list').innerHTML = '<table><thead><tr>'
+    + '<th>Person</th>'
+    // Editable HERE, not only on the settings page. The rate is the one input that decides
+    // every other number in the row, so having to leave the page to fix a blank one, and then
+    // come back to see what it did, was the wrong shape. Same field either way; this writes
+    // the same column the settings card does.
+    + '<th class="num" style="width:104px" title="Their own rate. Hourly people are $ per hour, salaried people $ per pay period. Also on the settings page.">Rate</th>'
+    + '<th class="num">Reg hrs</th><th class="num">OT hrs</th>'
+    + '<th class="num" style="width:96px">PTO hrs</th>'
+    + '<th class="num" style="width:110px" title="Hours for an hourly person, a flat stipend for a salaried one">On-call</th>'
+    + '<th class="num">Wage pay</th><th class="num">Commission</th><th class="num">Gross</th>'
+    + '</tr></thead><tbody>'
+    + rows.map((r) => {
+      const salaried = r.pay_type === 'salary';
+      // A salaried person's hours and PTO are shown for visibility and pay nothing, so they
+      // are greyed and chipped rather than hidden: "why is this zero" is a worse question.
+      const hrs = (v) => '<td class="num' + (salaried ? ' muted' : '') + '">' + Number(v || 0).toFixed(2) + '</td>';
+      return '<tr data-pay-person="' + r.person_id + '">'
+        + '<td><span class="cust">' + esc(r.name) + '</span>'
+        + (salaried ? ' <span class="tag">salary</span>' : '')
+        // Found by the payroll pull and not yet confirmed: paid for their time, earning no
+        // commission. Said on the row so nobody wonders why their commission column is empty.
+        + (r.payroll_only ? ' <span class="tag" title="Created from ServiceTitan payroll. Paid for time only, earns no commission until you confirm them on the settings page.">unconfirmed</span>' : '')
+        + '</td>'
+        // THE RATE, editable in place. Hourly people are $/hr (base_rate), salaried people
+        // $/period (salary_per_period), the same two fields the settings card writes, so
+        // there is one stored rate per person and no second place for it to disagree.
+        //
+        // Deliberately NOT disabled on a closed period: a rate belongs to the person, not to
+        // the period, and the settings page has always let it be edited from anywhere. The
+        // note under a closed period already says wage pay is recomputed at current rates.
+        + '<td class="num"><input type="number" step="0.01" min="0" class="ovp"'
+        + ' data-rate="' + (salaried ? 'salary_per_period' : 'base_rate') + '"'
+        + ' value="' + ((salaried ? r.salary_per_period : r.base_rate) ?? '') + '"'
+        // ServiceTitan's own figure sits in the placeholder, so an empty box for an hourly
+        // person suggests the number instead of showing nothing. A ServiceTitan rate of $0.00
+        // is never seeded, so it is not offered here either.
+        + ' placeholder="' + (salaried ? '/period' : (r.st_hourly_rate ? Number(r.st_hourly_rate).toFixed(2) : 'rate')) + '"'
+        + ' title="' + (salaried ? 'Salary per pay period' : 'Base rate per hour; overtime pays 1.5x unless set on the settings page') + '"'
+        + ' aria-label="' + (salaried ? 'Salary per period' : 'Base rate per hour') + ' for ' + esc(r.name) + '"></td>'
+        + hrs(r.reg_hours) + hrs(r.ot_hours)
+        + '<td class="num"><input type="number" step="0.25" min="0" class="ovp" data-extra="pto"'
+        + ' value="' + (r.pto_hours == null ? '' : r.pto_hours) + '"' + (open ? '' : ' disabled')
+        + ' aria-label="PTO hours for ' + esc(r.name) + '"></td>'
+        // One rotation, two units. A salaried person gets a flat stipend (they cannot be paid
+        // by the hour); an hourly person types HOURS and is paid their own rate for them.
+        //
+        // Which unit is SHOWN follows the stored row, falling back to the pay type when there
+        // is no entry yet. Rendering purely by pay type hid a real entry: a person switched to
+        // salary with on-call hours already stored showed a blank dollar box while payrollRows
+        // went on paying those hours. The page must never be able to omit money it is paying.
+        + '<td class="num"><input type="number" step="' + (asDollars(r) ? '0.01' : '0.25') + '" min="0" class="ovp"'
+        + ' data-extra="on_call"'
+        + ' value="' + ((asDollars(r) ? r.on_call_amount : r.on_call_hours) ?? '') + '"' + (open ? '' : ' disabled')
+        // Their own default prefills the box as a placeholder, so entering it is a
+        // confirmation rather than a retype, and an empty box still means "not paid".
+        + ' placeholder="' + (r.on_call_rate == null ? (asDollars(r) ? '$' : 'hrs') : Number(r.on_call_rate).toFixed(2)) + '"'
+        + ' title="' + (asDollars(r) ? 'A flat stipend for the period' : 'Hours on call, paid at their base rate') + '"'
+        + ' aria-label="On-call ' + (asDollars(r) ? 'dollars' : 'hours') + ' for ' + esc(r.name) + '">'
+        // What those hours come to, so the row shows its own arithmetic rather than making
+        // somebody find it inside the wage-pay total.
+        + (!asDollars(r) && r.on_call_hours != null && r.on_call_pay != null
+          ? '<div class="muted" style="font-size:11px">' + money(r.on_call_pay) + '</div>' : '')
+        + '</td>'
+        + '<td class="num">' + cell(r, r.wage_pay) + variance(r) + '</td>'
+        + '<td class="num">' + money(r.commission) + '</td>'
+        + '<td class="num"><b>' + cell(r, r.gross) + '</b></td></tr>';
+    }).join('')
+    + '</tbody></table>'
+    // A closed period's COMMISSION is frozen in its lines. Its wage pay is not: there is no
+    // stored pay column by design (the plan's "no converger, no drift flag"), so these figures
+    // are re-derived from today's rates, pay types and salaries every time the page loads.
+    // Change somebody's rate and this period's wage pay changes with it. Say so rather than
+    // let the number read as a record of what was paid, until wage pay reaches the Gusto
+    // export there is nothing anywhere that freezes it.
+    + (open ? '' : '<div class="frozen">This pay period is closed, so its PTO and on-call entries are locked.'
+      + ' Commission is frozen in its lines, but wage pay is recomputed from <b>current</b> rates and salaries'
+      + ' every time this page loads, it is not a record of what was paid.</div>');
+
+  // ServiceTitan employees who logged time but map to nobody. Never auto-linked by name:
+  // two people can share one, and guessing hands the wrong person every job the other ran.
+  document.getElementById('payroll-unlinked').innerHTML = !unlinked.length ? ''
+    : '<div class="gate"><b>' + unlinked.length + ' ServiceTitan employee'
+      + (unlinked.length === 1 ? '' : 's') + ' logged time but ' + (unlinked.length === 1 ? 'is' : 'are')
+      + ' not linked to anyone here.</b> Link the ServiceTitan identity on the settings page'
+      + ', a name match alone is not enough to link on.<ul>'
+      + unlinked.map((u) => '<li>' + esc(u.name || 'unnamed') + ' (' + esc(u.kind) + ' ' + esc(u.st_id)
+        + '), ' + Number(u.hours || 0).toFixed(2) + ' hrs</li>').join('')
+      + '</ul></div>';
+}
+
 let CURRENT = null;   // the pay period on screen: the Monday its first week starts
 let PERIODS = [];     // every period, newest first
 let DATA = null;      // the last /api/period payload, shared by the cards and the printer
@@ -1588,6 +1734,20 @@ async function loadPeriod(id) {
     carded.add(u.person_id);
     cardPeople.push({ person_id: u.person_id, name: u.person, payable: 0 });
   }
+  // And anybody on PAYROLL this period, for the same reason: the card is where a hand-written
+  // line is added, and the five people the pull created earn no commission but do get the
+  // occasional bonus (the owner, 2026-07-27). Without a card there was nowhere to add it.
+  for (const r of (data.payroll || [])) {
+    if (carded.has(r.person_id)) continue;
+    carded.add(r.person_id);
+    cardPeople.push({ person_id: r.person_id, name: r.name, payable: 0 });
+  }
+  // Stamp the unconfirmed flag onto EVERY card, not just the synthesized ones: the moment an
+  // unconfirmed person is handed a bonus they arrive through data.people instead, which
+  // carries no such flag, and the chip explaining why they earn nothing vanished exactly when
+  // the card started showing money.
+  const unconfirmed = new Set((data.payroll || []).filter((r) => r.payroll_only).map((r) => r.person_id));
+  for (const p of cardPeople) p.payroll_only = unconfirmed.has(p.person_id);
   // What is on screen is what prints, including the synthetic cards, whose Print button had
   // nothing to find before.
   CARD_PEOPLE = cardPeople;
@@ -1599,10 +1759,13 @@ async function loadPeriod(id) {
   document.getElementById('people').innerHTML = (cardPeople.length
     ? cardPeople.map((p) => personCard(p, byPerson.get(p.person_id) || [], open, data.tnfrItems, data.activePeople, upByPerson.get(p.person_id) || [])).join('')
     : '<div class="card"><div class="empty">No commission lines in this pay period.'
-      + (open && data.activePeople.length ? ' You can still add one by hand below.' : '') + '</div>'
-      + (open && data.activePeople.length
+      + (open && data.bonusPeople.length ? ' You can still add one by hand below.' : '') + '</div>'
+      + (open && data.bonusPeople.length
         ? '<div class="addrow"><select id="add-person" aria-label="Person">'
-          + data.activePeople.map((p) => '<option value="' + p.id + '">' + esc(p.name) + '</option>').join('')
+          // bonusPeople, not activePeople: a hand-written line is open to anybody on payroll,
+          // including someone unconfirmed who earns no commission but does get a bonus.
+          + data.bonusPeople.map((p) => '<option value="' + p.id + '">' + esc(p.name)
+            + (p.payroll_only ? ' (bonus only)' : '') + '</option>').join('')
           + '</select>'
           + '<input class="amt" type="number" step="0.01" data-add="amount" data-person="pick" placeholder="Amount" aria-label="Manual amount">'
           + '<input type="text" maxlength="500" data-add="note" data-person="pick" placeholder="Why (required)" aria-label="Manual note">'
@@ -1611,6 +1774,7 @@ async function loadPeriod(id) {
       + '</div>')
     + (open ? '' : '<div class="frozen">This pay period is ' + esc(status) + ', so its lines are locked. Corrections go in as a manual line in the current pay period.</div>');
   renderGates(data);
+  renderPayroll(data);
   renderDisputed(data.lines, data.tnfrItems);
   renderAttention(data.unmatched, data.dismissed || [], data.activePeople, open);
 }
@@ -1667,6 +1831,14 @@ document.addEventListener('change', (ev) => {
   } else if (t.dataset && t.dataset.line
     && (t.dataset.act === 'tech_approved' || t.dataset.act === 'office_approved' || t.dataset.act === 'disputed')) {
     edit(t.dataset.line, t.dataset.act, t.checked ? 1 : 0);
+  } else if (t.dataset && t.dataset.rate) {
+    // The person's own rate, edited from the payroll row. Writes the same person column the
+    // settings card does, through the same per-field patch endpoint.
+    setRate(t.closest('[data-pay-person]').dataset.payPerson, t.dataset.rate, t.value);
+  } else if (t.dataset && t.dataset.extra) {
+    // PTO hours / on-call dollars, per person per PAY PERIOD. Blank clears the entry, which
+    // is not the same as a stored zero.
+    setExtra(t.closest('[data-pay-person]').dataset.payPerson, t.dataset.extra, t.value);
   } else if (t.dataset && t.dataset.attribute) {
     attribute(t.dataset.attribute, t.value);
   } else if (t.dataset && t.dataset.attn) {
@@ -1676,6 +1848,22 @@ document.addEventListener('change', (ev) => {
     else attribute(t.dataset.attn, t.value.startsWith('p:') ? t.value.slice(2) : '');
   }
 });
+
+async function setRate(personId, field, value) {
+  try {
+    await post('/api/person/patch', { id: Number(personId), field, value });
+    await loadPeriod(CURRENT);
+    toast('Rate saved');
+  } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
+}
+
+async function setExtra(personId, kind, value) {
+  try {
+    await post('/api/extra', { person_id: Number(personId), period_id: CURRENT, kind, value });
+    await loadPeriod(CURRENT);
+    toast('Saved');
+  } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
+}
 
 async function attribute(invoiceId, personId) {
   try {
