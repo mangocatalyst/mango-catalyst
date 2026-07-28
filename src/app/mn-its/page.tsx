@@ -6,6 +6,7 @@ import { breadcrumbLd, graph, softwareApplicationLd } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 import { LocalOnlyArt } from "@/components/industries/TradeArt";
 import { DemoVideo, Shot } from "@/components/mnits/DemoMedia";
@@ -100,6 +101,19 @@ const ALSO: { lead: string; text: string }[] = [
     lead: "Keeps score.",
     text: "A running counter in the extension's options shows every click and keystroke it has typed on your behalf since the day you installed it.",
   },
+];
+
+/**
+ * Tiers mirror mnits-licensing seed.js (the code-owned source of truth):
+ * slots in increments of 4 because MN caps 4 clients per household. Keep the
+ * two in sync when prices change. Per the pricing-copy rule: no
+ * cost-comparison anchors next to the price, ever.
+ */
+const TIERS: { name: string; price: string; clients: number }[] = [
+  { name: "Starter", price: "$65", clients: 4 },
+  { name: "Basic", price: "$120", clients: 8 },
+  { name: "Standard", price: "$220", clients: 16 },
+  { name: "Plus", price: "$300", clients: 24 },
 ];
 
 const PRIVACY_POINTS: string[] = [
@@ -201,6 +215,58 @@ export default function MnItsPage() {
               click per field, two per dropdown, characters as typed, on a
               Professional Claim with fourteen service dates, the typical
               two-week billing cycle.
+            </p>
+          </div>
+        </Section>
+
+        <Section id="pricing" tone="light" containerClassName="pt-0">
+          <SectionHeading
+            tone="light"
+            title="What it costs"
+            lead="Priced by how many clients you bill in a month. Every plan is the same full extension: every feature, every update, no per-seat fees, no setup charge."
+          />
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {TIERS.map((tier) => (
+              <Card key={tier.name} tone="light" accent className="p-7">
+                <h3 className="text-[0.8rem] font-semibold tracking-[0.18em] uppercase text-muted-lt">
+                  {tier.name}
+                </h3>
+                <p className="mt-2 flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-display text-[2.6rem] leading-none font-bold text-navy">
+                    {tier.price}
+                  </span>
+                  <span className="text-[0.95rem] font-medium text-muted-lt">
+                    a month
+                  </span>
+                </p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-navy-2">
+                  Up to {tier.clients} clients a month
+                </p>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-10 grid max-w-[52rem] gap-4">
+            <p className="text-[0.95rem] leading-relaxed text-navy-2">
+              <strong className="font-semibold text-navy">Start free:</strong>{" "}
+              every plan begins with a 30-day trial. The full extension,
+              unlimited clients, no card required.
+            </p>
+            <p className="text-[0.95rem] leading-relaxed text-navy-2">
+              <strong className="font-semibold text-navy">
+                How counting works:
+              </strong>{" "}
+              a client counts toward your plan the first time you fill a claim
+              for them in a calendar month. Fill for the same client all month,
+              it still counts once.
+            </p>
+            <p className="text-[0.95rem] leading-relaxed text-navy-2">
+              <strong className="font-semibold text-navy">
+                Billing more than 24 clients?
+              </strong>{" "}
+              <Link href="/contact" className="inline-link-light">
+                Get in touch
+              </Link>{" "}
+              and we&apos;ll set up a plan that fits.
             </p>
           </div>
         </Section>
