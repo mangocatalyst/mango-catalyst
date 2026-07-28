@@ -105,10 +105,12 @@ const addToken = (word) => {
 };
 
 /**
- * A STAFF name: the owner, a tech, an advisor, a CSR, a cached ServiceTitan
- * employee. Whole string AND every word, because colleagues get referred to by
- * first name alone. That is exactly how the 2026-07-24 leak read: "Russ and Ron
- * run service and sell", "Zack is off Mondays", "(Bryan 2026-07-11)".
+ * A STAFF name: the owner, a tech, an advisor, a CSR — someone a donor page can
+ * refer to by first name alone. Whole string AND every word, because that is
+ * exactly how the 2026-07-24 leak read: "Russ and Ron run service and sell",
+ * "Zack is off Mondays", "(Bryan 2026-07-11)".
+ *
+ * NOT the cached ServiceTitan staff directory — see addDirectory.
  */
 const addStaff = (n) => {
   const s = String(n || '').trim();
@@ -117,6 +119,37 @@ const addStaff = (n) => {
   if (PLACEHOLDER.test(s)) return;
   if (s.length > 3) names.add(s);
   for (const word of s.split(/[^A-Za-z]+/)) addToken(word);
+};
+
+/**
+ * A name from commission.db's `st_staff`: the whole ServiceTitan employee
+ * directory the tracker caches. Whole string only, for the same reason
+ * addCustomer is — see the argument there.
+ *
+ * 218 rows as of 2026-07-27, against the 9 real earners in `people`. Tokenising
+ * it turns the ban list into a list of common given names, and on 2026-07-28 it
+ * did: the bake failed on Marcus, Sam, Aaron, Ryan, Nathan, Doyle and Max, every
+ * one a collision between a fictional demo person and a different real employee
+ * ("Marcus Vellen" vs. Marcus Ekeberg, "Chris Doyle" vs. Parker Doyle) — plus
+ * "Return", from the directory row "Return Completions", which is not a person
+ * at all. None of the 8 appeared in `people` or the NS roster.
+ *
+ * The people a donor page actually names — techs, advisors, the owner — come
+ * from raw.json, whiteboard.json and `people`, and are all still tokenised, so
+ * the 2026-07-24 first-name leak stays caught. What this gives up is a bare
+ * first name of someone in the directory who appears nowhere else, which
+ * identifies nobody. Revisit if a donor page is found rendering one.
+ */
+const addDirectory = (n) => {
+  const s = String(n || '').trim();
+  // A single-word row is a bare first name ("Seth", "Rudy", "Bradley") or a
+  // service account ("AutoBot1", "PPH_NRTHS"). The whole-string pass is a
+  // case-insensitive substring match, which cannot tell a 4-letter first name
+  // from markup: "Seth" matched `start.setHours(12, 0, 0, 0)` in the whiteboard
+  // demo. A directory employee leaks as a whole record, "Seth Sams", the same
+  // way a customer does.
+  if (!/\s/.test(s)) return;
+  if (s.length > 3 && !PLACEHOLDER.test(s)) names.add(s);
 };
 
 /**
@@ -239,9 +272,8 @@ if (!present.commissionDb) {
   };
   // every earner, every ServiceTitan staff name cached, every customer ever
   // billed or sold a membership
-  for (const sql of ['SELECT name AS v FROM people', 'SELECT name AS v FROM st_staff']) {
-    for (const r of q(sql)) addStaff(r.v);
-  }
+  for (const r of q('SELECT name AS v FROM people')) addStaff(r.v);
+  for (const r of q('SELECT name AS v FROM st_staff')) addDirectory(r.v);
   for (const sql of [
     'SELECT DISTINCT customer_name AS v FROM invoices',
     'SELECT DISTINCT customer_name AS v FROM memberships',
