@@ -376,7 +376,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>Commission tracker</span>
-  <span>demo v2026-07-28 · fictional data · edits reset on reload</span>
+  <span>demo v2026-07-29 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%"></span>
 </footer>
 </div>
@@ -1236,9 +1236,13 @@ function personCard(p, lines, open, tnfrItems, people, upcoming) {
     + '<span class="name">' + esc(p.name) + '</span>'
     // Why this card can sit at $0.00 with no lines: they are on payroll but earn no commission
     // automatically. The card exists so a bonus can be added by hand, which is the only money
-    // that ever lands here until somebody confirms them on the settings page.
-    + (p.payroll_only ? '<span class="tag" title="On payroll, earns no commission automatically.'
-      + ' Add a bonus by hand below, or confirm them on the settings page.">bonus only</span>' : '')
+    // that ever lands here. ONE name for this flag across both pages: it was "bonus only" here
+    // and "unconfirmed" on the payroll row, which read as two different states, one permanent
+    // and one pending. The five people carrying it are permanently non-earning by the owner's
+    // decision, so nothing here nags toward confirming; that button lives on the settings card
+    // where the consequence can be spelled out beside it.
+    + (p.payroll_only ? '<span class="tag" title="Paid for their time. Commission rules do not'
+      + ' apply to them, so a bonus here has to be added by hand.">no commission</span>' : '')
     + (badges.length ? '<span class="muted" style="font-size:12px">' + esc(badges.join(' · ')) + '</span>' : '')
     + (p.disputed ? '<span class="badge-disputed" style="font-size:12px">' + p.disputed + ' disputed</span>' : '')
     // Print is deliberately available on a frozen period too: that is when a tech reads it.
@@ -1505,9 +1509,9 @@ function renderPayroll(data) {
       return '<tr data-pay-person="' + r.person_id + '">'
         + '<td><span class="cust">' + esc(r.name) + '</span>'
         + (salaried ? ' <span class="tag">salary</span>' : '')
-        // Found by the payroll pull and not yet confirmed: paid for their time, earning no
-        // commission. Said on the row so nobody wonders why their commission column is empty.
-        + (r.payroll_only ? ' <span class="tag" title="Created from ServiceTitan payroll. Paid for time only, earns no commission until you confirm them on the settings page.">unconfirmed</span>' : '')
+        // Paid for their time, earning no commission. Said on the row so nobody wonders why
+        // their commission column is empty. Same wording as the card above by design.
+        + (r.payroll_only ? ' <span class="tag" title="Paid for their time. Commission rules do not apply to them; change that on the settings page.">no commission</span>' : '')
         + '</td>'
         // THE RATE, editable in place. Hourly people are $/hr (base_rate), salaried people
         // $/period (salary_per_period), the same two fields the settings card writes, so
@@ -1560,9 +1564,17 @@ function renderPayroll(data) {
     // Change somebody's rate and this period's wage pay changes with it. Say so rather than
     // let the number read as a record of what was paid, until wage pay reaches the Gusto
     // export there is nothing anywhere that freezes it.
-    + (open ? '' : '<div class="frozen">This pay period is closed, so its PTO and on-call entries are locked.'
-      + ' Commission is frozen in its lines, but wage pay is recomputed from <b>current</b> rates and salaries'
-      + ' every time this page loads, it is not a record of what was paid.</div>');
+    + (open ? ''
+      : DATA.paySnapshot
+        // Frozen at approve time, so it IS a record now. Said just as plainly as the warning
+        // it replaced: the two states look identical on screen and only the banner separates
+        // a number that can still move from one that cannot.
+        ? '<div class="frozen">This pay period is closed. Its wage pay was frozen when it was'
+          + ' approved, so these are the figures that were approved, editing a rate now'
+          + ' will not change them.</div>'
+        : '<div class="frozen">This pay period is closed, so its PTO and on-call entries are locked.'
+          + ' Commission is frozen in its lines, but wage pay is recomputed from <b>current</b> rates and salaries'
+          + ' every time this page loads, it is not a record of what was paid.</div>');
 
   // ServiceTitan employees who logged time but map to nobody. Never auto-linked by name:
   // two people can share one, and guessing hands the wrong person every job the other ran.
@@ -1756,22 +1768,30 @@ async function loadPeriod(id) {
   // the server's own pay destination, not on the period status: Clear works on an approved
   // period and hiding it there was wrong.
   starBacklogSection(data.starBacklog, data.starPayWeek);
+  // Anybody payable who has NO card this period. A card carries its own add-line row, so the
+  // picker below only has to reach the people a card cannot. Before this it rendered solely
+  // when cardPeople was empty, which meant one person having a card locked everybody else out
+  // of a hand-written bonus (found 2026-07-27). The trigger is not the payroll_only flag but
+  // payrollRows' activity filter: an active hourly person with no hours, PTO, on-call or
+  // commission has no card either, so a bonus for somebody on vacation was equally unreachable.
+  const uncarded = (data.bonusPeople || []).filter((p) => !carded.has(p.id));
+  const addRow = (open && uncarded.length
+    ? '<div class="addrow"><select id="add-person" aria-label="Person">'
+      // bonusPeople, not activePeople: a hand-written line is open to anybody on payroll,
+      // including someone who earns no commission but does get a bonus.
+      + uncarded.map((p) => '<option value="' + p.id + '">' + esc(p.name)
+        + (p.payroll_only ? ' (no commission)' : '') + '</option>').join('')
+      + '</select>'
+      + '<input class="amt" type="number" step="0.01" data-add="amount" data-person="pick" placeholder="Amount" aria-label="Manual amount">'
+      + '<input type="text" maxlength="500" data-add="note" data-person="pick" placeholder="Why (required)" aria-label="Manual note">'
+      + '<button class="btn go" data-add="go" data-person="pick" type="button">Add line</button></div>'
+    : '');
   document.getElementById('people').innerHTML = (cardPeople.length
     ? cardPeople.map((p) => personCard(p, byPerson.get(p.person_id) || [], open, data.tnfrItems, data.activePeople, upByPerson.get(p.person_id) || [])).join('')
+      + (addRow ? '<div class="card"><div class="empty">Nobody else has a line this pay period.'
+        + ' You can still add one by hand.</div>' + addRow + '</div>' : '')
     : '<div class="card"><div class="empty">No commission lines in this pay period.'
-      + (open && data.bonusPeople.length ? ' You can still add one by hand below.' : '') + '</div>'
-      + (open && data.bonusPeople.length
-        ? '<div class="addrow"><select id="add-person" aria-label="Person">'
-          // bonusPeople, not activePeople: a hand-written line is open to anybody on payroll,
-          // including someone unconfirmed who earns no commission but does get a bonus.
-          + data.bonusPeople.map((p) => '<option value="' + p.id + '">' + esc(p.name)
-            + (p.payroll_only ? ' (bonus only)' : '') + '</option>').join('')
-          + '</select>'
-          + '<input class="amt" type="number" step="0.01" data-add="amount" data-person="pick" placeholder="Amount" aria-label="Manual amount">'
-          + '<input type="text" maxlength="500" data-add="note" data-person="pick" placeholder="Why (required)" aria-label="Manual note">'
-          + '<button class="btn go" data-add="go" data-person="pick" type="button">Add line</button></div>'
-        : '')
-      + '</div>')
+      + (addRow ? ' You can still add one by hand below.' : '') + '</div>' + addRow + '</div>')
     + (open ? '' : '<div class="frozen">This pay period is ' + esc(status) + ', so its lines are locked. Corrections go in as a manual line in the current pay period.</div>');
   renderGates(data);
   renderPayroll(data);
