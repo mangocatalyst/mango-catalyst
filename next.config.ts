@@ -49,6 +49,15 @@ const nextConfig: NextConfig = {
       })),
       /* /ai reworked into the paid consulting offer at /ai-consultant (2026-07-16). */
       { source: "/ai", destination: "/ai-consultant", permanent: true },
+      /* Direct-mail measurement path (2026-07-28): the printed letters say
+         mangocatalyst.com/demo, so a visit here is the mail channel's only
+         attributable signal. Temporary on purpose: it may be repointed per
+         campaign, and nothing else should ever link to it. */
+      {
+        source: "/demo",
+        destination: "/dashboards?utm_source=directmail&utm_medium=print&utm_campaign=mc-mail-2026-07",
+        permanent: false,
+      },
     ];
   },
 };
