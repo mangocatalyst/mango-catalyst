@@ -181,9 +181,20 @@ const addText = (t) => {
   if (s.length > 3 && !PLACEHOLDER.test(s)) names.add(s);
 };
 
-/** Shared mailboxes are not people, and "admin" is not a leak. */
+/**
+ * Shared mailboxes are not people, and "admin" is not a leak.
+ *
+ * The local part is banned as a SUBSTRING, so a role mailbox that is also an
+ * ordinary word fires on unrelated copy: on 2026-07-29 `finance@` appeared in
+ * the commission audit trail and the bake failed on "no agency or financed work
+ * waiting on funds" — "finance" inside "financed". The department mailboxes are
+ * the same class as `sales` and `billing`, already here. Nothing is given up:
+ * the full address is still banned above this check, and the domain is a static
+ * hit of its own.
+ */
 const GENERIC_MAILBOX = new Set(['admin', 'info', 'office', 'hello', 'support',
-  'sales', 'billing', 'noreply', 'no-reply', 'contact', 'help', 'team']);
+  'sales', 'billing', 'noreply', 'no-reply', 'contact', 'help', 'team',
+  'finance', 'accounting', 'payroll', 'dispatch', 'service', 'careers']);
 /** Audit rows are written by tooling as well as by humans. */
 const isToolActor = (who) => /^mango\b|runbook|orchestrator|cron|bot|script/i.test(String(who));
 
