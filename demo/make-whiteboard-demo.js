@@ -145,7 +145,7 @@ swap('<script>\n  const TYPE = {', `<script>
       { customer: "Kolstad, Mabel", brand: "Gree", model: "GWH18AC", serial: "GRE-5541-K", installDate: D(-4), status: "Queued for Registration", stEquipmentId: "EQ-111", groupTag: "Kolstad main", pairedSerial: "GRE-5542-K" },
       { customer: "Holmquist, Otto & Signe", brand: "Gree", model: "GWH12QC", serial: "GRE-1180-G", installDate: D(-2), status: "Queued for ST", stEquipmentId: "EQ-107", groupTag: "Holmquist upstairs", pairedSerial: "" },
       { customer: "Tarvainen, Freya", brand: "Mitsubishi", model: "MUZ-GL18NA", serial: "MIT-7719-E", installDate: D(-20), status: "Registration Verified", stEquipmentId: "EQ-105", groupTag: "", pairedSerial: "" },
-      { customer: "Lindstrand, Astrid", brand: "Bosch", model: "BOVA-36", serial: "BOS-4402-H", installDate: D(-5), status: "Registration Verified by Human", stEquipmentId: "EQ-108", groupTag: "", pairedSerial: "" },
+      { customer: "Lindstrand, Astrid", brand: "Bosch", model: "BOVA-36", serial: "BOS-4402-H", installDate: D(-5), status: "Registration Verified", stEquipmentId: "EQ-108", groupTag: "", pairedSerial: "" },
       { customer: "Kettunen, Nils", brand: "Maytag", model: "M1200", serial: "MAY-6653-F", installDate: D(-30), status: "Registered", stEquipmentId: "EQ-106", groupTag: "", pairedSerial: "" },
       { customer: "Holmquist, Otto & Signe", brand: "Gree", model: "GWH09QB", serial: "", installDate: D(-1), status: "Ignore", stEquipmentId: "INV-2207", groupTag: "", pairedSerial: "" },
     ],
