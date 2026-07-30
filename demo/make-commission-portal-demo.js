@@ -65,23 +65,23 @@ swap('  <div class="logo-chip"><img alt="NorthStar Heating and Cooling" src="/as
 /* ---------- ServiceTitan deep links: defang the shared builder ---------- */
 swap(`// The techs have ServiceTitan logins, so every row on this page deep-links its OWN work the
 // same way the office's copy does: the customer name opens the job, the "invoice N" chip opens
-// the invoice. Targets read off ServiceTitan's own links rather than guessed — a membership
-// lives under FollowUps, which is not guessable. Declared here because lineWhat below is the
-// first thing that uses them.
+// the invoice. Targets read off ServiceTitan's own links rather than guessed. Declared here
+// because lineWhat below is the first thing that uses them.
 const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
-const ST_CUSTOMER = 'https://go.servicetitan.com/#/Customer/';
 const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';
-const ST_MEMBERSHIP = 'https://go.servicetitan.com/#/FollowUps/Membership/';
 const stLink = (href, label, title) => '<a class="job" href="' + href + '" target="_blank" rel="noopener"'
   + ' title="' + esc(title) + '">' + label + '</a>';`,
   `// In the real portal every row deep-links its OWN work into ServiceTitan, the same way the
 // office's copy does: the customer name opens the job, the "invoice N" chip opens the invoice.
 // There is no ServiceTitan behind this demo, so the same cells render as plain text.
 const ST_JOB = '';
-const ST_CUSTOMER = '';
 const ST_INVOICE = '';
-const ST_MEMBERSHIP = '';
 const stLink = (href, label) => '<span class="job">' + label + '</span>';`);
+
+// Same real-customer donor comment as the master card carries; same reason it is rewritten
+// here rather than left to the name scrub, which does not touch code comments.
+swap(`  // Dahl, Peg (backlog)" knows which sale this is, where "added by hand" told them only that`,
+  `  // Nordling, Elin (backlog)" knows which sale this is, where "added by hand" told them only that`);
 
 /* ---------- the demo engine, in place of the server ---------- */
 const engine = fs.readFileSync(path.join(__dirname, 'commission-demo-engine.js'), 'utf8')
@@ -138,23 +138,10 @@ swap(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The compute
     + ' Question a line by ticking Dispute on your portal, or tell Bryan.</div>'`,
   `    + '<div class="stmt-meta">Boreal Comfort Co. The computed number is a draft; the approved number is what pays.'
     + ' Question a line by ticking Dispute on your portal, or tell the office.</div>'`);
-swap(`<!-- TEMPORARY (Bryan, 2026-07-23): this person's unpaid StarClub sales from before the`,
-  `<!-- TEMPORARY: this person's unpaid StarClub sales from before the`);
-// This comment carries a real earner's real backlog: their name, their dollars, and
-// their marker count on the day it was written. The name scrub would swap the name
-// and leave the figures sitting next to a fictional person, which is worse than
-// either. Asserted, so a reworded donor comment stops the bake instead of shipping.
-swap(`  // BOTH verbs confirm, and the sentence is the master's (commission.html): count, dollars,
-  // earners. Every row on this preview starts ticked, so Pay used to move the whole of one
-  // person's backlog — $195 and 31 durable markers on Ron today — on a single unconfirmed
-  // click, with no undo verb anywhere. This preview is one person's block, so "1 earner".`,
-  `  // BOTH verbs confirm, and the sentence is the master's (commission.html): count, dollars,
-  // earners. Every row on this preview starts ticked, so Pay used to move the whole of one
-  // person's backlog on a single unconfirmed click, with no undo verb anywhere.
-  // This preview is one person's block, so "1 earner".`);
-
+// The star-backlog swaps that sat here (including the one guarding a real earner's real
+// dollars in a donor comment) went with the UI itself, commission-tracker f438944. Verified
+// 2026-07-30: portal.html no longer carries that comment, so there is nothing left to guard.
 html = html.split('StarClub').join('Comfort Club');
-swap('<span class="name">Star backlog</span>', '<span class="name">Comfort Club backlog</span>');
 
 /* ---------- version stamp ---------- */
 swap(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
