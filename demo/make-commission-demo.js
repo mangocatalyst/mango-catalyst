@@ -97,21 +97,17 @@ const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
 // capture of a live ServiceTitan invoice chip (mirrors Job/Index/<id>). ponytail: if ST
 // ever moves the route this constant is the only knob; Bryan re-clicks it post-merge.
 const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';
-// The customer record, and the membership record itself. Both confirmed against
-// ServiceTitan's own links rather than guessed — a membership lives under FollowUps.
-const ST_CUSTOMER = 'https://go.servicetitan.com/#/Customer/';
-const ST_MEMBERSHIP = 'https://go.servicetitan.com/#/FollowUps/Membership/';
 function customerCell(l) {
   const name = l.customer_name ? esc(l.customer_name) : (l.kind === 'manual' ? '' : 'unknown customer');
   if (!name) return '';
   return l.job_id
     ? '<a class="job cust" href="' + ST_JOB + encodeURIComponent(l.job_id) + '" target="_blank" rel="noopener"'
-      + ' title="Open job ' + l.job_id + ' in ServiceTitan">' + name + '</a>'
+      + ' title="Open job ' + esc(l.job_id) + ' in ServiceTitan">' + name + '</a>'
     : '<span class="cust">' + name + '</span>';
 }`,
-  `// In the real tracker the customer, the invoice, the customer record and the membership
-// are all deep links into ServiceTitan, so a questioned line is one click from the
-// evidence. There is no ServiceTitan behind this demo, so the same cells render as text.
+  `// In the real tracker the customer and the invoice are deep links into ServiceTitan,
+// so a questioned line is one click from the evidence. There is no ServiceTitan behind
+// this demo, so the same cells render as text.
 function customerCell(l) {
   const name = l.customer_name ? esc(l.customer_name) : (l.kind === 'manual' ? '' : 'unknown customer');
   return name ? '<span class="cust">' + name + '</span>' : '';
@@ -121,31 +117,17 @@ swap(`// The "invoice N" text as a deep link to the invoice in ServiceTitan. Cus
 const invoiceRef = (id) => '<a class="job" href="' + ST_INVOICE + encodeURIComponent(id)
   + '" target="_blank" rel="noopener" title="Open invoice ' + esc(id) + ' in ServiceTitan">invoice ' + esc(id) + '</a>';`,
   `const invoiceRef = (id) => '<span class="job">invoice ' + esc(id) + '</span>';`);
-swap(`function starCustomerCell(s) {
-  const name = esc(s.customer_name || 'customer ' + s.membership_id);
-  return s.customer_id
-    ? '<a class="job cust" href="' + ST_CUSTOMER + encodeURIComponent(s.customer_id) + '" target="_blank"'
-      + ' rel="noopener" title="Open this customer in ServiceTitan">' + name + '</a>'
-    : '<span class="cust">' + name + '</span>';
-}`,
-  `function starCustomerCell(s) {
-  return '<span class="cust">' + esc(s.customer_name || 'customer ' + s.membership_id) + '</span>';
-}`);
-swap(`function starWhat(s) {
-  const label = s.is_renewal ? 'StarClub renewal' : 'StarClub sale';
-  if (s.sale_invoice_id) {
-    return '<a class="job" href="' + ST_INVOICE + encodeURIComponent(s.sale_invoice_id) + '" target="_blank"'
-      + ' rel="noopener" title="Open invoice ' + s.sale_invoice_id + ' in ServiceTitan">' + label + '</a>';
-  }
-  return '<a class="job" href="' + ST_MEMBERSHIP + encodeURIComponent(s.membership_id) + '" target="_blank"'
-    + ' rel="noopener" title="No sale invoice found; opens the membership record instead">' + label
-    + ' <span class="was">no invoice</span></a>';
-}`,
-  `function starWhat(s) {
-  const label = s.is_renewal ? 'StarClub renewal' : 'StarClub sale';
-  return '<span class="job">' + label
-    + (s.sale_invoice_id ? '' : ' <span class="was">no invoice</span>') + '</span>';
-}`);
+// The starCustomerCell/starWhat swaps that used to sit here are gone with the star
+// backlog UI itself (commission-tracker f438944): StarClub is a `spiff` line in the
+// main table now, so it defangs through customerCell + invoiceRef like any other row.
+// The servicetitan.com guardrail below is what proves nothing was missed.
+
+// A real customer's name in a donor comment (commission-tracker c85dcfd). The name scrub
+// leaves code comments alone, and the privacy validator rightly fails the bake on it, so
+// the example is rewritten here to a fictional one. Anchored: reword it upstream and the
+// bake stops instead of shipping the real name.
+swap(`  // A manual line's NOTE is what it is: "StarClub renewal: Dahl, Peg (backlog)" says the thing`,
+  `  // A manual line's NOTE is what it is: "StarClub renewal: Nordling, Elin (backlog)" says the thing`);
 
 /* ---------- the demo engine, in place of the server ---------- */
 const engine = fs.readFileSync(path.join(__dirname, 'commission-demo-engine.js'), 'utf8')
@@ -168,8 +150,23 @@ swap(`    const res = await fetch(path, { method: 'POST', headers: { 'Content-Ty
     // way the server does so the error toasts are real rather than decorative.
     return demoWrite(path, body);`);
 swap(`  const data = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(id), { cache: 'no-store' })).json();
+  if (token !== LOAD_TOKEN) return;   // overtaken while in flight: the newer load owns the page
   if (data.error) throw new Error(data.error);`,
-  `  const data = demoPeriod(id); // demo: built in the page, no server behind it`);
+  `  const data = demoPeriod(id); // demo: built in the page, no server behind it
+  // No LOAD_TOKEN check: demoPeriod is synchronous, so there is no in-flight window
+  // for a newer load to overtake.`);
+// Two more /api/period readers arrived with the compute-run watcher and the idle poll
+// (commission-tracker "Idle poll discards its own stale answer", 6e70696). Neither can
+// reach a server here. They are defanged rather than deleted so the next upstream drift
+// in either still trips an anchor instead of silently shipping a live fetch.
+swap(`      const p = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(CURRENT), { cache: 'no-store' })).json();
+      const run = p && p.computeRun;`,
+  `      // demo: unreachable. post() refuses /api/sync and /api/recompute above, so
+      // startBackgroundJob returns before it ever schedules this watcher.
+      const run = null;`);
+swap(`    const p = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(forPeriod), { cache: 'no-store' })).json();`,
+  `    return; // demo: the page IS the data, so nothing can have changed underneath it
+    const p = null;`);
 swap(`  const { periods, floor, current, next, previous } = await (await fetch('/api/periods?view=master', { cache: 'no-store' })).json();`,
   `  const { periods, floor, current, next, previous } = demoPeriods(); // demo: no server behind it`);
 swap(`    window.location = '/api/export?batch=' + encodeURIComponent(out.batch);`,
@@ -216,10 +213,6 @@ swap('// New Flat Rate tier letters spelled out, the way Bryan reads them on a l
   '// New Flat Rate tier letters spelled out, the way an owner reads them on a line.');
 swap('// COMPLETE CALL rows live here too (Bryan, 2026-07-23) — one Upcoming bucket per person,',
   '// COMPLETE CALL rows live here too: one Upcoming bucket per person,');
-swap('// TEMPORARY (Bryan, 2026-07-23): the StarClub backlog — sales ServiceTitan credited to',
-  '// TEMPORARY: the StarClub backlog, sales ServiceTitan credited to');
-swap('// ONE table for everybody, not a block per card (Bryan, 2026-07-23): the job here is bulk',
-  '// ONE table for everybody, not a block per card: the job here is bulk');
 swap(`// Navigation lives in the period dropdown (Bryan, 2026-07-22: no tab bar) and carries`,
   `// Navigation lives in the period dropdown (no tab bar) and carries`);
 swap(`// sit in each person's Upcoming block (Bryan, 2026-07-23). Hash tokens (#last/#current/#next)`,
@@ -229,8 +222,9 @@ swap('// fed by the nightly xyOps run (ST pull + compute, 05:15), so 45m would b
   '// fed by a nightly run (ST pull + compute, just after 05:00), so 45m would be amber from about');
 
 /* ---------- StarClub is NorthStar's membership brand; Boreal has its own ---------- */
+// This catch-all is now the whole job: the three anchored star-backlog swaps that sat
+// here went with the UI they de-Bryan'd (commission-tracker f438944).
 html = html.split('StarClub').join('Comfort Club');
-swap('  <h2>Star backlog</h2>', '  <h2>Comfort Club backlog</h2>');
 
 /* ---------- version stamp: say what this is instead of which build it came from ---------- */
 swap(`  <!-- page version, extension-style date.build: bump on every shipped template change -->

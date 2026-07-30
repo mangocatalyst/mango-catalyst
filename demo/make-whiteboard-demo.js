@@ -135,6 +135,13 @@ swap('<script>\n  const TYPE = {', `<script>
   // tags + paired serials; Gree/Bosch have no warranty window so show no badge. ----
   const DEMO_EQUIPMENT = {
     deadlines: { maytag_rheem: 60, mitsubishi: 90, mitsubishi_cutoff: "03-31", fujitsu: 60 },
+    // Mirrors server.js REG_STATUSES. Without it regStatuses stays [] and the
+    // status pill is a dead control in the demo (it cycles this list, not the
+    // statuses present in the rows).
+    statuses: ["New", "Queued for Registration", "Queued for ST", "Needs Grouping",
+      "Needs Manual Registration", "Registered", "Registration Verified",
+      "No Registration Verified", "Equipment Received ST", "Error",
+      "Error - Registration", "No Equipment Listed", "Ignore"],
     units: [
       { customer: "Havermark, Petra", brand: "Fujitsu", model: "AOU12RLFW", serial: "FUJ-8823-C", installDate: D(-55), status: "Needs registration", stEquipmentId: "EQ-102", groupTag: "", pairedSerial: "" },
       { customer: "Brandvold, Roald", brand: "Maytag", model: "PSA4BF", serial: "MAY-3391-B", installDate: D(-48), status: "Needs registration", stEquipmentId: "EQ-103", groupTag: "", pairedSerial: "" },
@@ -211,26 +218,41 @@ swap(`  async function loadSales() {
     renderSales();
   }`);
 swap(`  async function loadRegistration() {
+    const my = ++regSeq;
     try {
       const r = await fetch("/api/equipment", { cache: "no-store" });
       if (!r.ok) return; // crew instance 404s it -> Registration tab stays hidden
-      regData = await r.json();
+      const fresh = await r.json();
+      if (my !== regSeq) return; // a save started after this poll; its answer is newer
+      regData = fresh;
+      regStatuses = regData.statuses || regStatuses; // server owns the allowlist; page mirrors it
       if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
       renderRegistration();
     } catch (e) { /* leave hidden; board unaffected */ }
   }`,
   `  async function loadRegistration() { // demo: inlined synthetic equipment, no server
     regData = DEMO_EQUIPMENT;
+    regStatuses = regData.statuses || regStatuses; // same mirror as live: the pill cycles this list
     if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
     renderRegistration();
   }`);
 swap(`  async function equipAction(stEquipmentId, action, value) {
+    const my = ++regSeq;
+    const mine = (unitSeq.get(stEquipmentId) || 0) + 1; // per-unit, see below
+    unitSeq.set(stEquipmentId, mine);
     try {
       const r = await fetch("/api/equip", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stEquipmentId, action, value }) });
       if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || \`HTTP \${r.status}\`);
       const { unit } = await r.json();
+      // A save PATCHES one unit, so it is ordered PER UNIT, not against every other
+      // request: sharing the GET's discard rule threw away a good save whenever a second,
+      // unrelated save started first. Bumping regSeq above still invalidates any poll in
+      // flight; unitSeq drops only an older response for THIS unit, which matters because
+      // the response is a whole-unit replace — tab quickly from model to serial and the
+      // slower model reply would otherwise put the old serial back on screen.
+      if (unitSeq.get(stEquipmentId) !== mine) return;
       const i = regData.units.findIndex((u) => u.stEquipmentId === stEquipmentId);
       if (i >= 0 && unit) regData.units[i] = unit;
       renderRegistration();
@@ -245,6 +267,7 @@ swap(`  async function equipAction(stEquipmentId, action, value) {
     const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
     if (u) {
       if (action === "group_tag") u.groupTag = value || "";
+      else if (action === "status") u.status = value; // click-through pill (upstream 28e6b9b)
       else if (action === "queue_st") u.status = "Queued for ST";
       else if (action === "queue_registration") u.status = "Queued for Registration";
       else if (action === "brand") u.brand = (value || "").trim();
@@ -281,7 +304,10 @@ swap('const OFF_DAY = { Zack: 1 }; // Zack takes Mondays (0 Sun .. 6 Sat); other
 swap('Zack is off Mondays.', 'Eli is off Mondays.');
 
 // em dashes in the source's code comments; the site bans them everywhere
-html = html.split(' — ').join(', ');
+// Space class is literal-space-only on purpose: a dash that ENDS a line (upstream
+// wraps both prose and // comments that way) must lose the dash and KEEP the
+// newline. Eating the newline would pull the next line of code into a comment.
+html = html.replace(/ *[–—] */g, ', ');
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */
 html = scrubNames(html);
