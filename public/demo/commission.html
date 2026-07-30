@@ -127,9 +127,38 @@ select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outlin
 .people{display:grid;grid-template-columns:1fr;gap:14px;margin-top:6px}
 .card{padding:16px 16px 12px}
 .who{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.who .name{font-family:var(--disp);font-weight:400;font-size:23px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream)}
+/* A PERSON'S NAME is set in Inter, not in the brand display face (the owner, 2026-07-29:
+   professional). Inter is already bundled locally for the body text, so this is a font-family
+   swap and nothing is fetched from anywhere. The masthead and the section headings keep the
+   brand font, the branding is the page's, the name is somebody's. */
+.who .name{font-family:var(--body);font-weight:600;font-size:21px;letter-spacing:.01em;color:var(--cream)}
 .who .pay{margin-left:auto;font-weight:600;font-size:24px;color:var(--num);font-variant-numeric:tabular-nums}
 .who .pay small{font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+/* The card is a disclosure now: the summary is the scan view (name, marks, what they are
+   paid) and the body holds the lines, the wage row and the add-line control. Same rotating
+   marker as details.tnfr below, so every expander on the page reads as one idiom. Cards open
+   themselves only while there is unapproved money in them, so a reviewed period collapses as
+   it is worked. Not a nested details: a summary is one element, and the money on the right
+   has to sit in the same flex row as the name. */
+details.person>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:9px}
+details.person>summary::-webkit-details-marker{display:none}
+details.person>summary::before{content:'\25B8';font-size:11px;color:var(--dimmer);align-self:center;transition:transform .15s ease}
+details.person[open]>summary::before{transform:rotate(90deg)}
+details.person>summary:hover .name{color:var(--teal-bri)}
+details.person>summary .who{flex:1;margin-bottom:0}
+details.person[open]>summary{margin-bottom:10px}
+/* The wage half of a person's pay, under their lines: same dashed rule as Upcoming had, so
+   the card reads as sections rather than as one long table. */
+.wagerow{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+/* Back link between the pay period and Upcoming; the tab-button look, lifted from admin.html
+   so the two pages navigate the same way. */
+.backbar{padding:10px 0 0}
+.tabbtn{background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-soft);
+  font:inherit;font-size:14.5px;font-weight:600;letter-spacing:.05em;padding:8px 2px;cursor:pointer;
+  text-decoration:none;display:inline-block;transition:border-color .15s ease,color .15s ease}
+.tabbtn:hover{color:var(--teal)}
+.tabbtn[aria-selected=true]{color:var(--brand);border-bottom-color:var(--gold)}
+.tabbtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dimmer);font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}
 td{padding:6px;border-bottom:1px solid var(--band);vertical-align:top}
@@ -200,16 +229,6 @@ input.notein:focus{width:320px}
 .uphead .upsub{margin-left:auto;font-size:12px;font-weight:600;letter-spacing:normal;text-transform:none;
   color:var(--dim);font-variant-numeric:tabular-nums}
 .upcoming td{color:var(--dim)}
-/* TEMPORARY: the all-earners Comfort Club backlog section; goes with the feature. */
-#star-view .starsub{color:var(--ink-soft);font-size:13px;margin:2px 0 10px;max-width:900px}
-#star-view table{border-collapse:collapse;width:100%}
-#star-view th,#star-view td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--line-soft)}
-#star-view th{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer)}
-#star-view th.num,#star-view td.num{text-align:right}
-#star-view td.tick,#star-view th:first-child{padding-right:0}
-#star-view .starpick{width:auto;margin:0;cursor:pointer}
-#star-view #star-sub{font-weight:600;color:var(--ink)}
-.starnote{color:var(--dim);font-size:11.5px;font-style:italic}
 .btn.pull{font-size:11px;font-weight:600;padding:3px 8px;background:var(--auto-bg);
   color:var(--auto);border-color:var(--auto)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
@@ -269,9 +288,14 @@ input[type=checkbox][data-act=disputed]:checked{accent-color:var(--warn)}
    is no second rendering path on the server that could disagree with the screen. */
 #print-area{display:none}
 .stmt-line-note{color:#444;font-style:italic;font-size:9.5pt}
+/* PRINTING. #print-area is filled on demand and only ever shown while body carries
+   `statements`, the class printStatements adds for the duration of one print. Without that
+   gate a plain Cmd+P hid .wrap and printed an EMPTY page (nothing had filled #print-area), and
+   once anything had been printed the container kept those statements forever, so the next
+   Cmd+P quietly printed last week's numbers on today's date. afterprint empties it again. */
 @media print{
-  .wrap,.toast,.stars,.polaris{display:none !important}
-  #print-area{display:block}
+  body.statements .wrap,.toast,.stars,.polaris{display:none !important}
+  body.statements #print-area{display:block}
   @page{margin:14mm}
   body{background:#fff;color:#000;font-size:10.5pt;line-height:1.35}
   /* One person per sheet, so a statement can be handed to exactly one person. */
@@ -316,21 +340,28 @@ try {
   <div class="hinfo">
     <span>Pay period <b id="h-range"></b></span>
     <span class="live" id="live"><span class="gen-dot"></span><span id="stamp">loading&hellip;</span></span>
+    <!-- the owner, 2026-07-29: the office fixes a missed clock-in in ServiceTitan and needs the
+         page to catch up now, not at 05:15 tomorrow. Runs the nightly itself, in the
+         background; the stamp above is what says when it has landed. -->
+    <span><button class="btn" id="btn-sync" type="button"
+      title="Pull ServiceTitan again now, invoices, hours and a recompute. Takes a few minutes.">Refresh from ServiceTitan</button></span>
     <span>The computed number is a draft.</span>
   </div>
 </header>
 
 <div class="strip">
-  <div class="stat"><div class="k">Company total</div><div class="v" id="s-total">$0</div></div>
+  <div class="stat"><div class="k">Commission total</div><div class="v" id="s-total">$0</div></div>
   <!-- Wage pay + commission for everyone on payroll. Sits beside the commission total rather
        than replacing it: the export is still commission-only. -->
   <div class="stat"><div class="k">Gross payroll</div><div class="v" id="s-gross">$0</div></div>
-  <div class="stat"><div class="k">Earners</div><div class="v" id="s-people">0</div></div>
   <div class="stat"><div class="k">Lines</div><div class="v" id="s-lines">0</div></div>
   <div class="stat"><div class="k">Needs a look</div><div class="v" id="s-attn">0</div></div>
   <div class="picker">
     <span class="pill" id="s-status">open</span>
     <select id="period-pick" aria-label="Pay period"></select>
+    <!-- Sold work the rates have already priced that nothing has paid yet. Its own view
+         rather than a block on every card: it is a list you read once, not per person. -->
+    <a class="tabbtn" href="#upcoming" id="upcoming-tab" title="Sold work already priced, waiting on the money">Upcoming</a>
     <button class="btn go" id="btn-approve" type="button">Approve</button>
     <button class="btn warn" id="btn-reopen" type="button" style="display:none">Reopen</button>
     <button class="btn" id="btn-print-all" type="button" title="One printable statement per person, page-break between them">Print all statements</button>
@@ -338,18 +369,14 @@ try {
   </div>
 </div>
 
+<!-- Everything that belongs to the pay period on screen, in one wrapper so the Upcoming view
+     can take the page without the strip above it moving: the period dropdown still navigates
+     from in there. -->
+<div id="period-view">
 <div id="gates"></div>
 
 <h2>By person</h2>
 <div class="people" id="people"></div>
-
-<!-- Wage pay: ServiceTitan's worked hours at our rates, plus the PTO and on-call ST cannot
-     know about, plus commission. Filled by renderPayroll(); hidden when nobody is on it. -->
-<section id="payroll-view" hidden>
-  <h2>Payroll</h2>
-  <div class="card"><div id="payroll-list"></div>
-    <div id="payroll-unlinked"></div></div>
-</section>
 
 <!-- Filled by renderDisputed() from the loaded period; stays hidden while nothing is disputed. -->
 <section id="disputed" hidden>
@@ -357,26 +384,31 @@ try {
   <div class="card attn" id="disputed-list"></div>
 </section>
 
-<!-- TEMPORARY: every unpaid Comfort Club sale, all earners in one table, so the backlog can be
-     bulk-cleaned in one pass instead of card by card. Hidden once it is empty; the whole
-     section goes when the backlog is done. -->
-<section id="star-view" hidden>
-  <h2>Comfort Club backlog</h2>
-  <div class="starsub">Comfort Club sales from before the ServiceTitan sold-by fix, so they never reached a pay
-    period. Oldest first. Untick anything already settled, then pay or clear the rest, paying writes one
-    line per earner. <span id="star-sub"></span></div>
-  <div class="card"><div class="scroll" id="star-list"></div>
-    <div class="addrow" id="star-actions"></div></div>
-</section>
-
 <h2>Needs a look</h2>
 <div class="card attn" id="attn"></div>
+</div>
+
+<!-- Sold work the rules engine has already priced but nothing has paid: projected only, never
+     in the payable total. One list for the whole company, grouped by person, filled by
+     renderUpcoming() from the period already loaded, it has no endpoint of its own. -->
+<section id="upcoming-view" hidden>
+  <h2>Upcoming (not yet paid)</h2>
+  <!-- READ ONLY (the owner, 2026-07-29): paying an advance here and reconciling it later against
+       the real line was, in his words, "just confusion". Work shows up on this list when it is
+       sold and leaves it when the customer pays; the money lands in whichever pay period that
+       happens in. The endpoint and the reconciliation behind it stay for recovery by hand. -->
+  <div class="backbar"><a class="tabbtn" href="#current">&larr; Pay period</a></div>
+  <div class="muted" style="font-size:13px;margin-bottom:10px">Sold work the rates have already
+    priced. Nothing here is payable yet, each line pays in the pay period its invoice is
+    actually paid in.</div>
+  <div id="upcoming-list"></div>
+</section>
 
 <footer>
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>Commission tracker</span>
-  <span>demo v2026-07-29 · fictional data · edits reset on reload</span>
+  <span>demo v2026-07-30 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%"></span>
 </footer>
 </div>
@@ -895,9 +927,9 @@ function tierChips(l, tnfrItems) {
   return tiers.map((t) => '<span class="tchip ' + TIER_CLASS[t] + '">' + TIER_NAME[t] + '</span>').join('');
 }
 
-// In the real tracker the customer, the invoice, the customer record and the membership
-// are all deep links into ServiceTitan, so a questioned line is one click from the
-// evidence. There is no ServiceTitan behind this demo, so the same cells render as text.
+// In the real tracker the customer and the invoice are deep links into ServiceTitan,
+// so a questioned line is one click from the evidence. There is no ServiceTitan behind
+// this demo, so the same cells render as text.
 function customerCell(l) {
   const name = l.customer_name ? esc(l.customer_name) : (l.kind === 'manual' ? '' : 'unknown customer');
   return name ? '<span class="cust">' + name + '</span>' : '';
@@ -911,7 +943,16 @@ function lineWhat(l, tnfrItems) {
   if (l.kind === 'tnfr') return 'TNFR ' + esc(l.tnfr_scope || '') + ', ' + invoiceRef(l.invoice_id);
   if (l.kind === 'spiff') return (l.spiff_event === 'membership_renewal' ? 'Comfort Club renewal' : 'Comfort Club sale') + ', ' + invoiceRef(l.invoice_id);
   if (l.kind === 'lead_gen') return 'turnover lead on ' + esc(l.job_type || 'the job') + ', ' + invoiceRef(l.invoice_id);
-  if (l.kind === 'manual') return 'added by hand';
+  // A manual line's NOTE is what it is: "Comfort Club renewal: Nordling, Elin (backlog)" says the thing
+  // an auto club line's own label says, and the office wrote it there precisely so somebody
+  // reading the row would know. "added by hand" said only how the line got here, true of every
+  // manual line and therefore of no use in telling them apart, with the one sentence that does
+  // tell them apart sitting three columns to the right. That is the fallback now, for a line
+  // typed in without a note, where how it got here really is all there is to say.
+  if (l.kind === 'manual') {
+    const n = String(l.note || '').trim();
+    return n ? esc(n) : 'added by hand';
+  }
   return esc(l.job_type || 'job type ' + (l.rule_kind || '')) + ', ' + invoiceRef(l.invoice_id);
 }
 
@@ -965,10 +1006,14 @@ function lineBasis(l) {
   return money(l.basis) + share;
 }
 
-// The per-person "Upcoming (not yet paid)" preview: sold work the rules engine already
-// priced but that has no paid_on yet. Projected only, never in the payable number. When
-// the period is open, each row offers "Pay this period" (a pull-forward: it becomes a
-// manual line now, and compute flags the eventual real line so nobody double-pays).
+// The "Upcoming (not yet paid)" preview: sold work the rules engine already priced but that
+// has no paid_on yet. Projected only, never in the payable number, and READ ONLY since
+// 2026-07-29: it used to offer "Pay this period" per row, which advanced the money and left
+// compute reconciling the advance against the real line when the invoice finally paid. the owner's
+// ruling on that pair: "If something is paid ahead remove it from the current pay period, that
+// is just confusion." /api/pull-forward, the marker table and the reconciliation all remain,
+// they are how an existing advance is unwound by hand, and how the approve gate still refuses
+// to freeze a pair that has drifted.
 //
 // COMPLETE CALL rows live here too: one Upcoming bucket per person,
 // the same list their portal shows. They carry a "waiting on payment" line instead of the
@@ -990,107 +1035,13 @@ function upcomingBlock(upcoming, open) {
     + '<td class="num">' + lineBasis(u) + '</td>'
     + '<td class="num muted">' + (u.pct == null ? '' : pct(u.pct)) + '</td>'
     + '<td class="num">' + money(u.computed_amount) + '</td>'
-    + (open
-      ? '<td>' + (waiting ? '' : '<button class="btn pull" type="button" data-pull-invoice="' + u.invoice_id + '"'
-        + ' data-pull-person="' + u.person_id + '" data-pull-rule="' + u.rule_id + '"'
-        + ' title="Pay this projected line in the current period now">Pay this period</button>') + '</td>'
-      : '')
     + '</tr>';
   }).join('');
   return '<div class="upcoming"><div class="uphead">Upcoming (not yet paid)'
     + '<span class="upsub">projected ' + money(subtotal) + '</span></div>'
     + '<table><thead><tr><th style="width:20%">Customer</th><th>Line</th>'
-    + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th>'
-    + (open ? '<th style="width:130px"></th>' : '') + '</tr></thead>'
+    + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>'
     + '<tbody>' + rows + '</tbody></table></div>';
-}
-
-// TEMPORARY: the Comfort Club backlog, sales ServiceTitan credited to
-// whoever keyed them until soldById was corrected, so they never reached a pay period.
-//
-// ONE table for everybody, not a block per card: the job here is bulk
-// cleaning, read down a list, untick what is already settled, act on the rest in one go,
-// and that is impossible when the rows are scattered across cards you have to scroll between.
-// Sorted oldest first, because that is the order you work a backlog in.
-//
-// Reads like Upcoming otherwise: named, dated, priced, and deep-linked into ServiceTitan.
-// New vs renewal sets the price ($10 vs $5) and comes from the server, never re-derived here.
-// The customer, linked into ServiceTitan the way a line's customer is, except a backlog row
-// has no job, so it points at the customer record, where the memberships are listed.
-function starCustomerCell(s) {
-  return '<span class="cust">' + esc(s.customer_name || 'customer ' + s.membership_id) + '</span>';
-}
-
-// What the sale was, linked to the INVOICE it was written on. Most sales have one; the ones
-// that do not fall back to the membership record, which always exists, so the row is always
-// one click from the thing you need to check it against.
-function starWhat(s) {
-  const label = s.is_renewal ? 'Comfort Club renewal' : 'Comfort Club sale';
-  return '<span class="job">' + label
-    + (s.sale_invoice_id ? '' : ' <span class="was">no invoice</span>') + '</span>';
-}
-
-// `payWeek` is the server's own answer to "is there a begun, open week to pay into", the same
-// one the writer uses. Selection and Clear are always offered on the backlog (it renders on the
-// current period only, and clearing needs no destination); Pay depends on that week existing,
-// and when it does not the section says which of the two reasons it is.
-function starBacklogSection(groups, payWeek) {
-  const sec = document.getElementById('star-view');
-  // person_id lives on the GROUP, not the sale, carry it down, or every row looks like the
-  // same earner and the "across N earners" summary lies about what a bulk action will do.
-  const sales = (groups || []).flatMap((g) => g.sales.map((s) => ({ ...s, person: g.name, person_id: g.person_id })));
-  sec.hidden = !sales.length;
-  if (!sales.length) return;
-  sales.sort((a, b) => String(a.from_date).localeCompare(String(b.from_date)) || a.membership_id - b.membership_id);
-  const total = sales.reduce((t, s) => t + (s.amount || 0), 0);
-  const renewals = sales.filter((s) => s.is_renewal).length;
-  document.getElementById('star-sub').innerHTML = sales.length + ' sale' + (sales.length === 1 ? '' : 's')
-    + ' &middot; ' + (sales.length - renewals) + ' new, ' + renewals + ' renewal &middot; ' + money(total);
-  const rows = sales.map((s) => '<tr>'
-    + '<td class="tick"><input type="checkbox" class="starpick" value="' + s.membership_id + '"'
-    + ' data-person="' + s.person_id + '" data-amount="' + (s.amount || 0) + '" checked'
-    + ' aria-label="Include this sale"></td>'
-    + '<td>' + esc(s.person) + '</td>'
-    + '<td>' + starCustomerCell(s) + '</td>'
-    + '<td class="what">' + starWhat(s) + '</td>'
-    + '<td class="num muted">' + esc(s.from_date || '') + '</td>'
-    + '<td class="num">' + (s.amount == null ? '<span class="was">no rate</span>' : money(s.amount)) + '</td>'
-    + '</tr>').join('');
-  document.getElementById('star-list').innerHTML = '<table><thead><tr>'
-    + '<th style="width:26px"></th>'
-    + '<th style="width:140px">Earner</th><th style="width:24%">Customer</th><th>Line</th>'
-    + '<th class="num" style="width:110px">Sold</th><th class="num" style="width:100px">Amount</th>'
-    + '</tr></thead><tbody>' + rows + '</tbody></table>';
-  // No destination week: say which of the two states it is and what ends it. Never "go to the
-  // current period", this table only ever renders on the current period.
-  const noPay = DATA && DATA.period && DATA.period.status !== 'open'
-    ? 'This pay period is approved, so there is no open week to pay into. Reopen it to pay, or clear sales that were already settled.'
-    : 'No begun week of this pay period is open, so there is nowhere to pay into. Reopen one, or wait for the next week to begin. Clearing still works.';
-  document.getElementById('star-actions').innerHTML =
-    '<button class="btn" type="button" data-star-all="1">Tick all</button>'
-    + '<button class="btn" type="button" data-star-none="1">Untick all</button>'
-    + '<span class="starnote" id="star-picked"></span>'
-    + '<span style="margin-left:auto;display:flex;gap:6px;align-items:center">'
-    + (payWeek
-      ? '<button class="btn pull" type="button" data-star-pay="1"'
-        + ' title="Pay the ticked sales into the current pay period, one line per earner">Pay ticked this period</button>'
-      : '<span class="starnote">' + esc(noPay) + '</span>')
-    + '<button class="btn" type="button" data-star-clear="1"'
-    + ' title="Drop the ticked sales without paying, they were already settled">Clear ticked</button></span>';
-  starPickedSummary();
-}
-
-// What the current ticks add up to, so a bulk action says what it is about to do before it
-// does it rather than after.
-function starPickedSummary() {
-  const el = document.getElementById('star-picked');
-  if (!el) return;
-  const picked = [...document.querySelectorAll('#star-list .starpick')].filter((c) => c.checked);
-  const sum = picked.reduce((t, c) => t + Number(c.dataset.amount || 0), 0);
-  const people = new Set(picked.map((c) => c.dataset.person)).size;
-  el.textContent = picked.length
-    ? picked.length + ' ticked · ' + money(sum) + ' across ' + people + (people === 1 ? ' earner' : ' earners')
-    : 'nothing ticked';
 }
 
 // The per-line "Pay next period" / "Pay last period" controls and their shared undo. A move
@@ -1121,7 +1072,79 @@ function deferBlock(l, open) {
     + ' title="Move this line into the ' + esc(DATA.lastPeriodLabel || 'last') + ' pay period">Pay last period</button></div>';
 }
 
-function personCard(p, lines, open, tnfrItems, people, upcoming) {
+// A missing rate is not a rate of zero, so the cell says so instead of printing $0.00 and
+// letting somebody pay it.
+const wageNeed = (r) => (r.pay_type === 'salary' ? 'no salary set' : 'no base rate set');
+const wageCell = (r, v) => (v == null ? '<span class="muted">' + wageNeed(r) + '</span>' : money(v));
+// Which UNIT this person's on-call box is in: what is stored, else what their pay type is
+// paid in. Stored wins so an entry can never be rendered as blank while it is being paid.
+const asDollars = (r) => (r.on_call_amount != null ? true
+  : r.on_call_hours != null ? false : r.pay_type === 'salary');
+// ServiceTitan prices the same WORKED hours with its own rate. A gap over a dollar means one
+// of the two rates is wrong, and the person whose pay it is should hear it from us first.
+// PTO and on-call are ours alone, ServiceTitan has never heard of either, so both come off
+// before the comparison, or every PTO entry would read as a rate disagreement.
+const workedPay = (r) => r.wage_pay - (r.on_call_pay || 0) - (r.pto_hours || 0) * (r.base_rate || 0);
+const wageVariance = (r) => (r.pay_type === 'salary' || r.wage_pay == null || !r.st_amount
+  || Math.abs(workedPay(r) - r.st_amount) <= 1 ? ''
+  : '<span class="flag" title="ServiceTitan prices the same worked hours at ' + money(r.st_amount) + '">ST ' + money(r.st_amount) + '</span>');
+
+// The wage half of a person's pay, inside their own card: ServiceTitan's worked hours priced
+// at our rates, plus the PTO and on-call ServiceTitan does not carry. Rendered only for
+// somebody the server sent a payroll row for, a person paid purely on commission has no wage
+// half at all, and a row of blanks beside their money said the opposite.
+//
+// The RATE is READ-ONLY here (the owner, 2026-07-29). It belongs to the person and not to the pay
+// period, so it is edited on the settings card, and one editable copy is one fewer place for
+// two numbers to disagree. PTO and on-call stay editable, because those genuinely ARE facts
+// about this period and this is the page they get decided on.
+function wageRow(r, open) {
+  if (!r) return '';
+  const salaried = r.pay_type === 'salary';
+  // Salaried people's hours and PTO are shown for visibility and pay nothing, so they are
+  // greyed rather than hidden: "why is this zero" is a worse question than a muted number.
+  const hrs = (v) => '<td class="num' + (salaried ? ' muted' : '') + '">' + Number(v || 0).toFixed(2) + '</td>';
+  const rate = salaried
+    ? (r.salary_per_period == null ? '<span class="muted">no salary set</span>' : money(r.salary_per_period) + '/period')
+    : (r.base_rate == null ? '<span class="muted">no base rate set</span>' : money(r.base_rate) + '/hr');
+  return '<div class="wagerow scroll"><table><thead><tr>'
+    + '<th class="num" style="width:120px" title="Their own rate, edited on the settings page">Rate</th>'
+    + '<th class="num">Reg hrs</th><th class="num">OT hrs</th>'
+    + '<th class="num" style="width:96px">PTO hrs</th>'
+    + '<th class="num" style="width:110px" title="Hours for an hourly person, a flat stipend for a salaried one">On-call</th>'
+    + '<th class="num">Wage pay</th><th class="num">Gross</th>'
+    + '</tr></thead><tbody><tr data-pay-person="' + r.person_id + '">'
+    + '<td class="num">' + rate + '</td>'
+    + hrs(r.reg_hours) + hrs(r.ot_hours)
+    + '<td class="num"><input type="number" step="0.25" min="0" class="ovp" data-extra="pto"'
+    + ' value="' + (r.pto_hours == null ? '' : r.pto_hours) + '"' + (open ? '' : ' disabled')
+    + ' aria-label="PTO hours for ' + esc(r.name) + '"></td>'
+    // One rotation, two units. A salaried person gets a flat stipend (they cannot be paid by
+    // the hour); an hourly person types HOURS and is paid their own rate for them.
+    //
+    // Which unit is SHOWN follows the stored row, falling back to the pay type when there is
+    // no entry yet. Rendering purely by pay type hid a real entry: a person switched to salary
+    // with on-call hours already stored showed a blank dollar box while payrollRows went on
+    // paying those hours. The page must never be able to omit money it is paying.
+    + '<td class="num"><input type="number" step="' + (asDollars(r) ? '0.01' : '0.25') + '" min="0" class="ovp"'
+    + ' data-extra="on_call"'
+    + ' value="' + ((asDollars(r) ? r.on_call_amount : r.on_call_hours) ?? '') + '"' + (open ? '' : ' disabled')
+    // Their own default prefills the box as a placeholder, so entering it is a confirmation
+    // rather than a retype, and an empty box still means "not paid".
+    + ' placeholder="' + (r.on_call_rate == null ? (asDollars(r) ? '$' : 'hrs') : Number(r.on_call_rate).toFixed(2)) + '"'
+    + ' title="' + (asDollars(r) ? 'A flat stipend for the period' : 'Hours on call, paid at their base rate') + '"'
+    + ' aria-label="On-call ' + (asDollars(r) ? 'dollars' : 'hours') + ' for ' + esc(r.name) + '">'
+    // What those hours come to, so the row shows its own arithmetic rather than making
+    // somebody find it inside the wage-pay total.
+    + (!asDollars(r) && r.on_call_hours != null && r.on_call_pay != null
+      ? '<div class="muted" style="font-size:11px">' + money(r.on_call_pay) + '</div>' : '')
+    + '</td>'
+    + '<td class="num">' + wageCell(r, r.wage_pay) + wageVariance(r) + '</td>'
+    + '<td class="num"><b>' + wageCell(r, r.gross) + '</b></td>'
+    + '</tr></tbody></table></div>';
+}
+
+function personCard(p, lines, open, tnfrItems, people, wage) {
   const rows = lines.map((l) => {
     const overridden = l.override_amount != null || l.zeroed;
     const amount = l.zeroed
@@ -1192,12 +1215,15 @@ function personCard(p, lines, open, tnfrItems, people, upcoming) {
       + '<td>' + tierChips(l, tnfrItems) + '</td>'
       + '<td>'
       + '<span class="what">' + lineWhat(l, tnfrItems) + '</span>'
+      // Clearing a flag is offered on a CLOSED period too, because the server exempts it from
+      // the freeze for a reason: 'changed_after_approval' only ever appears ON a frozen week,
+      // it means the inputs moved after approval, so a dead span there left the one flag that
+      // can only appear on a closed week permanently unanswerable. It moves no money; it is a
+      // human saying they have read the question.
       + (l.flag
-        ? (open
-          ? '<button class="flag ' + esc(l.flag) + '" data-line="' + l.id + '" data-act="clear_flag"'
-            + ' title="Mark as looked at. Recompute can raise this again but never clears it.">'
-            + esc(l.flag.replace(/_/g, ' ')) + ' \u00d7</button>'
-          : '<span class="flag ' + esc(l.flag) + '">' + esc(l.flag.replace(/_/g, ' ')) + '</span>')
+        ? '<button class="flag ' + esc(l.flag) + '" data-line="' + l.id + '" data-act="clear_flag"'
+          + ' title="Mark as looked at. Recompute can raise this again but never clears it.">'
+          + esc(l.flag.replace(/_/g, ' ')) + ' \u00d7</button>'
         : '')
       + tnfrItemsBlock(l, tnfrItems)
       + (open && l.kind === 'job_type' && l.attributed_person_id != null
@@ -1231,24 +1257,37 @@ function personCard(p, lines, open, tnfrItems, people, upcoming) {
       + '</div>'
     : '';
 
+  // Open only while there is unapproved money in it: a card the office has ticked through
+  // closes itself, which is what turns a long page into a shrinking one. Zero-line cards (the
+  // five who earn no commission) and all-$0 cards (Cole) never open on their own. Purely
+  // derived, and then overridden by anything the reviewer opened or closed BY HAND, because
+  // loadPeriod re-renders after every single edit and a card that collapsed under you mid-edit
+  // is the page arguing with you. That memory is in-memory and per session, deliberately: it
+  // is what you are doing right now, not a preference worth storing.
+  const derived = (p.office_approved || 0) < (p.lines || 0) && p.payable !== 0;
+  const expanded = OPEN_BY_HAND.has(p.person_id) ? OPEN_BY_HAND.get(p.person_id) : derived;
   // id so the Disputed strip can jump straight to the card the questioned line sits on.
-  return '<div class="card" id="person-' + p.person_id + '"><div class="who">'
+  return '<details class="card person" id="person-' + p.person_id + '"' + (expanded ? ' open' : '') + '>'
+    + '<summary><div class="who">'
     + '<span class="name">' + esc(p.name) + '</span>'
-    // Why this card can sit at $0.00 with no lines: they are on payroll but earn no commission
-    // automatically. The card exists so a bonus can be added by hand, which is the only money
-    // that ever lands here. ONE name for this flag across both pages: it was "bonus only" here
-    // and "unconfirmed" on the payroll row, which read as two different states, one permanent
-    // and one pending. The five people carrying it are permanently non-earning by the owner's
-    // decision, so nothing here nags toward confirming; that button lives on the settings card
-    // where the consequence can be spelled out beside it.
-    + (p.payroll_only ? '<span class="tag" title="Paid for their time. Commission rules do not'
-      + ' apply to them, so a bonus here has to be added by hand.">no commission</span>' : '')
+    // TAG THE EXCEPTION (the owner, 2026-07-29). Most of the crew is hourly and earns no
+    // commission, so chipping all of them said nothing and chipped the wrong people: the
+    // question a reader actually has is who the rules DO pay. A card with no tag still sits at
+    // $0.00 with no lines for the same reason as before, they are paid for their time, and
+    // still carries its own add-line row, which is where a Saturday bonus goes.
+    + (p.payroll_only ? '' : '<span class="tag" title="The commission rules apply to this'
+      + ' person; the lines below are what they earned.">commission</span>')
+    // Salaried, read off their wage row rather than a second stored flag: whichever pay type
+    // the row was priced under is the one the summary names.
+    + (wage && wage.pay_type === 'salary' ? '<span class="tag">salary</span>' : '')
     + (badges.length ? '<span class="muted" style="font-size:12px">' + esc(badges.join(' · ')) + '</span>' : '')
     + (p.disputed ? '<span class="badge-disputed" style="font-size:12px">' + p.disputed + ' disputed</span>' : '')
-    // Print is deliberately available on a frozen period too: that is when a tech reads it.
-    + '<button class="btn" type="button" data-print-person="' + p.person_id + '" style="margin-left:8px"'
-    + ' title="Printable statement for this person and pay period">Print statement</button>'
-    + '<span class="pay">' + money(p.payable) + '<br><small>payable</small></span></div>'
+    + '<span class="pay">' + money(p.payable) + '<br><small>payable</small></span>'
+    // The wage half beside the commission, so the summary answers "what does this person get
+    // paid" without the card having to be opened. Only for somebody who has a wage row at all.
+    + (wage ? '<span class="pay">' + wageCell(wage, wage.wage_pay) + '<br><small>wage pay</small></span>'
+      + '<span class="pay">' + wageCell(wage, wage.gross) + '<br><small>gross</small></span>' : '')
+    + '</div></summary>'
     + '<div class="scroll"><table><thead><tr>'
     + '<th style="width:24px" title="Tech approved">T</th><th style="width:24px" title="Office approved">&#10003;</th><th style="width:24px" title="Disputed">!</th>'
     + '<th style="width:20%">Customer</th><th style="width:96px">Tier</th><th>Line</th><th style="width:120px">Turnover</th>'
@@ -1256,7 +1295,13 @@ function personCard(p, lines, open, tnfrItems, people, upcoming) {
     + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th>'
     + (open ? '<th class="num" style="width:230px">Edit</th>' : '')
     + '<th style="width:130px">Note</th></tr></thead>'
-    + '<tbody>' + rows + '</tbody></table></div>' + add + upcomingBlock(upcoming, open) + '</div>';
+    + '<tbody>' + rows + '</tbody></table></div>'
+    // Print lives in the BODY and not in the summary: a button inside a <summary> toggles the
+    // card on the way to its own click, so the card would slam shut every time somebody
+    // printed. Available on a frozen period too, deliberately, that is when a tech reads it.
+    + '<div style="margin-top:9px"><button class="btn" type="button" data-print-person="' + p.person_id + '"'
+    + ' title="Printable statement for this person and pay period">Print statement</button></div>'
+    + wageRow(wage, open) + add + '</details>';
 }
 
 // ---- printable statement -------------------------------------------------------------
@@ -1301,7 +1346,9 @@ function statementHtml(person, lines) {
     + '<td>' + esc(l.customer_name || (l.kind === 'manual' ? '' : 'unknown customer')) + '</td>'
     + '<td>' + lineWhat(l).replace(/<[^>]*>/g, '')
     + (l.deferred_from ? ' <em>(moved from ' + esc(l.deferred_from_label || l.deferred_from) + ')</em>' : '')
-    + (l.note ? '<div class="stmt-line-note">' + esc(l.note) + '</div>' : '')
+    // Not under a manual line, where the note IS the label above it: printing it twice reads
+    // as two different facts about the row that happen to be worded identically.
+    + (l.note && l.kind !== 'manual' ? '<div class="stmt-line-note">' + esc(l.note) + '</div>' : '')
     + paidAheadBreakdown(l) + '</td>'
     + '<td class="num">' + (l.basis == null ? 'flat' : money(l.basis)) + '</td>'
     // The rate this line actually paid at, by the SAME derivation the dashboard uses. The
@@ -1343,6 +1390,20 @@ function printStatements(people, byPerson) {
   if (!people.length) { toast('Nobody to print in this pay period', 'err'); return; }
   document.getElementById('print-area').innerHTML =
     people.map((p) => statementHtml(p, byPerson.get(p.person_id) || [])).join('');
+  printNow();
+}
+
+// The print gate, shared by both print paths here and mirrored on the portal: mark the body for
+// exactly the length of one print, then put the page back and empty the container. A statement
+// left sitting in #print-area is a statement somebody prints again by accident, on a day when
+// the numbers have moved. afterprint fires on cancel too, so the cleanup is not conditional on
+// anybody actually printing.
+function printNow() {
+  document.body.classList.add('statements');
+  addEventListener('afterprint', () => {
+    document.body.classList.remove('statements');
+    document.getElementById('print-area').innerHTML = '';
+  }, { once: true });
   window.print();
 }
 
@@ -1420,7 +1481,9 @@ function renderAttention(unmatched, dismissed, activePeople, open) {
       + '<table><thead>' + head + '</thead><tbody>' + rowsHtml(unmatched, false) + '</tbody></table>'
     : '<div class="empty">Nothing waiting. Every paid invoice this period landed on someone.</div>';
   if (dismissed && dismissed.length) {
-    html += '<details class="dismissed"><summary>dismissed (' + dismissed.length + ')</summary>'
+    // id so the harvest can key it: without one, expanderKey returns null and this reopened
+    // itself closed after every save, mid-read.
+    html += '<details class="dismissed" id="attn-dismissed"><summary>dismissed (' + dismissed.length + ')</summary>'
       + '<table><thead>' + head + '</thead><tbody>' + rowsHtml(dismissed, true) + '</tbody></table></details>';
   }
   document.getElementById('attn').innerHTML = html;
@@ -1450,156 +1513,123 @@ function renderDisputed(lines, tnfrItems) {
     + '</tbody></table>';
 }
 
-// The wage half of payroll: ServiceTitan's worked hours priced at our own rates, plus the
-// PTO and on-call ServiceTitan does not carry, plus commission. Everything here is derived
-// server-side at read time (server.js payrollRows), so this renders what it is given and
-// computes no money of its own.
+// The whole company's Upcoming work, one block per person, in its own view. It used to hang
+// off the bottom of every card, which put a projection nobody is being paid for yet inside
+// the thing the office ticks money through, and made a card you had finished with as long as
+// one you had not. It is a list you read straight down once a week, so it gets a page.
 //
-// PTO hours and the on-call dollars are the only editable cells, and both write per PERIOD
-// rather than per week, which is the granularity they are decided at.
-function renderPayroll(data) {
-  const rows = data.payroll || [];
-  const unlinked = data.payrollUnlinked || [];
+// Grouped here, not on the server: the payload already arrives sorted by person, so this is a
+// regrouping of rows the page holds rather than a second read. upcomingBlock is the SAME
+// renderer the card used, buttons and all, so the pull-forward path is untouched.
+function renderUpcoming(data) {
+  const rows = data.upcoming || [];
   const open = (data.period.status || 'open') === 'open';
-  document.getElementById('payroll-view').hidden = !rows.length && !unlinked.length;
-  // The headline sums what is KNOWN and says so when something is missing. Summing with
-  // `|| 0` turned every unset rate into a confident zero and dropped that person's commission
-  // out of the total as well, so the number read as complete when it was not.
-  const unpriced = rows.filter((r) => r.gross == null);
-  document.getElementById('s-gross').innerHTML = money(rows.reduce((s, r) => s + (r.gross || 0), 0))
-    + (unpriced.length ? '<small> + ' + unpriced.length + ' unpriced</small>' : '');
-  document.getElementById('s-gross').title = unpriced.length
-    ? 'Incomplete: ' + unpriced.map((r) => r.name).join(', ') + ' have no rate set, so their pay is not in this total'
-    : 'Wage pay plus commission for everyone on payroll this period';
-
-  // A missing rate is not a rate of zero, so the cell says so instead of printing $0.00 and
-  // letting somebody pay it.
-  const need = (r) => (r.pay_type === 'salary' ? 'no salary set' : 'no base rate set');
-  // Which UNIT this person's on-call box is in: what is stored, else what their pay type is
-  // paid in. Stored wins so an entry can never be rendered as blank while it is being paid.
-  const asDollars = (r) => (r.on_call_amount != null ? true
-    : r.on_call_hours != null ? false : r.pay_type === 'salary');
-  const cell = (r, v) => (v == null ? '<span class="muted">' + need(r) + '</span>' : money(v));
-  // ServiceTitan prices the same WORKED hours with its own rate. A gap over a dollar means one
-  // of the two rates is wrong, and the person whose pay it is should hear it from us first.
-  // PTO and on-call are ours alone, ServiceTitan has never heard of either, so both come off
-  // before the comparison, or every PTO entry would read as a rate disagreement.
-  const worked = (r) => r.wage_pay - (r.on_call_pay || 0) - (r.pto_hours || 0) * (r.base_rate || 0);
-  const variance = (r) => (r.pay_type === 'salary' || r.wage_pay == null || !r.st_amount
-    || Math.abs(worked(r) - r.st_amount) <= 1 ? ''
-    : '<span class="flag" title="ServiceTitan prices the same worked hours at ' + money(r.st_amount) + '">ST ' + money(r.st_amount) + '</span>');
-
-  document.getElementById('payroll-list').innerHTML = '<table><thead><tr>'
-    + '<th>Person</th>'
-    // Editable HERE, not only on the settings page. The rate is the one input that decides
-    // every other number in the row, so having to leave the page to fix a blank one, and then
-    // come back to see what it did, was the wrong shape. Same field either way; this writes
-    // the same column the settings card does.
-    + '<th class="num" style="width:104px" title="Their own rate. Hourly people are $ per hour, salaried people $ per pay period. Also on the settings page.">Rate</th>'
-    + '<th class="num">Reg hrs</th><th class="num">OT hrs</th>'
-    + '<th class="num" style="width:96px">PTO hrs</th>'
-    + '<th class="num" style="width:110px" title="Hours for an hourly person, a flat stipend for a salaried one">On-call</th>'
-    + '<th class="num">Wage pay</th><th class="num">Commission</th><th class="num">Gross</th>'
-    + '</tr></thead><tbody>'
-    + rows.map((r) => {
-      const salaried = r.pay_type === 'salary';
-      // A salaried person's hours and PTO are shown for visibility and pay nothing, so they
-      // are greyed and chipped rather than hidden: "why is this zero" is a worse question.
-      const hrs = (v) => '<td class="num' + (salaried ? ' muted' : '') + '">' + Number(v || 0).toFixed(2) + '</td>';
-      return '<tr data-pay-person="' + r.person_id + '">'
-        + '<td><span class="cust">' + esc(r.name) + '</span>'
-        + (salaried ? ' <span class="tag">salary</span>' : '')
-        // Paid for their time, earning no commission. Said on the row so nobody wonders why
-        // their commission column is empty. Same wording as the card above by design.
-        + (r.payroll_only ? ' <span class="tag" title="Paid for their time. Commission rules do not apply to them; change that on the settings page.">no commission</span>' : '')
-        + '</td>'
-        // THE RATE, editable in place. Hourly people are $/hr (base_rate), salaried people
-        // $/period (salary_per_period), the same two fields the settings card writes, so
-        // there is one stored rate per person and no second place for it to disagree.
-        //
-        // Deliberately NOT disabled on a closed period: a rate belongs to the person, not to
-        // the period, and the settings page has always let it be edited from anywhere. The
-        // note under a closed period already says wage pay is recomputed at current rates.
-        + '<td class="num"><input type="number" step="0.01" min="0" class="ovp"'
-        + ' data-rate="' + (salaried ? 'salary_per_period' : 'base_rate') + '"'
-        + ' value="' + ((salaried ? r.salary_per_period : r.base_rate) ?? '') + '"'
-        // ServiceTitan's own figure sits in the placeholder, so an empty box for an hourly
-        // person suggests the number instead of showing nothing. A ServiceTitan rate of $0.00
-        // is never seeded, so it is not offered here either.
-        + ' placeholder="' + (salaried ? '/period' : (r.st_hourly_rate ? Number(r.st_hourly_rate).toFixed(2) : 'rate')) + '"'
-        + ' title="' + (salaried ? 'Salary per pay period' : 'Base rate per hour; overtime pays 1.5x unless set on the settings page') + '"'
-        + ' aria-label="' + (salaried ? 'Salary per period' : 'Base rate per hour') + ' for ' + esc(r.name) + '"></td>'
-        + hrs(r.reg_hours) + hrs(r.ot_hours)
-        + '<td class="num"><input type="number" step="0.25" min="0" class="ovp" data-extra="pto"'
-        + ' value="' + (r.pto_hours == null ? '' : r.pto_hours) + '"' + (open ? '' : ' disabled')
-        + ' aria-label="PTO hours for ' + esc(r.name) + '"></td>'
-        // One rotation, two units. A salaried person gets a flat stipend (they cannot be paid
-        // by the hour); an hourly person types HOURS and is paid their own rate for them.
-        //
-        // Which unit is SHOWN follows the stored row, falling back to the pay type when there
-        // is no entry yet. Rendering purely by pay type hid a real entry: a person switched to
-        // salary with on-call hours already stored showed a blank dollar box while payrollRows
-        // went on paying those hours. The page must never be able to omit money it is paying.
-        + '<td class="num"><input type="number" step="' + (asDollars(r) ? '0.01' : '0.25') + '" min="0" class="ovp"'
-        + ' data-extra="on_call"'
-        + ' value="' + ((asDollars(r) ? r.on_call_amount : r.on_call_hours) ?? '') + '"' + (open ? '' : ' disabled')
-        // Their own default prefills the box as a placeholder, so entering it is a
-        // confirmation rather than a retype, and an empty box still means "not paid".
-        + ' placeholder="' + (r.on_call_rate == null ? (asDollars(r) ? '$' : 'hrs') : Number(r.on_call_rate).toFixed(2)) + '"'
-        + ' title="' + (asDollars(r) ? 'A flat stipend for the period' : 'Hours on call, paid at their base rate') + '"'
-        + ' aria-label="On-call ' + (asDollars(r) ? 'dollars' : 'hours') + ' for ' + esc(r.name) + '">'
-        // What those hours come to, so the row shows its own arithmetic rather than making
-        // somebody find it inside the wage-pay total.
-        + (!asDollars(r) && r.on_call_hours != null && r.on_call_pay != null
-          ? '<div class="muted" style="font-size:11px">' + money(r.on_call_pay) + '</div>' : '')
-        + '</td>'
-        + '<td class="num">' + cell(r, r.wage_pay) + variance(r) + '</td>'
-        + '<td class="num">' + money(r.commission) + '</td>'
-        + '<td class="num"><b>' + cell(r, r.gross) + '</b></td></tr>';
-    }).join('')
-    + '</tbody></table>'
-    // A closed period's COMMISSION is frozen in its lines. Its wage pay is not: there is no
-    // stored pay column by design (the plan's "no converger, no drift flag"), so these figures
-    // are re-derived from today's rates, pay types and salaries every time the page loads.
-    // Change somebody's rate and this period's wage pay changes with it. Say so rather than
-    // let the number read as a record of what was paid, until wage pay reaches the Gusto
-    // export there is nothing anywhere that freezes it.
-    + (open ? ''
-      : DATA.paySnapshot
-        // Frozen at approve time, so it IS a record now. Said just as plainly as the warning
-        // it replaced: the two states look identical on screen and only the banner separates
-        // a number that can still move from one that cannot.
-        ? '<div class="frozen">This pay period is closed. Its wage pay was frozen when it was'
-          + ' approved, so these are the figures that were approved, editing a rate now'
-          + ' will not change them.</div>'
-        : '<div class="frozen">This pay period is closed, so its PTO and on-call entries are locked.'
-          + ' Commission is frozen in its lines, but wage pay is recomputed from <b>current</b> rates and salaries'
-          + ' every time this page loads, it is not a record of what was paid.</div>');
-
-  // ServiceTitan employees who logged time but map to nobody. Never auto-linked by name:
-  // two people can share one, and guessing hands the wrong person every job the other ran.
-  document.getElementById('payroll-unlinked').innerHTML = !unlinked.length ? ''
-    : '<div class="gate"><b>' + unlinked.length + ' ServiceTitan employee'
-      + (unlinked.length === 1 ? '' : 's') + ' logged time but ' + (unlinked.length === 1 ? 'is' : 'are')
-      + ' not linked to anyone here.</b> Link the ServiceTitan identity on the settings page'
-      + ', a name match alone is not enough to link on.<ul>'
-      + unlinked.map((u) => '<li>' + esc(u.name || 'unnamed') + ' (' + esc(u.kind) + ' ' + esc(u.st_id)
-        + '), ' + Number(u.hours || 0).toFixed(2) + ' hrs</li>').join('')
-      + '</ul></div>';
+  const byPerson = new Map();
+  for (const u of rows) {
+    if (!byPerson.has(u.person_id)) byPerson.set(u.person_id, { name: u.person, rows: [] });
+    byPerson.get(u.person_id).rows.push(u);
+  }
+  document.getElementById('upcoming-list').innerHTML = byPerson.size
+    ? [...byPerson.values()].map((g) => '<div class="card"><div class="who">'
+      + '<span class="name">' + esc(g.name) + '</span></div>'
+      + upcomingBlock(g.rows, open) + '</div>').join('')
+    : '<div class="card"><div class="empty">Nothing upcoming. Every priced line has been paid'
+      + ' or is waiting on an invoice nobody has sold yet.</div></div>';
 }
 
 let CURRENT = null;   // the pay period on screen: the Monday its first week starts
 let PERIODS = [];     // every period, newest first
 let DATA = null;      // the last /api/period payload, shared by the cards and the printer
 let BY_PERSON = new Map();  // person_id -> their lines, for the print buttons
-// The people a CARD was rendered for, which is data.people plus the synthetic $0 cards built
-// below for people with Upcoming work but no payable line. The print buttons look people up
-// here rather than in data.people: a synthetic card carried a Print statement button that
-// silently did nothing, because the lookup could never find its person. statementHtml already
-// handles a person with no lines, so what prints is a deliberate zero-line statement.
+// The people a CARD was rendered for: everybody active, plus anyone else this period holds a
+// line or a wage row for. The print buttons look people up here rather than in data.people,
+// which never held the cards built for people with no payable line, those buttons silently
+// did nothing. statementHtml already handles a person with no lines, so what prints for one
+// of them is a deliberate zero-line statement.
 let CARD_PEOPLE = [];
 // The three period ids the nav tabs point at, resolved server-side from today's date.
 let NAV = { current: null, next: null, last: null };
+// WHAT A RE-RENDER MUST NOT THROW AWAY. loadPeriod rebuilds #people after every single edit,
+// and the browser keeps none of what was in flight: a half-typed bonus and its reason, an
+// expander somebody opened to read a basis, and the box the cursor was in. Each save quietly
+// undid the work in progress beside it, which is how a page teaches people to distrust it.
+//
+// Harvested by STABLE key rather than by position, the person id for an add-line box, the
+// line id for a tier expander, because the rebuild can reorder or drop rows. The cards
+// themselves are deliberately not handled here: OPEN_BY_HAND and the derived default already
+// own that, and a second mechanism would fight it.
+function captureUiState() {
+  const addrow = {};
+  for (const el of document.querySelectorAll('#people input[data-add]')) {
+    if (el.value !== '') addrow[el.dataset.person + ':' + el.dataset.add] = el.value;
+  }
+  const expanders = [...document.querySelectorAll('#people details.tnfr[open], #disputed details[open], #attn details[open]')]
+    .map(expanderKey).filter(Boolean);
+  const a = document.activeElement;
+  const focus = a && a.matches('#people input, #people select, #attn select')
+    ? { key: fieldKey(a), start: a.selectionStart, end: a.selectionEnd } : null;
+  return { addrow, expanders, focus };
+}
+// A tier expander has no id of its own, so it is keyed by the LINE it hangs off, which is the
+// thing that survives a rebuild. Anything not inside a line row keys on its own id, if it has
+// one; anything with neither is simply not restored, rather than restored onto the wrong row.
+function expanderKey(d) {
+  const row = d.closest('tr');
+  const line = row && row.querySelector('[data-line]');
+  return line ? 'line:' + line.dataset.line : (d.id ? 'id:' + d.id : null);
+}
+const fieldKey = (el) => (el.dataset.line ? 'line:' + el.dataset.line + ':' + (el.dataset.act || '')
+  : el.dataset.add ? 'add:' + el.dataset.person + ':' + el.dataset.add
+  : el.dataset.extra ? 'extra:' + (el.closest('[data-pay-person]') || { dataset: {} }).dataset.payPerson + ':' + el.dataset.extra
+  : el.dataset.attn ? 'attn:' + el.dataset.attn + ':' + (el.dataset.component || '') : null);
+function restoreUiState(state) {
+  if (!state) return;
+  for (const el of document.querySelectorAll('#people input[data-add]')) {
+    const v = state.addrow[el.dataset.person + ':' + el.dataset.add];
+    if (v != null) el.value = v;
+  }
+  const wanted = new Set(state.expanders);
+  for (const d of document.querySelectorAll('#people details.tnfr, #disputed details, #attn details')) {
+    const k = expanderKey(d);
+    if (k && wanted.has(k)) d.open = true;
+  }
+  if (!state.focus) return;
+  for (const el of document.querySelectorAll('#people input, #people select, #attn select')) {
+    if (fieldKey(el) !== state.focus.key) continue;
+    el.focus();
+    // Put the caret back where it was, so a re-render mid-word does not send the next
+    // keystroke to the end of the box.
+    if (state.focus.start != null && el.setSelectionRange) {
+      try { el.setSelectionRange(state.focus.start, state.focus.end); } catch (e) { /* not a text input */ }
+    }
+    return;
+  }
+}
+
+// Cards the reviewer opened or closed BY HAND this session, person_id -> open. Applied over
+// the derived default on every re-render, and loadPeriod re-renders after every edit, without
+// it, ticking a line collapsed the card you were reading. Cleared when the period changes: it
+// is intent about what is on screen.
+const OPEN_BY_HAND = new Map();
+// A GESTURE is what counts, not a toggle event. A <details> written into the page with `open`
+// queues a toggle of its own as it is inserted, so recording every toggle marked every card
+// the RENDER opened as one the reviewer had opened by hand, and once a card was in the map,
+// the derived default never applied to it again and approving its last line no longer closed
+// it. The summary click is the gesture; Enter and Space on a summary dispatch one too, so the
+// keyboard is covered by the same mark. Capture phase on both: `toggle` does not bubble, and
+// the click has to be seen before the toggle it causes.
+const TOGGLED_BY_HAND = new WeakSet();
+document.addEventListener('click', (ev) => {
+  const summary = ev.target.closest && ev.target.closest('details.person > summary');
+  if (summary) TOGGLED_BY_HAND.add(summary.parentElement);
+}, true);
+document.addEventListener('toggle', (ev) => {
+  const d = ev.target;
+  // Matched on the card itself, so the tier and dismissed expanders are never mistaken for one.
+  if (!d.matches || !d.matches('details.person') || !TOGGLED_BY_HAND.has(d)) return;
+  TOGGLED_BY_HAND.delete(d);   // one gesture, one recorded choice
+  OPEN_BY_HAND.set(Number(d.id.slice(7)), d.open);
+}, true);
 
 // ---- freshness stamp -----------------------------------------------------------------
 // Whiteboard pattern: a dot plus "synced Nh ago", amber once the data is stale.
@@ -1642,6 +1672,23 @@ setInterval(renderStamp, 30000);
 // later paid into them would be refused as week_frozen instead of becoming money. The server
 // refuses it too, this only stops the button offering something that would be rejected.
 const isFuturePeriod = (data) => !!(NAV.current && data.period && data.period.id > NAV.current);
+// Has this period's last day passed? Periods are contiguous, so anything before the current
+// one has ended, the same question the server asks as (period start + 13 days < today).
+const hasEnded = (data) => !!(NAV.current && data.period && data.period.id < NAV.current);
+// WHAT THE SERVER WILL ACCEPT, said once here so the button and the writer cannot drift.
+// Commission lines are approvable whenever; a period carrying only WAGES is approvable only
+// once it has ended, because until then more hours are still coming and freezing them would
+// freeze a number that is not finished.
+const canApprove = (data) => !isFuturePeriod(data)
+  && (data.lines.length ? true : hasEnded(data) && (data.payroll || []).length > 0);
+const approveWhy = (data) => (isFuturePeriod(data)
+  ? 'This pay period has not started yet. Approving would freeze weeks that have not happened, '
+    + 'so invoices paying into them would be refused instead of paid.'
+  : data.lines.length ? 'Approve both weeks of this pay period'
+    : (data.payroll || []).length && !hasEnded(data)
+      ? 'This pay period pays wages but no commission, and it has not ended yet, more hours can '
+        + 'still land in it. It can be approved once the period is over.'
+      : 'Nothing to approve in this pay period yet.');
 
 // The nav's active underline: which of the three tabs, if any, is the period on screen.
 // An older period picked from the dropdown selects none, which is correct, it is none of them.
@@ -1701,8 +1748,18 @@ async function edit(lineId, action, value, extra) {
 // were shaped by the hostname, so opening this page on a portal host (which the preview banner
 // links to) rendered one tech's total under "Company total" and then crashed on the fields the
 // portal projection leaves out. The server honours it only for an already-authorized admin.
+// Which load is the LATEST one asked for. Two loads can be in flight at once, a save's
+// reload racing a period click, or two nav clicks in a row, and the network decides which
+// answer lands last, not the reader. The older payload arriving second rendered a period
+// nobody had asked for while CURRENT named it, so the next edit was aimed at the wrong pay
+// period. A counter is the whole fix: a load that is no longer the newest renders nothing.
+let LOAD_TOKEN = 0;
 async function loadPeriod(id) {
+  const token = ++LOAD_TOKEN;
   const data = demoPeriod(id); // demo: built in the page, no server behind it
+  // No LOAD_TOKEN check: demoPeriod is synchronous, so there is no in-flight window
+  // for a newer load to overtake.
+  const wasPeriod = CURRENT;   // captured BEFORE the reassignment below; the harvest needs it
   CURRENT = id;
   DATA = data;
   renderStamp();
@@ -1711,7 +1768,6 @@ async function loadPeriod(id) {
   document.getElementById('h-range').textContent = data.isCurrent ? 'in progress'
     : (NAV.current && id > NAV.current ? 'not started yet' : 'complete');
   document.getElementById('s-total').innerHTML = money(data.total);
-  document.getElementById('s-people').textContent = data.people.length;
   document.getElementById('s-lines').textContent = data.lines.length;
   document.getElementById('s-attn').textContent = data.unmatched.length;
   const status = data.period.status || 'open';
@@ -1721,7 +1777,7 @@ async function loadPeriod(id) {
 
   const open = status === 'open';
   document.getElementById('btn-approve').style.display = open ? '' : 'none';
-  document.getElementById('btn-approve').disabled = !data.lines.length || isFuturePeriod(data);
+  document.getElementById('btn-approve').disabled = !canApprove(data);
   document.getElementById('btn-reopen').style.display = status === 'approved' ? '' : 'none';
   document.getElementById('btn-export').disabled = open;
 
@@ -1731,72 +1787,65 @@ async function loadPeriod(id) {
     byPerson.get(l.person_id).push(l);
   }
   BY_PERSON = byPerson;
-  // Upcoming rows group by person too. A person with pipeline but no paid line this period
-  // (the whole point of the section for an early-period salesperson) has no aggregate row,
-  // so synthesise a $0-payable card for them, appended after the people who did earn.
-  const upByPerson = new Map();
-  for (const u of (data.upcoming || [])) {
-    if (!upByPerson.has(u.person_id)) upByPerson.set(u.person_id, []);
-    upByPerson.get(u.person_id).push(u);
-  }
-  const cardPeople = data.people.slice();
+  // ONE card per person, and everybody active gets one (the owner, 2026-07-29). bonusPeople is the
+  // list, active people in the office's own sort order, carrying the flag that says who earns
+  // no commission, merged with whatever this period actually holds for them. Before this the
+  // page had three ways of making a card (earners, people with only Upcoming work, people with
+  // only a payroll row) and a fourth control for whoever fell through all three; the answer to
+  // "where do I add a bonus for X" depended on which of the four X happened to land in.
+  //
+  // The append at the end is for people who are NOT active: somebody who left mid-period still
+  // has lines to review, and an approved period's frozen wage rows outlive a deactivation too.
+  // Both keep their card; nobody with money on this period is unreachable.
+  // Taken before anything is rebuilt and put back after the last renderer has run, but ONLY
+  // for a re-render of the SAME period. Loading a different one is not a re-render, and
+  // carrying a half-typed bonus across into it would offer it against the wrong pay period.
+  // Compared against the period that was on screen, not against CURRENT: CURRENT is already
+  // the one being loaded by this point, so testing it was testing id === id.
+  const uiState = id === wasPeriod ? captureUiState() : null;
+  const agg = new Map(data.people.map((p) => [p.person_id, p]));
+  const wageByPerson = new Map((data.payroll || []).map((r) => [r.person_id, r]));
+  const cardPeople = (data.bonusPeople || []).map((b) => ({
+    person_id: b.id, name: b.name, payable: 0, lines: 0, ...agg.get(b.id), payroll_only: !!b.payroll_only }));
   const carded = new Set(cardPeople.map((p) => p.person_id));
-  for (const u of (data.upcoming || [])) {
-    if (carded.has(u.person_id)) continue;
-    carded.add(u.person_id);
-    cardPeople.push({ person_id: u.person_id, name: u.person, payable: 0 });
+  // Everyone this period holds something for, active or not: an aggregate row of lines, or a
+  // wage row (an approved period's frozen ones outlive the person being deactivated).
+  const alsoHolds = data.people
+    .concat([...wageByPerson.values()].map((r) => ({ person_id: r.person_id, name: r.name,
+      payable: 0, lines: 0, payroll_only: !!r.payroll_only })));
+  for (const p of alsoHolds) {
+    if (carded.has(p.person_id)) continue;
+    carded.add(p.person_id);
+    cardPeople.push(p);
   }
-  // And anybody on PAYROLL this period, for the same reason: the card is where a hand-written
-  // line is added, and the five people the pull created earn no commission but do get the
-  // occasional bonus (the owner, 2026-07-27). Without a card there was nowhere to add it.
-  for (const r of (data.payroll || [])) {
-    if (carded.has(r.person_id)) continue;
-    carded.add(r.person_id);
-    cardPeople.push({ person_id: r.person_id, name: r.name, payable: 0 });
-  }
-  // Stamp the unconfirmed flag onto EVERY card, not just the synthesized ones: the moment an
-  // unconfirmed person is handed a bonus they arrive through data.people instead, which
-  // carries no such flag, and the chip explaining why they earn nothing vanished exactly when
-  // the card started showing money.
-  const unconfirmed = new Set((data.payroll || []).filter((r) => r.payroll_only).map((r) => r.person_id));
-  for (const p of cardPeople) p.payroll_only = unconfirmed.has(p.person_id);
-  // What is on screen is what prints, including the synthetic cards, whose Print button had
-  // nothing to find before.
+  // What is on screen is what prints, including the cards with no lines, whose Print button
+  // had nothing to find before.
   CARD_PEOPLE = cardPeople;
   document.getElementById('btn-print-all').disabled = !cardPeople.length;
-  // TEMPORARY: every earner's unpaid Comfort Club sales, in ONE table below the cards. Gated on
-  // the server's own pay destination, not on the period status: Clear works on an approved
-  // period and hiding it there was wrong.
-  starBacklogSection(data.starBacklog, data.starPayWeek);
-  // Anybody payable who has NO card this period. A card carries its own add-line row, so the
-  // picker below only has to reach the people a card cannot. Before this it rendered solely
-  // when cardPeople was empty, which meant one person having a card locked everybody else out
-  // of a hand-written bonus (found 2026-07-27). The trigger is not the payroll_only flag but
-  // payrollRows' activity filter: an active hourly person with no hours, PTO, on-call or
-  // commission has no card either, so a bonus for somebody on vacation was equally unreachable.
-  const uncarded = (data.bonusPeople || []).filter((p) => !carded.has(p.id));
-  const addRow = (open && uncarded.length
-    ? '<div class="addrow"><select id="add-person" aria-label="Person">'
-      // bonusPeople, not activePeople: a hand-written line is open to anybody on payroll,
-      // including someone who earns no commission but does get a bonus.
-      + uncarded.map((p) => '<option value="' + p.id + '">' + esc(p.name)
-        + (p.payroll_only ? ' (no commission)' : '') + '</option>').join('')
-      + '</select>'
-      + '<input class="amt" type="number" step="0.01" data-add="amount" data-person="pick" placeholder="Amount" aria-label="Manual amount">'
-      + '<input type="text" maxlength="500" data-add="note" data-person="pick" placeholder="Why (required)" aria-label="Manual note">'
-      + '<button class="btn go" data-add="go" data-person="pick" type="button">Add line</button></div>'
-    : '');
   document.getElementById('people').innerHTML = (cardPeople.length
-    ? cardPeople.map((p) => personCard(p, byPerson.get(p.person_id) || [], open, data.tnfrItems, data.activePeople, upByPerson.get(p.person_id) || [])).join('')
-      + (addRow ? '<div class="card"><div class="empty">Nobody else has a line this pay period.'
-        + ' You can still add one by hand.</div>' + addRow + '</div>' : '')
-    : '<div class="card"><div class="empty">No commission lines in this pay period.'
-      + (addRow ? ' You can still add one by hand below.' : '') + '</div>' + addRow + '</div>')
+    ? cardPeople.map((p) => personCard(p, byPerson.get(p.person_id) || [], open, data.tnfrItems,
+      data.activePeople, wageByPerson.get(p.person_id))).join('')
+    : '<div class="card"><div class="empty">Nobody is on payroll, so there is nothing to review.'
+      + ' Add people on the settings page.</div></div>')
     + (open ? '' : '<div class="frozen">This pay period is ' + esc(status) + ', so its lines are locked. Corrections go in as a manual line in the current pay period.</div>');
+  // Every dollar of commission counts once, even for somebody with no payroll row at all: a
+  // 100%-commission person has no wage half, so the whole company commission total goes on the
+  // wage side rather than being summed per row. Unpriced is counted, not guessed at, a wage
+  // person whose rate is not set yet is missing from the number and the stat says so, because
+  // a total that reads complete when it is not is worse than one that admits the gap.
+  const wageRows = data.payroll || [];
+  const unpriced = wageRows.filter((r) => r.wage_pay == null);
+  document.getElementById('s-gross').innerHTML = money(wageRows.reduce((s, r) => s + (r.wage_pay || 0), 0) + (data.total || 0))
+    + (unpriced.length ? '<small> + ' + unpriced.length + ' unpriced</small>' : '');
+  document.getElementById('s-gross').title = unpriced.length
+    ? 'Incomplete: ' + unpriced.map((r) => r.name).join(', ') + ' have no rate set, so their pay is not in this total'
+    : 'Wage pay plus every dollar of commission this pay period';
+  document.getElementById('upcoming-tab').textContent = 'Upcoming' + ((data.upcoming || []).length ? ' (' + data.upcoming.length + ')' : '');
   renderGates(data);
-  renderPayroll(data);
+  renderUpcoming(data);
   renderDisputed(data.lines, data.tnfrItems);
   renderAttention(data.unmatched, data.dismissed || [], data.activePeople, open);
+  restoreUiState(uiState);
 }
 
 // What stands between this period and a payroll file, said before the button is
@@ -1813,21 +1862,45 @@ function renderGates(data) {
     parts.push('<div class="gate"><b>Not ready to export to Gusto:</b><ul>'
       + data.exportBlockers.map((r) => '<li>' + esc(r) + '</li>').join('') + '</ul></div>');
   }
+  // ServiceTitan employees who logged time but map to nobody. Never auto-linked by name: two
+  // people can share one, and guessing hands the wrong person every job the other ran. It sat
+  // under the payroll table until the wage rows moved into the cards; it is a gate about the
+  // period as a whole, so it belongs with the other gates and not inside one person's card.
+  const unlinked = data.payrollUnlinked || [];
+  if (unlinked.length) {
+    parts.push('<div class="gate"><b>' + unlinked.length + ' ServiceTitan employee'
+      + (unlinked.length === 1 ? '' : 's') + ' logged time but ' + (unlinked.length === 1 ? 'is' : 'are')
+      + ' not linked to anyone here.</b> Link the ServiceTitan identity on the settings page'
+      + ', a name match alone is not enough to link on.<ul>'
+      + unlinked.map((u) => '<li>' + esc(u.name || 'unnamed') + ' (' + esc(u.kind) + ' ' + esc(u.st_id)
+        + '), ' + Number(u.hours || 0).toFixed(2) + ' hrs</li>').join('')
+      + '</ul></div>');
+  }
+  // A closed period's COMMISSION is frozen in its lines. Its wage pay is frozen only once the
+  // period was approved (pay_snapshots); before that it re-derives from today's rates every
+  // time the page loads. The two states look identical on the wage rows, so only this banner
+  // separates a number that can still move from one that cannot.
+  if ((data.period.status || 'open') !== 'open') {
+    parts.push(data.paySnapshot
+      ? '<div class="frozen">This pay period is closed. Its wage pay was frozen when it was'
+        + ' approved, so these are the figures that were approved, editing a rate now'
+        + ' will not change them.</div>'
+      : '<div class="frozen">This pay period is closed, so its PTO and on-call entries are locked.'
+        + ' Commission is frozen in its lines, but wage pay is recomputed from <b>current</b> rates and salaries'
+        + ' every time this page loads, it is not a record of what was paid.</div>');
+  }
   document.getElementById('gates').innerHTML = parts.join('');
   const rb = document.getElementById('btn-recompute');
   if (rb) {
-    rb.onclick = async () => {
-      rb.disabled = true; rb.textContent = 'Recomputing...';
-      try { await post('/api/recompute', {}); await refreshPeriods(CURRENT); toast('Recomputed'); }
-      catch (e) { toast(e.message, 'err'); rb.disabled = false; rb.textContent = 'Recompute now'; }
-    };
+    // Started, not awaited: /api/recompute spawns the child and answers at once, so the page
+    // watches the computed stamp for it exactly as the ServiceTitan refresh does.
+    rb.onclick = () => startBackgroundJob('/api/recompute', rb, {
+      busy: 'Recomputing...', idle: 'Recompute now',
+      started: 'Recomputing.', done: 'Recomputed.' });
   }
   const approve = document.getElementById('btn-approve');
-  approve.disabled = !data.lines.length || data.recomputePending || isFuturePeriod(data);
-  approve.title = isFuturePeriod(data)
-    ? 'This pay period has not started yet. Approving would freeze weeks that have not happened, '
-      + 'so invoices paying into them would be refused instead of paid.'
-    : 'Approve both weeks of this pay period';
+  approve.disabled = !canApprove(data) || data.recomputePending;
+  approve.title = approveWhy(data);
   document.getElementById('btn-export').disabled = data.period.status === 'open' || (data.exportBlockers || []).length > 0;
 }
 
@@ -1835,8 +1908,6 @@ function renderGates(data) {
 // after every save, and rebound handlers are how stale ids creep in.
 document.addEventListener('change', (ev) => {
   const t = ev.target;
-  // A tick moves the "what am I about to act on" line, so it has to update on every change.
-  if (t.classList && t.classList.contains('starpick')) { starPickedSummary(); return; }
   if (t.dataset && t.dataset.line && t.dataset.act === 'override') {
     edit(t.dataset.line, 'override', t.value === '' ? null : t.value);
   } else if (t.dataset && t.dataset.line && t.dataset.act === 'override_pct') {
@@ -1851,10 +1922,6 @@ document.addEventListener('change', (ev) => {
   } else if (t.dataset && t.dataset.line
     && (t.dataset.act === 'tech_approved' || t.dataset.act === 'office_approved' || t.dataset.act === 'disputed')) {
     edit(t.dataset.line, t.dataset.act, t.checked ? 1 : 0);
-  } else if (t.dataset && t.dataset.rate) {
-    // The person's own rate, edited from the payroll row. Writes the same person column the
-    // settings card does, through the same per-field patch endpoint.
-    setRate(t.closest('[data-pay-person]').dataset.payPerson, t.dataset.rate, t.value);
   } else if (t.dataset && t.dataset.extra) {
     // PTO hours / on-call dollars, per person per PAY PERIOD. Blank clears the entry, which
     // is not the same as a stored zero.
@@ -1869,14 +1936,6 @@ document.addEventListener('change', (ev) => {
   }
 });
 
-async function setRate(personId, field, value) {
-  try {
-    await post('/api/person/patch', { id: Number(personId), field, value });
-    await loadPeriod(CURRENT);
-    toast('Rate saved');
-  } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
-}
-
 async function setExtra(personId, kind, value) {
   try {
     await post('/api/extra', { person_id: Number(personId), period_id: CURRENT, kind, value });
@@ -1887,9 +1946,11 @@ async function setExtra(personId, kind, value) {
 
 async function attribute(invoiceId, personId) {
   try {
-    await post('/api/attribute', { invoice_id: Number(invoiceId), person_id: personId === '' ? null : Number(personId) });
+    const out = await post('/api/attribute', { invoice_id: Number(invoiceId), person_id: personId === '' ? null : Number(personId) });
     await loadPeriod(CURRENT);
-    toast(personId === '' ? 'Attribution cleared' : 'Sale attributed');
+    // The server defers the recompute when a sync is running, and says so. Reporting a plain
+    // success over that would tell the office the line is written when it is not yet.
+    toast(out.note || (personId === '' ? 'Attribution cleared' : 'Sale attributed'), out.note ? 'err' : undefined);
   } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
 }
 
@@ -1906,7 +1967,13 @@ document.addEventListener('click', async (ev) => {
   const jump = ev.target.closest('[data-jump-person]');
   if (jump) {
     const card = document.getElementById('person-' + jump.dataset.jumpPerson);
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // OPEN it on the way. Cards close themselves once every line is office-approved, and a
+    // dispute is normally raised days later off a printed sheet, so the strip's whole job was
+    // scrolling to a collapsed card with the questioned line hidden inside it. Deliberately
+    // NOT recorded as a by-hand choice: this is the page answering a click, not the reviewer
+    // deciding, so the next render re-derives and the card closes itself again once the
+    // dispute is settled.
+    if (card) { card.open = true; card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     return;
   }
   const t = ev.target.closest('button');
@@ -1919,48 +1986,6 @@ document.addEventListener('click', async (ev) => {
   }
   if (t.dataset.restore) {
     return dismiss(t.dataset.restore, t.dataset.component, false);
-  }
-  if (t.dataset.pullInvoice) {
-    t.disabled = true; // a pull creates a real manual line; don't let a double-click double it
-    try {
-      await post('/api/pull-forward', { period_id: CURRENT, invoice_id: Number(t.dataset.pullInvoice),
-        person_id: Number(t.dataset.pullPerson), rule_id: Number(t.dataset.pullRule) });
-      await loadPeriod(CURRENT);
-      toast('Pulled into this period');
-    } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
-    return;
-  }
-  // TEMPORARY: the star backlog's two decisions. Both shrink the count, and only one of them
-  // pays, so the confirm names which, and the count comes from the input next to the button.
-  // Tick all / untick all: bulk cleaning starts by choosing the shape of the selection.
-  if (t.dataset.starAll || t.dataset.starNone) {
-    const on = !!t.dataset.starAll;
-    for (const c of document.querySelectorAll('#star-list .starpick')) c.checked = on;
-    starPickedSummary();
-    return;
-  }
-  if (t.dataset.starPay || t.dataset.starClear) {
-    const pay = !!t.dataset.starPay;
-    const picked = [...document.querySelectorAll('#star-list .starpick')].filter((c) => c.checked);
-    const ids = picked.map((c) => Number(c.value));
-    if (!ids.length) { toast('Tick at least one Comfort Club sale', 'err'); return; }
-    const people = new Set(picked.map((c) => c.dataset.person)).size;
-    const sum = picked.reduce((tot, c) => tot + Number(c.dataset.amount || 0), 0);
-    // A bulk action says exactly what it is about to do. Paying is confirmed too, not just
-    // clearing: one click can now write money for several people at once.
-    const what = ids.length + ' Comfort Club sale' + (ids.length === 1 ? '' : 's')
-      + ' across ' + people + (people === 1 ? ' earner' : ' earners');
-    if (!confirm(pay
-      ? 'Pay ' + what + ', ' + money(sum) + ', into this pay period?'
-      : 'Drop ' + what + ' from the backlog without paying?')) return;
-    t.disabled = true; // a pay creates real manual lines; don't let a double-click double them
-    try {
-      const r = await post('/api/star-backlog', { membership_ids: ids, action: pay ? 'pay' : 'clear' });
-      await loadPeriod(CURRENT);
-      toast(pay ? 'Paid ' + r.resolved + ' into this period on ' + r.lines + ' line' + (r.lines === 1 ? '' : 's')
-        : 'Cleared ' + r.resolved + ' from the backlog');
-    } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
-    return;
   }
   // "Pay next period", "Pay last period" and their shared undo: the line MOVES, so the page it
   // was on no longer holds it.
@@ -1995,13 +2020,18 @@ document.addEventListener('click', async (ev) => {
     return;
   }
   if (t.dataset.add === 'go') {
-    const key = t.dataset.person;
-    const amt = document.querySelector('input[data-add=amount][data-person="' + key + '"]');
-    const note = document.querySelector('input[data-add=note][data-person="' + key + '"]');
-    const picker = document.getElementById('add-person');
-    const personId = key === 'pick' ? (picker && picker.value) : key;
+    // The person is the button's own id, always. There was a 'pick' fallback here that read a
+    // separate dropdown for whoever had no card; every person has a card now, so that dropdown
+    // is gone and the fallback could only ever have posted person id 0.
+    const person = t.dataset.person;
+    const amt = document.querySelector('input[data-add=amount][data-person="' + person + '"]');
+    const note = document.querySelector('input[data-add=note][data-person="' + person + '"]');
     try {
-      await post('/api/line/add', { period_id: CURRENT, person_id: Number(personId), amount: amt.value, note: note.value });
+      await post('/api/line/add', { period_id: CURRENT, person_id: Number(person), amount: amt.value, note: note.value });
+      // Emptied BEFORE the reload, so the harvest below cannot find them and put them back.
+      // A line that has been added is not work in progress, and an amount sitting in the box
+      // beside it reads as one that has not been added yet, which is how it gets added twice.
+      amt.value = ''; note.value = '';
       await loadPeriod(CURRENT);
       toast('Line added');
     } catch (e) { toast(e.message, 'err'); }
@@ -2042,7 +2072,9 @@ async function refreshPeriods(keep) {
     document.getElementById('people').innerHTML = '<div class="card"><div class="empty">No pay periods yet. Run compute.js.</div></div>';
     return null;
   }
-  pick.innerHTML = periods.map((p) => '<option value="' + p.id + '">' + p.label
+  // The label is server-generated, so this is belt: an attribute and a text node built by
+  // string concatenation should escape what they interpolate, whoever wrote it.
+  pick.innerHTML = periods.map((p) => '<option value="' + esc(p.id) + '">' + esc(p.label)
     + (p.status === 'open' ? '' : '  (' + p.status + ')') + '</option>').join('');
   // Open on the newest period that actually has something to review. The current
   // period is usually empty early in its two weeks, and landing on an empty page
@@ -2058,6 +2090,100 @@ async function refreshPeriods(keep) {
   return target;
 }
 
+// A manual ServiceTitan pull. The server starts the nightly as a background child and answers
+// straight away, a full pull takes minutes, and a request that held the connection for them
+// would hold the whole single-threaded server with it. So the page watches instead: the
+// computed stamp is already in every period payload, so when it moves past what we started
+// with, the run has finished and the numbers on screen are stale by exactly one reload.
+//
+// A second click while one is running gets a 409 from the single-flight guard; that is not an
+// error worth a red toast, it just means somebody else already pressed it, so we watch too.
+let RUNNING_JOB = false;
+async function startBackgroundJob(path, btn, { busy, idle, started, done }) {
+  if (RUNNING_JOB) return;
+  // WHICH run this is. The marker is shared, the nightly and any CLI run hold it too, so
+  // watching "is it terminal yet" would let somebody else's run finishing be reported as this
+  // job's success, or as its failure. The reply names the run it started; only a terminal
+  // marker carrying that same identity is ours to report on.
+  let mine = null;
+  try {
+    const r = await post(path, {});
+    mine = r && r.started_at;
+    toast(started);
+  } catch (e) {
+    // A 409 from the single-flight guard is not an error worth a red toast: something is
+    // already running, so watch that instead of starting a second one beside it.
+    if (!/already/i.test(e.message)) { toast(e.message, 'err'); return; }
+    toast('One is already running.');
+  }
+  RUNNING_JOB = true;
+  btn.disabled = true;
+  btn.textContent = busy;
+  const end = (message, kind) => {
+    RUNNING_JOB = false;
+    btn.disabled = false;
+    btn.textContent = idle;
+    if (message) toast(message, kind);
+  };
+  // WATCH THE RUN, not the clock. computed_at moving was the old signal and it lied three ways:
+  // a child that died half way still moved it, a run that failed before writing never moved it,
+  // and the nightly landing mid-watch moved it for somebody else. The server records what its
+  // own run did, so the page reports that, including the failure, in the words the child used.
+  const tick = async () => {
+    try {
+      // demo: unreachable. post() refuses /api/sync and /api/recompute above, so
+      // startBackgroundJob returns before it ever schedules this watcher.
+      const run = null;
+      if (!run) { end('Lost track of that run; reload to see where it got to.', 'err'); return; }
+      if (run.state === 'running') { setTimeout(tick, 5000); return; }
+      // Terminal, but whose? Ours only if it carries the identity we were handed. Anything
+      // else is a run we were never watching: the numbers may well have moved, so reload and
+      // say so, but do not dress it up as this job succeeding.
+      await refreshPeriods(CURRENT);
+      if (!mine || run.started_at !== mine) { end('Another compute finished; the page has been reloaded.'); return; }
+      end(run.state === 'error' ? 'That did not finish: ' + (run.error || 'the run failed') : done,
+        run.state === 'error' ? 'err' : undefined);
+      return;
+    } catch (e) { /* a blip mid-pull is not a failure: keep watching */ }
+    setTimeout(tick, 5000);
+  };
+  setTimeout(tick, 5000);
+}
+const startSync = () => startBackgroundJob('/api/sync', document.getElementById('btn-sync'), {
+  busy: 'Refreshing...', idle: 'Refresh from ServiceTitan',
+  started: 'Refreshing from ServiceTitan. This takes a few minutes.',
+  done: 'ServiceTitan refresh finished.' });
+
+// A tab left open goes stale in one direction that matters: the FIRST commission line of a
+// period arrives from the nightly, not from anything the reader did, and until it does the
+// Approve button is correctly disabled, so the page sits there refusing to approve a period
+// that has since become approvable. One minute is slow enough to be free (this is a handful of
+// office tabs, not a public site) and fast enough that nobody sits looking at a stale gate.
+//
+// Only when the COMPUTED stamp has actually moved: a reload on every tick would fight whatever
+// the reader is typing, and loadPeriod's harvest is protection, not a licence to churn. Skipped
+// while a watched run is in flight, that flow does its own reloading, and the reload goes
+// through loadPeriod, whose order token stops a slow response regressing a newer one.
+const IDLE_POLL_MS = 60000;
+async function idlePoll() {
+  try {
+    if (!CURRENT || RUNNING_JOB || document.hidden) return;
+    // WHICH period this poll is about, and which load it was asked during. Its fetch happens
+    // out here rather than inside loadPeriod, so loadPeriod's own order token cannot cover it:
+    // navigate from A to B while this is in flight and the answer that comes back describes A.
+    // Acting on it either reloads the period the reader has just left, or reloads the right one
+    // for the wrong reason, comparing A's stamp against B's, which will always differ.
+    const forPeriod = CURRENT;
+    const atToken = LOAD_TOKEN;
+    return; // demo: the page IS the data, so nothing can have changed underneath it
+    const p = null;
+    // Overtaken while waiting: this answer is about the past. The next tick asks about the present.
+    if (forPeriod !== CURRENT || atToken !== LOAD_TOKEN) return;
+    if (p && !p.error && p.lastComputedAt && DATA && p.lastComputedAt !== DATA.lastComputedAt) await loadPeriod(forPeriod);
+  } catch (e) { /* a blip is not news; the next tick asks again */ }
+}
+setInterval(idlePoll, IDLE_POLL_MS);
+
 // The nav tabs and the address bar agree: #current / #next / #last survive a reload and are
 // linkable. A raw period id works too, so
 // the dropdown's choice is shareable.
@@ -2065,7 +2191,12 @@ const NAV_TOKENS = ['current', 'next', 'last'];
 function periodFromHash() {
   const h = (location.hash || '').replace(/^#/, '');
   if (NAV_TOKENS.includes(h)) return NAV[h];
-  return /^\d{4}-\d{2}-\d{2}$/.test(h) ? h : null;
+  // Date-SHAPED is not the same as being a pay period. #2026-07-22 is a Wednesday, and taking
+  // it at face value made CURRENT a date no period starts on, which is then what Add line and
+  // Approve post. The server refuses both now, but the page should not offer a period that
+  // does not exist in the first place: the dropdown's own list is the authority, and it is
+  // loaded before any hash is read.
+  return /^\d{4}-\d{2}-\d{2}$/.test(h) && PERIODS.some((p) => p.id === h) ? h : null;
 }
 async function goTo(id, hash) {
   if (!id) return;
@@ -2074,9 +2205,60 @@ async function goTo(id, hash) {
   if (hash !== undefined) HASH_SET_BY_US = true;
   const pick = document.getElementById('period-pick');
   if ([...pick.options].some((o) => o.value === id)) pick.value = id;
+  // Which cards you had opened by hand was about the period you were reading. Carrying it to
+  // the next one would open cards nobody has looked at and close ones that need looking at.
+  OPEN_BY_HAND.clear();
+  // And the Upcoming bounce-back goes with it: it means "the period I was on when I stepped
+  // into Upcoming", so once the reader has navigated for any other reason it is just an old
+  // period they would be thrown to later, out of nowhere. enterUpcoming sets it again after
+  // its own goTo, which is the only case that should survive this.
+  RETURN_TO = null;
+  // A period is only ever reached from the period view: navigating out of Upcoming is what
+  // the dropdown does from inside it, so the page has to come back with you.
+  UPCOMING_OPEN = false;
+  syncHashView();
   await loadPeriod(id);
 }
 let HASH_SET_BY_US = false;
+// Which of the two things the page is showing. Kept as a flag rather than read back off the
+// hash: the hash also carries the pay period, so #2026-07-20 has to mean "the period view"
+// without the period being lost, and goTo sets the hash to a period id on its way out.
+let UPCOMING_OPEN = false;
+function syncHashView() {
+  document.getElementById('upcoming-view').hidden = !UPCOMING_OPEN;
+  document.getElementById('period-view').hidden = UPCOMING_OPEN;
+  document.getElementById('upcoming-tab').setAttribute('aria-selected', UPCOMING_OPEN ? 'true' : 'false');
+}
+// Entering the Upcoming view. Those rows ship with the CURRENT pay period only, so an older
+// one on screen is moved forward first: an empty list that reads as "nothing upcoming" while
+// the truth is "wrong period" is exactly the kind of quiet lie that costs somebody money.
+//
+// Through goTo and not loadPeriod, for the same reason the hashchange handler goes through it:
+// goTo is what moves the DROPDOWN with the data and what clears the by-hand disclosure map.
+// Loading directly left the picker naming a period the page had left, and left one period's
+// opened-by-hand cards applying to the next one's. No hash argument: the hash is #upcoming and
+// is what got us here. goTo returns to the period view on its way past, so reveal after it.
+async function enterUpcoming() {
+  // Where to come BACK to. Entering moves the page to the current period (that is the only one
+  // Upcoming ships with), and the reviewer was probably mid-way through an older one, landing
+  // them somewhere else on the way out is the page losing their place for them.
+  const from = CURRENT;
+  if (NAV.current && CURRENT !== NAV.current) await goTo(NAV.current);
+  if (from && from !== CURRENT) RETURN_TO = from;
+  UPCOMING_OPEN = true;
+  syncHashView();
+}
+// Set only when entering Upcoming moved the page; cleared the moment it is honoured, so it can
+// never send somebody back to a period they have since navigated away from deliberately.
+let RETURN_TO = null;
+function leaveUpcoming() {
+  const back = RETURN_TO;
+  RETURN_TO = null;
+  UPCOMING_OPEN = false;
+  syncHashView();
+  // Only if it is still a period the dropdown offers: the list is re-read on every reload.
+  if (back && back !== CURRENT && PERIODS.some((p) => p.id === back)) goTo(back, back);
+}
 
 async function boot() {
   try {
@@ -2084,6 +2266,7 @@ async function boot() {
     document.getElementById('btn-approve').onclick = () => setPeriodStatus('approve');
     document.getElementById('btn-reopen').onclick = () => setPeriodStatus('reopen');
     document.getElementById('btn-export').onclick = () => exportPeriod();
+    document.getElementById('btn-sync').onclick = () => startSync();
     document.getElementById('btn-print-all').onclick = async () => {
       try { await WRITES; await loadPeriod(CURRENT); } catch (e) { toast(e.message, 'err'); return; }
       printStatements(CARD_PEOPLE, BY_PERSON);
@@ -2096,11 +2279,18 @@ async function boot() {
       // had left, so the control that says which period you are on was lying. goTo leaves the
       // hash alone when it is not given one, which is right, the hash is what got us here.
       if (id && id !== CURRENT) goTo(id);
+      // Every other hash is either the page's second view or the period already loaded; both
+      // are answered by which one is on screen, not by re-fetching anything.
+      else if (location.hash === '#upcoming') enterUpcoming();
+      else if (UPCOMING_OPEN) leaveUpcoming();
+      else syncHashView();
     });
     // A hash from the address bar wins over the default landing.
     await refreshPeriods(null);
     const wanted = periodFromHash();
     if (wanted && wanted !== CURRENT) await goTo(wanted);
+    else if (location.hash === '#upcoming') await enterUpcoming();
+    syncHashView();
   } catch (e) {
     document.getElementById('people').innerHTML = '<div class="card"><div class="empty">Could not load: ' + esc(e.message) + '</div></div>';
   }

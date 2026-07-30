@@ -97,20 +97,20 @@ select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outlin
 .pill.approved{background:var(--pend-bg);color:var(--pend)}
 .btn.go{background:var(--auto-bg);color:var(--auto);border-color:var(--auto)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
-/* TEMPORARY: the office-only star backlog controls; goes with the feature. */
-.starrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-/* ServiceTitan deep links on every row that has something to open, commission lines,
-   Upcoming and the backlog; the techs have logins. Same look as the dashboard's, arrow and
-   all, so the two pages read as one product. */
+/* ServiceTitan deep links on every row that has something to open, commission lines and
+   Upcoming; the techs have logins. Same look as the dashboard's, arrow and all, so the two
+   pages read as one product. */
 a.job{color:var(--ice);text-decoration:none;border-bottom:1px dotted var(--line)}
 a.job:hover{color:var(--teal-bri);border-bottom-color:var(--teal-bri)}
 a.job::after{content:'\2197';font-size:10px;vertical-align:2px;margin-left:2px;opacity:.7}
-#starback td.tick{padding-right:0}
-#starback .starpick{width:auto;margin:0;cursor:pointer}
 .pill.exported{background:var(--done-bg);color:var(--done)}
 .card{padding:16px 16px 12px;margin-top:14px}
 .who{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.who .name{font-family:var(--disp);font-weight:400;font-size:23px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream)}
+/* A PERSON'S NAME is set in Inter, not in the brand display face (the owner, 2026-07-29:
+   professional). Inter is already bundled locally for the body text, so this is a font-family
+   swap and nothing is fetched from anywhere. The masthead and the section headings keep the
+   brand font, the branding is the page's, the name is somebody's. */
+.who .name{font-family:var(--body);font-weight:600;font-size:21px;letter-spacing:.01em;color:var(--cream)}
 .who .pay{margin-left:auto;font-weight:600;font-size:24px;color:var(--num);font-variant-numeric:tabular-nums}
 .who .pay small{font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -149,9 +149,14 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;font-si
 /* ---- printable statement: the dashboard's sheet, one person by construction ---- */
 #print-area{display:none}
 .stmt-line-note{color:#444;font-style:italic;font-size:9.5pt}
+/* PRINTING. #print-area is filled on demand and only ever shown while body carries
+   `statements`, the class printStatements adds for the duration of one print. Without that
+   gate a plain Cmd+P hid .wrap and printed an EMPTY page (nothing had filled #print-area), and
+   once anything had been printed the container kept those statements forever, so the next
+   Cmd+P quietly printed last week's numbers on today's date. afterprint empties it again. */
 @media print{
-  .wrap,.toast,.stars,.polaris{display:none !important}
-  #print-area{display:block}
+  body.statements .wrap,.toast,.stars,.polaris{display:none !important}
+  body.statements #print-area{display:block}
   @page{margin:14mm}
   body{background:#fff;color:#000;font-size:10.5pt;line-height:1.35}
   .stmt h1{font-family:var(--disp);font-size:22pt;letter-spacing:.5px;text-transform:uppercase;margin:0}
@@ -220,24 +225,11 @@ try {
   </div>
 </section>
 
-<!-- TEMPORARY: this person's unpaid Comfort Club sales from before the
-     ServiceTitan sold-by fix. The tech SEES the count; only the office can act on it, and the
-     server enforces that independently, the portal role cannot POST /api/star-backlog at
-     all, so the buttons below exist for the office preview and nothing else. -->
-<section id="starback" hidden>
-  <div class="card">
-    <div class="who"><span class="name">Comfort Club backlog</span>
-      <span class="muted" style="font-size:12px">Comfort Club sales from before the ServiceTitan fix &middot; the office is checking each one</span>
-      <span class="muted" style="font-size:12px;margin-left:auto" id="starback-sub"></span></div>
-    <div id="starback-body"></div>
-  </div>
-</section>
-
 <footer>
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>My commission portal</span>
-  <span>demo v2026-07-29 · fictional data · edits reset on reload</span>
+  <span>demo v2026-07-30 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%">Tick Approve when a line looks right, or Dispute when it does not; the office sees both right away. Nothing here changes the money itself.</span>
 </footer>
 </div>
@@ -741,9 +733,7 @@ function effectivePct(l) {
 // office's copy does: the customer name opens the job, the "invoice N" chip opens the invoice.
 // There is no ServiceTitan behind this demo, so the same cells render as plain text.
 const ST_JOB = '';
-const ST_CUSTOMER = '';
 const ST_INVOICE = '';
-const ST_MEMBERSHIP = '';
 const stLink = (href, label) => '<span class="job">' + label + '</span>';
 
 // The customer name, linked to the job behind it, the master's customerCell, same rule: a
@@ -769,7 +759,13 @@ function lineWhat(l) {
   if (l.kind === 'tnfr') return 'TNFR ' + esc(l.tnfr_scope || '') + inv;
   if (l.kind === 'spiff') return (l.spiff_event === 'membership_renewal' ? 'Comfort Club renewal' : 'Comfort Club sale') + inv;
   if (l.kind === 'lead_gen') return 'turnover lead on ' + esc(l.job_type || 'the job') + inv;
-  if (l.kind === 'manual') return 'added by hand';
+  // The note is the label, exactly as on the master card: a tech reading "Comfort Club renewal:
+  // Nordling, Elin (backlog)" knows which sale this is, where "added by hand" told them only that
+  // somebody typed it, which is true of every manual line and answers nothing.
+  if (l.kind === 'manual') {
+    const n = String(l.note || '').trim();
+    return n ? esc(n) : 'added by hand';
+  }
   return esc(l.job_type || l.rule_job_type || 'job') + inv;
 }
 
@@ -856,34 +852,6 @@ document.addEventListener('change', (ev) => {
   if (t.dataset && t.dataset.line && (t.dataset.act === 'tech_approved' || t.dataset.act === 'disputed')) {
     mark(t.dataset.line, t.dataset.act, t.checked ? 1 : 0);
   }
-});
-
-// TEMPORARY: the office-only star backlog decisions, rendered only in the office preview.
-// A real tech never gets these buttons, and the server refuses the write for the portal role
-// even if one arrived, the page declining is the second lock, not the only one.
-document.addEventListener('click', async (ev) => {
-  const btn = ev.target.closest('#star-pay, #star-clear');
-  if (!btn) return;
-  const pay = btn.id === 'star-pay';
-  const picked = [...document.querySelectorAll('#starback .starpick')].filter((c) => c.checked);
-  const ids = picked.map((c) => Number(c.value));
-  if (!ids.length) { toast('Tick at least one Comfort Club sale', 'err'); return; }
-  // BOTH verbs confirm, and the sentence is the master's (commission.html): count, dollars,
-  // earners. Every row on this preview starts ticked, so Pay used to move the whole of one
-  // person's backlog on a single unconfirmed click, with no undo verb anywhere.
-  // This preview is one person's block, so "1 earner".
-  const sum = picked.reduce((tot, c) => tot + Number(c.dataset.amount || 0), 0);
-  const what = ids.length + ' Comfort Club sale' + (ids.length === 1 ? '' : 's') + ' across 1 earner';
-  if (!confirm(pay
-    ? 'Pay ' + what + ', ' + money(sum) + ', into this pay period?'
-    : 'Drop ' + what + ' from the backlog without paying?')) return;
-  btn.disabled = true; // a pay creates a real line; don't let a double-click double it
-  try {
-    await post('/api/star-backlog', { person_id: Number(btn.dataset.person), membership_ids: ids, action: pay ? 'pay' : 'clear' });
-    await loadPeriod(CURRENT);
-    await loadUpcoming();
-    toast(pay ? 'Paid into this period' : 'Cleared from the backlog');
-  } catch (e) { toast(e.message, 'err'); btn.disabled = false; }
 });
 
 function lineRow(l) {
@@ -975,7 +943,8 @@ function statementHtml(person, lines) {
     + '<td>' + esc(l.customer_name || (l.kind === 'manual' ? '' : 'unknown customer')) + '</td>'
     + '<td>' + lineWhat(l).replace(/<[^>]*>/g, '')
     + (l.deferred_from_label ? ' <em>(moved from ' + esc(l.deferred_from_label) + ')</em>' : '')
-    + (l.note ? '<div class="stmt-line-note">' + esc(l.note) + '</div>' : '')
+    // Same sheet, same rule: a manual line's note is already the label above it.
+    + (l.note && l.kind !== 'manual' ? '<div class="stmt-line-note">' + esc(l.note) + '</div>' : '')
     + paidAheadBreakdown(l) + '</td>'
     + '<td class="num">' + (l.basis == null ? 'flat' : money(l.basis)) + '</td>'
     + '<td class="num">' + (effectivePct(l) != null
@@ -1012,6 +981,14 @@ async function printStatement() {
   try { await WRITES; await loadPeriod(CURRENT); } catch (e) { toast(e.message, 'err'); return; }
   if (!DATA || !DATA.person) return;
   document.getElementById('print-area').innerHTML = statementHtml(DATA.person, DATA.lines || []);
+  // Mark the body for one print, then put the page back and empty the container. Without the
+  // mark a plain Cmd+P printed a blank sheet; without the emptying it printed whatever was
+  // last rendered, on a day when the numbers had moved. afterprint fires on cancel too.
+  document.body.classList.add('statements');
+  addEventListener('afterprint', () => {
+    document.body.classList.remove('statements');
+    document.getElementById('print-area').innerHTML = '';
+  }, { once: true });
   window.print();
 }
 
@@ -1021,50 +998,8 @@ async function printStatement() {
 // list, tagged: the office zeroed the invoice so it would leave accounts receivable, which
 // is not money received, so it pays when the real payment lands. "Waiting on payment", not
 // "agency", COMPLETE CALL gets used on jobs with no agency behind them at all.
-// A backlog row deep-links the customer and the invoice the sale was written on, using the
-// ST_* targets and stLink declared up by lineWhat.
-
-// TEMPORARY: the person's Comfort Club backlog. A tech reads it and nothing more, the wording
-// says "the office is checking each one", because until that check happens the count is a
-// claim, not a promise. The office preview (an admin on this hostname) gets the same two
-// buttons the master card has; a real tech never sees them, and the server refuses the write
-// for the portal role regardless of what the page renders.
-function renderStarBacklog(sb, canAct) {
-  document.getElementById('starback').hidden = !sb || !sb.sales.length;
-  if (!sb || !sb.sales.length) return;
-  document.getElementById('starback-sub').textContent = sb.sales.length + ' sale'
-    + (sb.sales.length === 1 ? '' : 's') + ' · ' + money(sb.total);
-  const rows = sb.sales.map((s) => '<tr>'
-    + (canAct ? '<td class="tick"><input type="checkbox" class="starpick" value="' + s.membership_id + '"'
-      + ' data-amount="' + (s.amount || 0) + '" checked aria-label="Include this sale"></td>' : '')
-    + '<td>' + (s.customer_id
-      ? stLink(ST_CUSTOMER + encodeURIComponent(s.customer_id),
-        '<span class="cust">' + esc(s.customer_name || 'customer') + '</span>', 'Open this customer in ServiceTitan')
-      : '<span class="cust">' + esc(s.customer_name || 'customer') + '</span>') + '</td>'
-    + '<td class="what">' + (s.sale_invoice_id
-      ? stLink(ST_INVOICE + encodeURIComponent(s.sale_invoice_id),
-        (s.is_renewal ? 'Comfort Club renewal' : 'Comfort Club sale'), 'Open the invoice this was sold on')
-      : stLink(ST_MEMBERSHIP + encodeURIComponent(s.membership_id),
-        (s.is_renewal ? 'Comfort Club renewal' : 'Comfort Club sale'), 'No sale invoice found; opens the membership')) + '</td>'
-    + '<td class="num muted">' + esc(s.from_date || '') + '</td>'
-    + '<td class="num">' + (s.amount == null ? '' : money(s.amount)) + '</td>'
-    + '</tr>').join('');
-  document.getElementById('starback-body').innerHTML =
-    '<div class="scroll"><table><thead><tr>' + (canAct ? '<th style="width:26px"></th>' : '')
-    + '<th>Customer</th><th>Line</th><th class="num" style="width:110px">Sold</th>'
-    + '<th class="num" style="width:110px">Amount</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
-    + (canAct
-      ? '<div class="starrow" style="margin-top:10px">'
-        + '<button class="btn go" type="button" id="star-pay" data-person="' + sb.person_id + '">Pay ticked this period</button>'
-        + '<button class="btn" type="button" id="star-clear" data-person="' + sb.person_id + '">Clear ticked</button>'
-        + '<span class="muted" style="font-size:12px">office only &middot; ' + esc(sb.name) + ' does not see these buttons</span></div>'
-      : '<div class="muted" style="font-size:12.5px;margin-top:8px">These have not been paid yet. The office is checking'
-        + ' each one against ServiceTitan, then they either pay in an upcoming pay period or come off this list.</div>');
-}
-
 async function loadUpcoming() {
   const data = demoPortalUpcoming(); // demo: no server behind it
-  renderStarBacklog(data.starBacklog, !!data.preview);
   const rows = data.invoices || [];
   document.getElementById('upcoming').hidden = !rows.length;
   if (!rows.length) return;
@@ -1092,7 +1027,7 @@ async function refreshPeriods(keep) {
     document.getElementById('statement').innerHTML = '<div class="card"><div class="empty">No pay periods yet.</div></div>';
     return null;
   }
-  pick.innerHTML = periods.map((p) => '<option value="' + p.id + '">' + p.label
+  pick.innerHTML = periods.map((p) => '<option value="' + esc(p.id) + '">' + esc(p.label)
     + (p.status === 'open' ? '' : '  (' + p.status + ')') + '</option>').join('');
   // Land on the current period; the dropdown reaches every other one.
   const target = keep && periods.some((p) => p.id === keep) ? keep

@@ -315,6 +315,14 @@
   .fld::placeholder { color: var(--ink-faint); font-style: italic; }
   .fld.f-brand { width: 92px; } .fld.f-model { width: 158px; font-variant-numeric: tabular-nums; }
   .fld.f-serial { width: 128px; font-variant-numeric: tabular-nums; } .fld.f-date { width: 92px; font-variant-numeric: tabular-nums; }
+  /* status pill clicks through the status list, same idiom as the Board tab's pills */
+  #reg-tbl .pill[data-act="status"] { white-space: nowrap; }
+  /* brand portal link: opens the portal + copies the unit's details to paste */
+  .reglink { color: var(--auto); text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;
+    border: 1px solid var(--line); border-radius: 7px; padding: 4px 9px; }
+  .reglink:hover { border-color: var(--auto); }
+  .reglink[data-copied]::after { content: " · copied"; color: var(--done); }
+  .nolink { color: var(--ink-faint); }
   .selbox { width: 16px; height: 16px; accent-color: var(--teal); cursor: pointer; }
   .qbtn { margin-left: auto; border: none; border-radius: 8px; padding: 6px 14px; font: inherit;
     font-size: 12.5px; font-weight: 600; cursor: pointer; background: var(--teal); color: #fff; }
@@ -336,6 +344,8 @@
   .dd-menu label { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 13px; color: var(--ink); cursor: pointer; }
   .dd-menu label:hover { background: var(--hover); }
   .dd-menu input { accent-color: var(--teal); width: 15px; height: 15px; flex: none; }
+  /* per-status count, so a status with nothing in it is visibly empty rather than missing */
+  .dd-n { margin-left: auto; color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 12px; }
 
   /* ---- sales role view: per-person cards (ported from the owner dashboard's Sales
      view, scoped under .rview and remapped onto the board's CSS variables) ---- */
@@ -485,36 +495,35 @@
       <div class="reg-toolbar">
         <span class="count" id="reg-count"></span>
         <button class="fbtn regf" data-regf="needs" aria-pressed="true">Needs Action <span class="cnt" id="rc-needs">0</span></button>
+        <button class="fbtn regf" data-regf="queued">Queued <span class="cnt" id="rc-queued">0</span></button>
         <button class="fbtn regf" data-regf="registered">Registered <span class="cnt" id="rc-registered">0</span></button>
-        <button class="fbtn regf" data-regf="all">All</button>
+        <button class="fbtn regf" data-regf="all">All <span class="cnt" id="rc-all">0</span></button>
         <details class="statusdd" id="reg-statusdd">
           <summary class="fbtn" id="reg-status-summary">Status</summary>
           <div class="dd-menu" id="reg-status-menu"></div>
         </details>
-        <label class="toggle">
-          <input type="checkbox" id="showReg">
-          <span class="sw"></span>
-          Show registered
-        </label>
         <button class="qbtn" id="reg-queue" disabled>Queue selected for registration</button>
       </div>
       <div class="scroll">
         <table id="reg-tbl">
           <thead><tr>
             <th class="w-sel"></th><th>Customer</th><th>Brand</th><th>Model</th><th>Serial</th>
-            <th class="w-sched">Installed</th><th>Status</th>
+            <th class="w-sched">Installed</th><th>Status</th><th>Registration link</th>
             <th>Actions</th>
           </tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="reg-hint">Tick the units that make up one system (condenser + its heads), then Queue.
-        They clear from Needs Action once queued; repeat for the next system.</div>
+        They clear from Needs Action once queued; repeat for the next system.
+        The Registration link opens the brand's portal and copies that unit's details to your clipboard, 
+        paste, check it against the screen, submit, then click the status pill on to Registration Verified
+        (click advances, shift-click goes back).</div>
       <div class="empty" id="reg-empty">Nothing matches this filter.</div>
     </div>
   </div><!-- /#tab-registration -->
 
-  <div class="foot">Install White Board · <span id="ver">v2026-07-23.1</span></div>
+  <div class="foot">Install White Board · <span id="ver">v2026-07-30.1</span></div>
 </div>
 
 <script>
@@ -557,28 +566,24 @@
 
   // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
   const DEMO_SALES = {
- "generatedAt": "2026-07-29T12:41:23.398Z",
+ "generatedAt": "2026-07-30T14:08:00.357Z",
  "revenue": {
   "daily": [
    {
-    "date": "2026-06-29",
-    "value": 35699
-   },
-   {
     "date": "2026-06-30",
-    "value": 52259
+    "value": 40280
    },
    {
     "date": "2026-07-01",
-    "value": 37171
+    "value": 27677
    },
    {
     "date": "2026-07-02",
-    "value": 32512
+    "value": 61803
    },
    {
     "date": "2026-07-03",
-    "value": 27249
+    "value": 35717
    },
    {
     "date": "2026-07-04",
@@ -590,27 +595,27 @@
    },
    {
     "date": "2026-07-06",
-    "value": 41699
+    "value": 25521
    },
    {
     "date": "2026-07-07",
-    "value": 40886
+    "value": 39280
    },
    {
     "date": "2026-07-08",
-    "value": 41722
+    "value": 35688
    },
    {
     "date": "2026-07-09",
-    "value": 39791
+    "value": 31555
    },
    {
     "date": "2026-07-10",
-    "value": 28010
+    "value": 33619
    },
    {
     "date": "2026-07-11",
-    "value": 0
+    "value": 5000
    },
    {
     "date": "2026-07-12",
@@ -618,27 +623,27 @@
    },
    {
     "date": "2026-07-13",
-    "value": 37842
+    "value": 31142
    },
    {
     "date": "2026-07-14",
-    "value": 61438
+    "value": 32600
    },
    {
     "date": "2026-07-15",
-    "value": 36691
+    "value": 29704
    },
    {
     "date": "2026-07-16",
-    "value": 33702
+    "value": 39165
    },
    {
     "date": "2026-07-17",
-    "value": 31239
+    "value": 34173
    },
    {
     "date": "2026-07-18",
-    "value": 9000
+    "value": 0
    },
    {
     "date": "2026-07-19",
@@ -646,27 +651,27 @@
    },
    {
     "date": "2026-07-20",
-    "value": 37113
+    "value": 30147
    },
    {
     "date": "2026-07-21",
-    "value": 39111
+    "value": 24091
    },
    {
     "date": "2026-07-22",
-    "value": 37100
+    "value": 24691
    },
    {
     "date": "2026-07-23",
-    "value": 38646
+    "value": 29343
    },
    {
     "date": "2026-07-24",
-    "value": 25866
+    "value": 41271
    },
    {
     "date": "2026-07-25",
-    "value": 6000
+    "value": 4000
    },
    {
     "date": "2026-07-26",
@@ -674,247 +679,253 @@
    },
    {
     "date": "2026-07-27",
-    "value": 27386
+    "value": 33978
    },
    {
     "date": "2026-07-28",
-    "value": 36548
+    "value": 39665
+   },
+   {
+    "date": "2026-07-29",
+    "value": 28916
    }
   ],
-  "rev7": 171546,
-  "mtd": 746722,
-  "priorMonthTotal": 798911,
-  "rolling7": 171546,
-  "prev7": 186856
+  "rev7": 177173,
+  "mtd": 718746,
+  "priorMonthTotal": 829163,
+  "rolling7": 177173,
+  "prev7": 152267
  },
  "estimates": {
-  "sold": 79,
-  "dismissed": 32,
-  "open": 90,
-  "total": 201,
+  "sold": 76,
+  "dismissed": 29,
+  "open": 94,
+  "total": 199,
   "closeRate": null,
-  "todaySold": 0,
-  "todayTotal": 10,
-  "unsoldPipeline": 806948
+  "todaySold": 2,
+  "todayTotal": 9,
+  "unsoldPipeline": 751907
  },
  "wip": {
   "count": 10,
-  "value": 162000,
+  "value": 169000,
   "count30dAgo": 11,
-  "value30dAgo": 162000
+  "value30dAgo": 169000
  },
  "advisors": [
   {
-   "name": "Sam",
-   "soldCount": 11,
-   "soldValue": 70087,
-   "installSoldCount": 3,
-   "installSoldValue": 59294,
-   "openCount": 43,
-   "openValue": 251857,
-   "oldestOpen": "2026-06-01"
-  },
-  {
    "name": "Victor",
    "soldCount": 4,
-   "soldValue": 39113,
+   "soldValue": 37332,
    "installSoldCount": 2,
-   "installSoldValue": 36027,
-   "openCount": 27,
-   "openValue": 114681,
-   "oldestOpen": "2026-06-02"
+   "installSoldValue": 33727,
+   "openCount": 28,
+   "openValue": 121725,
+   "oldestOpen": "2026-06-03"
+  },
+  {
+   "name": "Sam",
+   "soldCount": 13,
+   "soldValue": 25486,
+   "installSoldCount": 1,
+   "installSoldValue": 11143,
+   "openCount": 44,
+   "openValue": 206106,
+   "oldestOpen": "2026-06-01"
   },
   {
    "name": "Jenna",
-   "soldCount": 4,
-   "soldValue": 5838,
+   "soldCount": 6,
+   "soldValue": 8857,
    "installSoldCount": 0,
    "installSoldValue": 0,
-   "openCount": 51,
-   "openValue": 279124,
-   "oldestOpen": "2026-06-01"
-  },
-  {
-   "name": "Marcus",
-   "soldCount": 2,
-   "soldValue": 2013,
-   "installSoldCount": 0,
-   "installSoldValue": 0,
-   "openCount": 25,
-   "openValue": 94994,
-   "oldestOpen": "2026-06-01"
+   "openCount": 47,
+   "openValue": 193452,
+   "oldestOpen": "2026-06-02"
   },
   {
    "name": "Dana",
-   "soldCount": 2,
-   "soldValue": 1378,
+   "soldCount": 1,
+   "soldValue": 1781,
    "installSoldCount": 0,
    "installSoldValue": 0,
-   "openCount": 24,
-   "openValue": 99103,
-   "oldestOpen": "2026-06-01"
+   "openCount": 30,
+   "openValue": 154143,
+   "oldestOpen": "2026-06-02"
+  },
+  {
+   "name": "Marcus",
+   "soldCount": 1,
+   "soldValue": 1371,
+   "installSoldCount": 0,
+   "installSoldValue": 0,
+   "openCount": 18,
+   "openValue": 87026,
+   "oldestOpen": "2026-06-08"
   }
  ],
  "salesRole": {
-  "reportDate": "2026-07-28",
+  "reportDate": "2026-07-29",
   "advisors": [
    {
     "name": "Sam Okafor",
-    "soldValue": 70087,
-    "sold": 11,
-    "soldValuePrev": 20789,
+    "soldValue": 25486,
+    "sold": 13,
+    "soldValuePrev": 21673,
     "salesRun": 0,
     "cohort": {
-     "sold": 25,
-     "dismissed": 9,
-     "pending": 23,
-     "missed": 1
+     "sold": 26,
+     "dismissed": 12,
+     "pending": 28,
+     "missed": 0
     },
     "ytd": null,
-    "openValue": 251857,
-    "openN": 43,
+    "openValue": 206106,
+    "openN": 44,
     "openOldest": "2026-06-01",
     "soldWk": {
-     "2026-05-11": 44290,
-     "2026-05-04": 1720,
-     "2026-05-18": 6367,
-     "2026-05-25": 40993,
-     "2026-06-01": 46497,
-     "2026-06-08": 44859,
-     "2026-06-15": 25949,
-     "2026-06-22": 5438,
-     "2026-06-29": 22994,
-     "2026-07-06": 31288,
-     "2026-07-13": 7977,
-     "2026-07-20": 76831,
-     "2026-07-27": 6068
+     "2026-05-04": 8828,
+     "2026-05-11": 32756,
+     "2026-05-18": 4902,
+     "2026-05-25": 39368,
+     "2026-06-01": 64637,
+     "2026-06-08": 20554,
+     "2026-06-15": 29862,
+     "2026-06-22": 23756,
+     "2026-06-29": 57514,
+     "2026-07-06": 21420,
+     "2026-07-13": 41260,
+     "2026-07-20": 22655,
+     "2026-07-27": 7042
     },
     "opps": [
      {
-      "customer": "Ulvestad, Nils",
-      "value": 21291,
-      "created": "2026-06-18",
+      "customer": "Lofgren, Arvid",
+      "value": 21193,
+      "created": "2026-06-19",
       "link": null
      },
      {
-      "customer": "Rustad, Wade",
-      "value": 19818,
-      "created": "2026-07-03",
+      "customer": "Thorvald, June",
+      "value": 19950,
+      "created": "2026-07-14",
       "link": null
      },
      {
-      "customer": "Marek, Britta & Cliff",
+      "customer": "Holmquist, Opal & June",
       "value": 18619,
-      "created": "2026-06-24",
+      "created": "2026-06-27",
       "link": null
      }
     ]
    },
    {
     "name": "Jenna Marsh",
-    "soldValue": 5838,
-    "sold": 4,
-    "soldValuePrev": 48240,
+    "soldValue": 8857,
+    "sold": 6,
+    "soldValuePrev": 23588,
     "salesRun": 0,
     "cohort": {
-     "sold": 20,
-     "dismissed": 8,
-     "pending": 32,
-     "missed": 2
+     "sold": 21,
+     "dismissed": 11,
+     "pending": 23,
+     "missed": 1
     },
     "ytd": null,
-    "openValue": 279124,
-    "openN": 51,
-    "openOldest": "2026-06-01",
+    "openValue": 193452,
+    "openN": 47,
+    "openOldest": "2026-06-02",
     "soldWk": {
-     "2026-05-04": 43105,
-     "2026-04-27": 1701,
-     "2026-05-11": 10370,
-     "2026-05-18": 31334,
-     "2026-06-01": 2907,
-     "2026-06-08": 35570,
-     "2026-06-22": 15543,
-     "2026-06-15": 9147,
-     "2026-06-29": 43111,
-     "2026-07-06": 20477,
-     "2026-07-13": 29574,
-     "2026-07-20": 25206
+     "2026-05-11": 4837,
+     "2026-05-04": 18522,
+     "2026-05-25": 20276,
+     "2026-05-18": 12044,
+     "2026-06-01": 579,
+     "2026-06-08": 22087,
+     "2026-06-15": 18423,
+     "2026-06-22": 16512,
+     "2026-06-29": 23810,
+     "2026-07-13": 27382,
+     "2026-07-06": 28495,
+     "2026-07-20": 11151,
+     "2026-07-27": 4134
     },
     "opps": [
      {
-      "customer": "Ivarson, Signe",
-      "value": 21535,
-      "created": "2026-07-03",
+      "customer": "Pallesen, Petra",
+      "value": 21811,
+      "created": "2026-07-20",
       "link": null
      },
      {
-      "customer": "Ivarson, Elin",
+      "customer": "Thorvald, Arvid & Wade",
       "value": 20089,
-      "created": "2026-07-07",
+      "created": "2026-07-09",
       "link": null
      },
      {
-      "customer": "Lindstrand, Nils",
-      "value": 19219,
-      "created": "2026-07-03",
+      "customer": "Pallesen, Roald & Mabel",
+      "value": 15596,
+      "created": "2026-06-13",
       "link": null
      }
     ]
    },
    {
     "name": "Victor Reyes",
-    "soldValue": 39113,
+    "soldValue": 37332,
     "sold": 4,
-    "soldValuePrev": 12968,
+    "soldValuePrev": 33789,
     "salesRun": 0,
     "cohort": {
-     "sold": 12,
-     "dismissed": 7,
-     "pending": 16,
-     "missed": 2
+     "sold": 13,
+     "dismissed": 2,
+     "pending": 18,
+     "missed": 3
     },
     "ytd": null,
-    "openValue": 114681,
-    "openN": 27,
-    "openOldest": "2026-06-02",
+    "openValue": 121725,
+    "openN": 28,
+    "openOldest": "2026-06-03",
     "soldWk": {
+     "2026-05-11": 12295,
      "2026-05-04": 1871,
-     "2026-05-11": 3794,
-     "2026-05-18": 24590,
-     "2026-05-25": 76243,
-     "2026-06-01": 18693,
-     "2026-06-08": 45158,
-     "2026-06-15": 14331,
-     "2026-06-22": 17915,
-     "2026-06-29": 21595,
-     "2026-07-06": 47724,
-     "2026-07-13": 2512,
-     "2026-07-20": 50707
+     "2026-05-18": 51779,
+     "2026-05-25": 47531,
+     "2026-06-01": 12059,
+     "2026-06-08": 21943,
+     "2026-06-15": 2613,
+     "2026-06-22": 12304,
+     "2026-06-29": 4349,
+     "2026-07-06": 45778,
+     "2026-07-13": 57053,
+     "2026-07-27": 3605,
+     "2026-07-20": 33727
     },
     "opps": [
      {
-      "customer": "Eikland, Wade & Freya",
+      "customer": "Brandvold, Wade",
       "value": 21010,
-      "created": "2026-07-22",
+      "created": "2026-07-27",
       "link": null
      },
      {
-      "customer": "Callahan, Arvid & Vera",
-      "value": 13241,
-      "created": "2026-06-02",
+      "customer": "Kettunen, June",
+      "value": 19325,
+      "created": "2026-07-07",
       "link": null
      },
      {
-      "customer": "Eikland, Liv",
-      "value": 12605,
-      "created": "2026-07-21",
+      "customer": "Thorvald, Wade",
+      "value": 14756,
+      "created": "2026-07-14",
       "link": null
      }
     ]
    }
   ],
   "team": {
-   "unsoldValue": 806948,
+   "unsoldValue": 751907,
    "unsoldGroups": 161,
    "todayPresets": 7,
    "todayTurnovers": 2
@@ -929,6 +940,13 @@
   // tags + paired serials; Gree/Bosch have no warranty window so show no badge. ----
   const DEMO_EQUIPMENT = {
     deadlines: { maytag_rheem: 60, mitsubishi: 90, mitsubishi_cutoff: "03-31", fujitsu: 60 },
+    // Mirrors server.js REG_STATUSES. Without it regStatuses stays [] and the
+    // status pill is a dead control in the demo (it cycles this list, not the
+    // statuses present in the rows).
+    statuses: ["New", "Queued for Registration", "Queued for ST", "Needs Grouping",
+      "Needs Manual Registration", "Registered", "Registration Verified",
+      "No Registration Verified", "Equipment Received ST", "Error",
+      "Error - Registration", "No Equipment Listed", "Ignore"],
     units: [
       { customer: "Havermark, Petra", brand: "Fujitsu", model: "AOU12RLFW", serial: "FUJ-8823-C", installDate: D(-55), status: "Needs registration", stEquipmentId: "EQ-102", groupTag: "", pairedSerial: "" },
       { customer: "Brandvold, Roald", brand: "Maytag", model: "PSA4BF", serial: "MAY-3391-B", installDate: D(-48), status: "Needs registration", stEquipmentId: "EQ-103", groupTag: "", pairedSerial: "" },
@@ -1524,16 +1542,76 @@
   });
 
   // ---- registration tab (2b) ----
-  let regData = null, regReady = false, regFilter = "needs";
+  let regData = null, regReady = false, regFilter = "needs", regStatuses = [];
+  // Last request STARTED wins. The 60s poll and a save both write regData, and the poll's
+  // payload is the bigger one: a poll that left before a save could land after it and put
+  // the pre-save status back on screen for a minute while the DB already held the new one.
+  let regSeq = 0;
+  const unitSeq = new Map(); // stEquipmentId -> last save started, so a slow save can't rewind a fast one
   // same stem test whiteboard-sync uses (isRegisteredStatus): the live pipeline carries
   // "Registration Verified", not just "Registered" (renamed from "…by Human" 2026-07-29).
   const isRegistered = (s) => /^\s*(registered|registration verified)/i.test(s || "");
   const isQueued = (s) => /^queued/i.test(s || "");
   const needsAction = (u) => !isRegistered(u.status) && !isQueued(u.status);
 
-  function statusPill(s) {
+  // The status cell IS the editor (the owner 2026-07-29), and it clicks like the Board tab's
+  // pills rather than opening a dropdown: tap to advance to the next status, shift-tap to
+  // go back. The sequence is the server's REG_STATUSES in lifecycle order, so the move
+  // this tab exists for (Registered -> Registration Verified) is one tap.
+  function statusPill(u) {
+    const s = u.status || "";
     const cls = isRegistered(s) ? "done" : isQueued(s) ? "auto" : "pend";
-    return `<span class="pill ${cls}"><span class="dot"></span>${esc(s || "-")}</span>`;
+    return `<span class="pill click ${cls}" data-eq="${esc(u.stEquipmentId)}" data-act="status" data-status="${esc(s)}"
+      title="Click for the next status, shift-click for the previous"><span class="dot"></span>${esc(s || "-")}</span>`;
+  }
+  // A status the server does not list (an old sheet value) sits at -1, so the first tap
+  // lands on the first listed status instead of getting stuck.
+  const nextStatus = (cur, back) => {
+    if (!regStatuses.length) return null;
+    const i = regStatuses.indexOf(cur);
+    return regStatuses[(i + (back ? -1 : 1) + regStatuses.length) % regStatuses.length];
+  };
+  // Registration link: the brand's own registration / warranty-lookup page, opened in a
+  // new tab with the unit's details copied to the clipboard so the human pastes, eyeballs
+  // and hits submit themselves. No auto-submit anywhere, that is the point.
+  // ponytail: clipboard, not a prefilled URL, because none of these portals take query
+  // params (Goodman/Amana are ASP.NET VIEWSTATE postbacks, Mitsubishi/Fujitsu are
+  // login+CAPTCHA, Gree's lookup fills from JS). Real field-level prefill needs a Chrome
+  // content script like the MN-ITS/BMF extensions, upgrade path if the paste chafes.
+  // Anchored, and \b after gree: the live brand column holds Greentek (an excluded
+  // accessory) which an unanchored /gree/ sent to Gree's portal, and both Daiken and
+  // Diaken as typos of Daikin. Rheem and Richmond have their own warranty pages, 
+  // sending them to the Maytag wizard was wrong even though all three are Rheem-built.
+  const PORTALS = [
+    [/^gree\b/i,                 "https://greecomfort.com/gree-warranty-registration-search"],
+    // Amana/Goodman/Daikin all iframe ONE widget; linking straight at it (rather than the
+    // brand page that frames it) puts the form in the top document, which is what lets the
+    // autofill extension reach the fields. ?site= keeps the brand's own styling.
+    [/^amana/i,                  "https://warranty.goodmanmfg.com/entitlement/GenericEntitlementLookup.htm?site=Amana"],
+    [/^goodman/i,                "https://warranty.goodmanmfg.com/entitlement/GenericEntitlementLookup.htm?site=Goodman"],
+    [/^(daikin|daiken|diaken)/i, "https://warranty.goodmanmfg.com/entitlement/GenericEntitlementLookup.htm?site=Daikin"],
+    [/^mitsubishi/i,             "https://www.registermehvac.com"],
+    [/^fujitsu/i,                "https://contractors.fujitsugeneral.com/registration/"],
+    [/^navien/i,                 "https://www.navieninc.com/register"],
+    [/^maytag/i,                 "https://maytag.registermyunit.com/en-US/warranty/wizard?brand=maytag"],
+    [/^rheem/i,                  "https://www.rheem.com/warranties/"],
+    [/^richmond/i,               "https://www.richmondwaterheaters.com/warranty/"],
+  ];
+  const portalFor = (brand) => (PORTALS.find(([re]) => re.test((brand || "").trim())) || [])[1] || null;
+  // What lands on the clipboard: one field per line, labelled, ready to paste field by
+  // field. The four editable cells are read from the ROW, not from regData: clicking the
+  // link blurs a just-typed serial, and that save is still in flight, regData would hand
+  // over the pre-edit value and the human would paste a serial they had already fixed.
+  function prefillText(u, tr) {
+    // present-but-empty beats the fallback: a serial the human just CLEARED (because it
+    // was wrong) must not come back on the clipboard as the old one
+    const live = (act, fallback) => { const el = tr?.querySelector(`.fld[data-act="${act}"]`);
+      return el ? el.value.trim() : fallback; };
+    return [["Name", [u.firstName, u.lastName].filter(Boolean).join(" ")], ["Address", u.street],
+      ["City", u.addrCity], ["State", u.state], ["Zip", u.zip], ["Phone", u.phone], ["Email", u.email],
+      ["Brand", live("brand", u.brand)], ["Model", live("model", u.model)],
+      ["Serial", live("serial", u.serial)], ["Installed", live("install_date", u.installDate)],
+    ].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n");
   }
   // city + Slack under the customer name, same pattern as the Board rows: joined
   // from the live board by locationId (fallback: exact customer-name match). No
@@ -1553,14 +1631,20 @@
       b.mapsUrl ? `<a href="${esc(b.mapsUrl)}" target="_blank">${esc(b.city)}</a>` : esc(b.city || ""),
       b.slackUrl ? `<a href="${esc(b.slackUrl)}" target="_blank">Slack</a>` : "",
     ].filter(Boolean).join(" · ") : "";
-    return `<tr data-need="${needsAction(u) ? 1 : 0}" data-reg="${isRegistered(u.status) ? 1 : 0}" data-status="${esc(u.status || "")}">
+    return `<tr data-need="${needsAction(u) ? 1 : 0}" data-queued="${isQueued(u.status) ? 1 : 0}" data-reg="${isRegistered(u.status) ? 1 : 0}" data-status="${esc(u.status || "")}">
       <td class="sel">${needsAction(u) ? `<input type="checkbox" class="selbox" data-eq="${esc(u.stEquipmentId)}" title="Select for registration">` : ""}</td>
       <td class="job"><div class="cust">${nameHtml}</div>${sub ? `<div class="sub">${sub}</div>` : ""}</td>
       <td><input type="text" class="fld f-brand" data-eq="${esc(u.stEquipmentId)}" data-act="brand" value="${esc(u.brand || "")}" placeholder="brand" maxlength="100"></td>
       <td><input type="text" class="fld f-model" data-eq="${esc(u.stEquipmentId)}" data-act="model" value="${esc(u.model || "")}" placeholder="model" maxlength="100"></td>
       <td><input type="text" class="fld f-serial" data-eq="${esc(u.stEquipmentId)}" data-act="serial" value="${esc(u.serial || "")}" placeholder="serial" maxlength="100"></td>
       <td><input type="text" class="fld f-date" data-eq="${esc(u.stEquipmentId)}" data-act="install_date" value="${esc(u.installDate || "")}" placeholder="M/D/YYYY" maxlength="100" title="Install date${u.installDate ? ` (${fmtDate(u.installDate)})` : ""}"></td>
-      <td>${statusPill(u.status)}</td>
+      <td>${statusPill(u)}</td>
+      <td>${portalFor(u.brand)
+        ? `<a class="reglink" href="${esc(portalFor(u.brand))}" target="_blank" rel="noopener" data-eq="${esc(u.stEquipmentId)}"
+             data-owner="${esc(JSON.stringify({ lastName: u.lastName || "", firstName: u.firstName || "",
+               zip: u.zip || "", state: u.state || "", city: u.addrCity || "", street: u.street || "" }))}"
+             title="Opens the ${esc(u.brand)} portal and copies this unit's details to the clipboard, paste, check, submit">Open ${esc(u.brand)}</a>`
+        : `<span class="nolink" title="No portal mapped for this brand">-</span>`}</td>
       <td class="reg-actions">
         <button class="regbtn" data-eq="${esc(u.stEquipmentId)}" data-act="queue_st">Queue ST</button>
       </td>
@@ -1569,23 +1653,56 @@
   // Status dropdown: a tickbox per distinct status in the data, controlling visibility
   // as a layer AFTER the chip/toggle filtering. regHidden = the set of unticked (hidden)
   // statuses, persisted. First-ever load defaults to hiding "Ignore", showing the rest.
-  let regHidden = (() => { const s = localStorage.getItem("wbRegHidden"); return s ? new Set(JSON.parse(s)) : null; })();
+  // the stored set holds status STRINGS, so the 2026-07-29 rename is migrated on read;
+  // without it a browser that had hidden the old tag silently starts showing it again
+  let regHidden = (() => { const s = localStorage.getItem("wbRegHidden");
+    return s ? new Set(JSON.parse(s).map((v) => v === "Registration Verified by Human" ? "Registration Verified" : v)) : null; })();
   const saveRegHidden = () => localStorage.setItem("wbRegHidden", JSON.stringify([...(regHidden || [])]));
+  // EVERY status the pill can set, not just the ones some unit happens to hold right now
+  // (the owner 2026-07-29: "make sure they are all there"). Listing only what was in the data
+  // meant a status you had just clicked a unter INTO could be missing from its own filter,
+  // and there was no way to pre-hide a status before the first unit reached it. Server
+  // order is lifecycle order; anything in the data the server does not list is appended so
+  // an old sheet value can still be filtered.
   function renderStatusMenu(units) {
-    const statuses = [...new Set(units.map((u) => u.status).filter(Boolean))].sort();
+    const inData = units.map((u) => u.status).filter(Boolean);
+    const statuses = [...regStatuses, ...inData.filter((s) => !regStatuses.includes(s))]
+      .filter((s, i, a) => a.indexOf(s) === i);
     if (regHidden === null) { regHidden = new Set(statuses.filter((s) => s.toLowerCase() === "ignore")); saveRegHidden(); }
+    const n = (s) => inData.filter((x) => x === s).length;
     $("reg-status-menu").innerHTML = statuses.length
-      ? statuses.map((s) => `<label><input type="checkbox" data-status="${esc(s)}" ${regHidden.has(s) ? "" : "checked"}>${esc(s)}</label>`).join("")
+      ? statuses.map((s) => `<label><input type="checkbox" data-status="${esc(s)}" ${regHidden.has(s) ? "" : "checked"}>${esc(s)}
+          <span class="dd-n">${n(s)}</span></label>`).join("")
       : `<label style="color:var(--ink-faint)">No statuses</label>`;
     const shownN = statuses.filter((s) => !regHidden.has(s)).length;
-    $("reg-status-summary").textContent = statuses.length && shownN < statuses.length ? `Status (${shownN}/${statuses.length})` : "Status";
+    $("reg-status-summary").textContent = shownN < statuses.length ? `Status (${shownN}/${statuses.length})` : "Status";
   }
+  // One customer's units render as one block, whatever the filters hide. Source order is
+  // registration-sheet order, so a customer with a condenser plus two heads could arrive
+  // split by other jobs, and hiding rows made it worse, not better. Grouping at render
+  // time fixes every filter combination at once.
+  // Two levels, because customer and address are not the same thing: the Rollings own units
+  // at two addresses, so the outer key is the NAME (that is the repetition a human sees) and
+  // the inner key is locationId, keeping each address's system together inside the name.
+  // Map insertion order = first appearance, so the sheet's order still picks who leads.
+  const groupByCustomer = (units) => {
+    const byCust = new Map();
+    for (const u of units) {
+      const c = String(u.customer ?? "");
+      if (!byCust.has(c)) byCust.set(c, new Map());
+      const byLoc = byCust.get(c);
+      const l = String(u.locationId ?? "");
+      if (!byLoc.has(l)) byLoc.set(l, []);
+      byLoc.get(l).push(u);
+    }
+    return [...byCust.values()].flatMap((byLoc) => [...byLoc.values()].flat());
+  };
   function renderRegistration() {
     if (!regData) return;
     // the 60s poll must not wipe an in-progress selection or a half-typed field
     if (document.querySelector(".selbox:checked") || document.activeElement?.classList.contains("fld")) return;
     const units = regData.units || [];
-    document.querySelector("#reg-tbl tbody").innerHTML = units.map(regRow).join("");
+    document.querySelector("#reg-tbl tbody").innerHTML = groupByCustomer(units).map(regRow).join("");
     $("reg-stamp").textContent = `${units.length} unit${units.length === 1 ? "" : "s"}`;
     renderStatusMenu(units); // initializes regHidden on first load; must run before counting
     updateRegCounts(units);
@@ -1597,19 +1714,24 @@
   function updateRegCounts(units) {
     const vis = units.filter((u) => !(regHidden && regHidden.has(u.status || "")));
     $("rc-needs").textContent = vis.filter(needsAction).length;
+    $("rc-queued").textContent = vis.filter((u) => isQueued(u.status)).length;
     $("rc-registered").textContent = vis.filter((u) => isRegistered(u.status)).length;
+    $("rc-all").textContent = vis.length;
   }
+  // The three chips partition the board: Needs Action is neither queued nor registered,
+  // Queued is waiting on a script, Registered is done. Queued had no chip, so ten units
+  // sat in a state you could only reach through All, and All did not show them either,
+  // because it hid registered rows unless a toggle was on. All means all now (minus what
+  // the Status dropdown hides), and the toggle is gone: it did nothing in the other two
+  // views, so its only real effect was making All a lie.
   function applyRegFilter() {
-    const showReg = $("showReg").checked;
     let shown = 0, statusHid = 0;
     document.querySelectorAll("#reg-tbl tbody tr").forEach((tr) => {
-      const isReg = tr.dataset.reg === "1";
-      // Needs Action excludes registered by definition; the Registered chip overrides
-      // the toggle and always shows them; All hides registered unless the toggle is on.
       let hide = regFilter === "needs" ? tr.dataset.need !== "1"
-        : regFilter === "registered" ? !isReg
-        : isReg && !showReg;
-      // status dropdown is the visibility layer applied AFTER chip/toggle filtering
+        : regFilter === "queued" ? tr.dataset.queued !== "1"
+        : regFilter === "registered" ? tr.dataset.reg !== "1"
+        : false;
+      // status dropdown is the visibility layer applied AFTER the chips
       if (!hide && regHidden && regHidden.has(tr.dataset.status)) { hide = true; statusHid++; }
       tr.style.display = hide ? "none" : "";
       if (!hide) shown++;
@@ -1617,10 +1739,17 @@
     $("reg-empty").style.display = shown === 0 ? "block" : "none";
     const parts = [`${shown} shown`];
     if (regFilter !== "all") parts.push("filtered");
-    if (!showReg && regFilter !== "registered") parts.push("registered hidden");
-    if (statusHid) parts.push("status filtered");
+    if (statusHid) parts.push(`${statusHid} hidden by Status`);
     $("reg-count").textContent = parts.join(" · ");
   }
+  // Click anywhere outside an open dropdown closes it, native <details> only toggles from
+  // its own summary, and testers kept clicking away and finding the menu still up. Class
+  // selector, not #reg-statusdd, so any future .statusdd gets it for free.
+  document.addEventListener("click", (ev) => {
+    document.querySelectorAll("details.statusdd[open]").forEach((d) => {
+      if (!d.contains(ev.target)) d.open = false;
+    });
+  });
   $("reg-status-menu").addEventListener("change", (ev) => {
     const cb = ev.target.closest("input[data-status]");
     if (!cb) return;
@@ -1632,6 +1761,7 @@
   });
   async function loadRegistration() { // demo: inlined synthetic equipment, no server
     regData = DEMO_EQUIPMENT;
+    regStatuses = regData.statuses || regStatuses; // same mirror as live: the pill cycles this list
     if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
     renderRegistration();
   }
@@ -1639,6 +1769,7 @@
     const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
     if (u) {
       if (action === "group_tag") u.groupTag = value || "";
+      else if (action === "status") u.status = value; // click-through pill (upstream 28e6b9b)
       else if (action === "queue_st") u.status = "Queued for ST";
       else if (action === "queue_registration") u.status = "Queued for Registration";
       else if (action === "brand") u.brand = (value || "").trim();
@@ -1653,17 +1784,37 @@
     document.querySelectorAll(".regf").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
     applyRegFilter();
   }));
-  // Show-registered toggle: OFF by default so registered/verified units are hidden in
-  // the Needs Action / All views (the Registered chip still shows them). Same pattern
-  // and visual style as the Board tab's Show-completed toggle; own localStorage key.
-  $("showReg").checked = localStorage.getItem("wbShowReg") === "1";
-  $("showReg").addEventListener("change", () => {
-    localStorage.setItem("wbShowReg", $("showReg").checked ? "1" : "0");
-    applyRegFilter();
-  });
+  localStorage.removeItem("wbShowReg"); // retired with the Show-registered toggle
   document.querySelector("#reg-tbl tbody").addEventListener("click", (ev) => {
     const b = ev.target.closest(".regbtn");
-    if (b) equipAction(b.dataset.eq, b.dataset.act);
+    if (b) { equipAction(b.dataset.eq, b.dataset.act); return; }
+    const p = ev.target.closest('.pill[data-act="status"]');
+    if (p) {
+      const to = nextStatus(p.dataset.status, ev.shiftKey);
+      if (to) equipAction(p.dataset.eq, "status", to);
+      return;
+    }
+    // Registration link: copy this unit's details, then let the anchor open the portal.
+    // Clipboard failure (no permission / insecure context) must never eat the click,
+    // so the copy is fire-and-forget and the navigation happens regardless.
+    const a = ev.target.closest(".reglink");
+    if (a) {
+      const u = (regData?.units || []).find((x) => x.stEquipmentId === a.dataset.eq);
+      const tr = a.closest("tr");
+      // A brand corrected but not yet saved must open the CORRECTED brand's portal; the
+      // href was written at render time from the old value. If the corrected brand maps
+      // to nothing, open nothing: no portal beats the wrong manufacturer's portal.
+      const bel = tr?.querySelector('.fld[data-act="brand"]');
+      if (bel) {
+        const live = portalFor(bel.value);
+        if (!live) { ev.preventDefault(); return; }
+        a.href = live;
+      }
+      if (u) navigator.clipboard?.writeText(prefillText(u, tr)).then(() => {
+        a.dataset.copied = "1";
+        setTimeout(() => { delete a.dataset.copied; }, 2500);
+      }).catch(() => {});
+    }
   });
 
   // ---- queue-selected: tick the units that form one system, hit the button.
