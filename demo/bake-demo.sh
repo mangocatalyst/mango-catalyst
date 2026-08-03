@@ -17,6 +17,9 @@ node privacy-validator.js
 node privacy-validator.js build/whiteboard.html
 node privacy-validator.js build/commission.html
 node privacy-validator.js build/commission-portal.html
+# The validators prove no real string or live URL survived. This proves the two
+# defanged link builders still BEHAVE, which a string scan cannot see.
+node check-defanged-cells.js
 
 mkdir -p ../public/demo
 cp build/index.html ../public/demo/dashboard.html

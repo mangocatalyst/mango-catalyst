@@ -70,9 +70,10 @@ body{font-family:var(--body);color:var(--ink);background:var(--panel);min-height
 .polaris::before,.polaris::after{content:'';position:absolute;background:linear-gradient(180deg,transparent,rgba(255,240,195,.85),transparent);left:50%;top:50%}
 .polaris::before{width:1px;height:46px;transform:translate(-50%,-50%)}
 .polaris::after{width:46px;height:1px;transform:translate(-50%,-50%)}
-/* Narrower than the dashboard's full bleed: one person's statement is a readable column,
-   not a wall-to-wall grid. */
-.wrap{position:relative;z-index:1;margin:0 auto;padding:22px 18px 60px;max-width:1200px}
+/* Full bleed, same as the dashboard (the owner, 2026-07-31). This page shipped with a 1200px
+   cap on the theory that one person's statement reads best as a column; the owner overrode
+   that deliberately, the pages should sit identically on a screen. */
+.wrap{position:relative;z-index:1;margin:0 auto;padding:22px 18px 60px}
 .scroll{overflow-x:auto}
 header{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:6px}
 :root[data-theme=dark] .logo-chip{background:linear-gradient(160deg,#fffdf4,#f3e9d2);border-radius:14px;padding:10px 16px;box-shadow:0 6px 24px rgba(0,0,0,.45),inset 0 0 0 1px rgba(210,152,71,.35)}
@@ -87,14 +88,12 @@ header{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:6px
 .card,.strip{background:var(--paper);border:1px solid var(--line);border-radius:16px}
 .strip{display:flex;flex-wrap:wrap;gap:22px;align-items:center;padding:16px 18px;margin-top:18px}
 .stat .k{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.stat .v{font-weight:600;font-size:27px;letter-spacing:-.4px;color:var(--num);font-variant-numeric:tabular-nums;line-height:1.15}
-.picker{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stat .v{font-weight:600;font-size:22px;letter-spacing:-.4px;color:var(--num);font-variant-numeric:tabular-nums;line-height:1.15}
+.picker{margin-left:auto;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.pgroup{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 select,.btn{font-family:var(--body);font-size:13px;font-weight:600;color:var(--ink);background:var(--band);
-  border:1px solid var(--line);border-radius:9px;padding:7px 11px;cursor:pointer}
+  border:1px solid var(--line);border-radius:9px;padding:7px 11px;cursor:pointer;text-decoration:none}
 select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outline-offset:1px}
-.pill{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:999px;
-  background:var(--auto-bg);color:var(--auto)}
-.pill.approved{background:var(--pend-bg);color:var(--pend)}
 .btn.go{background:var(--auto-bg);color:var(--auto);border-color:var(--auto)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 /* ServiceTitan deep links on every row that has something to open, commission lines and
@@ -103,15 +102,17 @@ select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outlin
 a.job{color:var(--ice);text-decoration:none;border-bottom:1px dotted var(--line)}
 a.job:hover{color:var(--teal-bri);border-bottom-color:var(--teal-bri)}
 a.job::after{content:'\2197';font-size:10px;vertical-align:2px;margin-left:2px;opacity:.7}
-.pill.exported{background:var(--done-bg);color:var(--done)}
 .card{padding:16px 16px 12px;margin-top:14px}
 .who{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 /* A PERSON'S NAME is set in Inter, not in the brand display face (the owner, 2026-07-29:
    professional). Inter is already bundled locally for the body text, so this is a font-family
    swap and nothing is fetched from anywhere. The masthead and the section headings keep the
    brand font, the branding is the page's, the name is somebody's. */
-.who .name{font-family:var(--body);font-weight:600;font-size:21px;letter-spacing:.01em;color:var(--cream)}
-.who .pay{margin-left:auto;font-weight:600;font-size:24px;color:var(--num);font-variant-numeric:tabular-nums}
+.who .name{font-family:var(--body);font-weight:600;font-size:17px;letter-spacing:.01em;color:var(--cream)}
+.who .pay{margin-left:auto;font-weight:600;font-size:19px;color:var(--num);font-variant-numeric:tabular-nums}
+/* A SOLD date standing in the Paid column, on a sale older than the tracker. Italic so it is
+   never read as a paid date. Master's rule, same words. */
+.sold{font-style:italic}
 .who .pay small{font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dimmer);font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}
@@ -125,7 +126,16 @@ tr:last-child td{border-bottom:0}
 .cust{font-weight:600;color:var(--ink)}
 .what{color:var(--dim);font-size:12.5px}
 /* Why an Upcoming row waits on something other than the calendar (a COMPLETE CALL zeroing). */
-.waiting{display:block;font-size:11px;color:var(--dim);font-style:italic;margin-top:2px}
+/* Payment type / AR / COMPLETE CALL chips, the master's .tag rule verbatim. The portal had no
+   .tag at all before these chips existed, which is the shape of drift this pair keeps hitting. */
+.tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 6px;border-radius:5px;vertical-align:1px;white-space:nowrap;
+  background:var(--band);color:var(--dim);border:1px solid var(--line)}
+.tag + .tag{margin-left:4px}
+/* A payment type ServiceTitan recorded for $0.00, a voided authorisation, a capture beside its
+   own deposit. Shown because it happened, muted and outlined in the warning colour because it
+   is NOT money that moved and must never read as a payment beside a real one. */
+.tag.caution{color:var(--warn);border-color:var(--warn);background:transparent;font-weight:600}
 .deferred-from{font-size:11px;color:var(--auto);white-space:nowrap}
 .person-note{font-size:12.5px;color:var(--dim);font-style:italic;border-left:2px solid var(--line);padding-left:10px;margin:2px 0 12px}
 .frozen{font-size:12.5px;color:var(--gold-bri);margin-top:6px}
@@ -177,10 +187,12 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;font-si
 </style>
 <script>
 // Theme before first paint, same nsdash-theme key as the dashboard, so one person
-// flipping dark mode anywhere carries it everywhere.
+// flipping dark mode anywhere carries it everywhere. LIGHT unless chosen: this page used
+// to follow prefers-color-scheme, which rendered Dana and Theo dark and Marcus light purely by
+// OS preference nobody set on purpose (the owner, 2026-07-31). Dark is opt-in via the toggle.
 try {
   const t = localStorage.getItem('nsdash-theme');
-  document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = t || 'light';
 } catch (e) { document.documentElement.dataset.theme = 'light'; }
 </script>
 </head>
@@ -204,10 +216,15 @@ try {
 <div class="strip">
   <div class="stat"><div class="k">My total</div><div class="v" id="s-total">$0</div></div>
   <div class="stat"><div class="k">Lines</div><div class="v" id="s-lines">0</div></div>
+  <!-- Two groups, same shape as the master: navigation (the period dropdown) on the left,
+       actions on the right, so the eye finds the same thing in the same place on both pages. -->
   <div class="picker">
-    <span class="pill" id="s-status">open</span>
-    <select id="period-pick" aria-label="Pay period"></select>
-    <button class="btn" id="btn-print" type="button" title="A printable statement for this pay period">Print statement</button>
+    <div class="pgroup">
+      <select id="period-pick" aria-label="Pay period"></select>
+    </div>
+    <div class="pgroup">
+      <button class="btn" id="btn-print" type="button" title="A printable statement for this pay period">Print statement</button>
+    </div>
   </div>
 </div>
 
@@ -218,7 +235,7 @@ try {
      loadUpcoming(); hidden when empty. -->
 <section id="upcoming" hidden>
   <div class="card">
-    <div class="who"><span class="name">Upcoming (not yet paid)</span>
+    <div class="who"><span class="name">Not Yet Paid</span>
       <span class="muted" style="font-size:12px">sold work the rates have already priced &middot; pays in the pay period the money actually lands</span>
       <span class="muted" style="font-size:12px;margin-left:auto" id="upcoming-sub"></span></div>
     <div class="scroll" id="upcoming-list"></div>
@@ -229,7 +246,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>My commission portal</span>
-  <span>demo v2026-07-30 · fictional data · edits reset on reload</span>
+  <span>demo v2026-08-03 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%">Tick Approve when a line looks right, or Dispute when it does not; the office sees both right away. Nothing here changes the money itself.</span>
 </footer>
 </div>
@@ -729,22 +746,133 @@ function effectivePct(l) {
   return (l.override_amount != null && l.basis && !l.zeroed) ? l.override_amount / l.basis * 100 : null;
 }
 
+// The two cells in front of Basis, same as the office's: what this line paid on before the
+// lender took its fee, and the fee's share of it. Total - Financing = Basis on every row,
+// a split and a TNFR line included, because the server hands each line the financing that
+// actually came off it. Blank where there was no financing, which is nearly every sale.
+// ServiceTitan's own payment type names are written for an accounting screen, not for a chip:
+// "Enerbank Financing Funded" is three words too long beside a customer name. Shortened for
+// display only, the STORED name is always ST's, so nothing here can drift the data (the owner,
+// 2026-07-30).
+//
+// UNMAPPED FALLS BACK TO THE RAW NAME, never to blank. A new lender or tender type appears in
+// ServiceTitan without warning, and a chip that silently vanished would read as "paid by
+// nothing", the one thing these chips must never say. A long ugly label is a prompt to add a
+// line here; an absent one is invisible.
+const PAY_LABEL = {
+  'Mobile Check Capture': 'Mobile Check',
+  'Check (Bank Deposit)': 'Check Deposit',
+};
+// The lenders are a PATTERN, not a list (the owner, 2026-07-31). ServiceTitan names them by
+// convention, verified on live: 'Enerbank Financing Funded', 'Enerbank Financing Fee', so the
+// label is derived rather than enumerated, and GreenSky, Synchrony and every future lender get
+// theirs the day they first appear instead of the day somebody notices a raw name on a sheet.
+//
+// This mirrors compute.js FINANCE_FEE_NAME = /financ\w*\s+fee/i, which is pattern-matched for
+// exactly the same reason: a hardcoded id or name list reads every financed invoice from a new
+// lender as fee 0 and quietly pays commission on the gross. That one is money; this one is only
+// the label, compute already NETS a GreenSky fee correctly off the basis, asserted in the
+// suite, so nothing here moves a number.
+const FINANCING_LABEL = /^(.*?)\s+financ\w*\s+(funded|fee)$/i;
+const payLabel = (name) => {
+  if (PAY_LABEL[name]) return PAY_LABEL[name];
+  const m = FINANCING_LABEL.exec(String(name == null ? '' : name).trim());
+  // Provider verbatim from ServiceTitan, so casing is theirs, 'GreenSky' stays 'GreenSky'.
+  if (m) return m[1] + (/^fee$/i.test(m[2]) ? ' Fee' : ' Funded');
+  return name;
+};
+
+// HOW the invoice behind this line was settled: one chip per payment type, from the mix
+// compute.js persists. The financing fee is listed with the rest because it settled part of the
+// balance, and a sheet showing the funded half without it does not add up to the total.
+//
+// Only ever describes an INVOICE, so a hand-written line (a bonus, a reimbursement) shows
+// nothing, there is no invoice behind it to have been paid any particular way.
+//
+// The amount rides in the title rather than the chip: the chips answer "how was this paid" at a
+// glance, and the row already carries the money in its own columns.
+function payTags(l) {
+  if (!l.invoice_id) return '';
+  let types = [];
+  // Stored as JSON by compute.js. Unparseable is treated as absent rather than thrown: this is
+  // a decoration, and a chip that cannot be drawn must never take the money row down with it.
+  try { types = JSON.parse(l.payment_types || '[]'); } catch (e) { types = []; }
+  return types.filter((t) => t && t.name).map((t) => {
+    // A $0.00 APPLICATION IS SHOWN, AND MARKED (the owner, 2026-07-31). ServiceTitan records a card
+    // authorised then settled another way, or a Mobile Check Capture beside its own deposit, as
+    // a payment type applied for nothing. That is a real event and worth seeing, a voided
+    // authorisation happened, but it is NOT money that moved, and an unmarked chip beside
+    // "Visa $5,000" would read as though it were. So the type chip is muted and a caution chip
+    // carrying the amount sits next to it: two marks saying the same thing, because the one
+    // failure mode here is a reader taking it for a payment at a glance.
+    const zero = !t.amount || Math.abs(t.amount) < 0.005;
+    const title = zero
+      ? t.name + ': applied for ' + money(0) + ', recorded by ServiceTitan but no money moved,'
+        + ' typically an authorisation that was voided or settled another way'
+      : t.name + ': ' + money(t.amount) + ' of this invoice';
+    return '<span class="tag' + (zero ? ' caution' : '') + '" title="' + esc(title) + '">'
+      + esc(payLabel(t.name)) + '</span>'
+      + (zero ? '<span class="tag caution" title="' + esc(title) + '">' + esc(money(0)) + '</span>' : '');
+  }).join('');
+}
+
+// What the invoice is WAITING ON, in its own column between Line and Installed (the owner,
+// 2026-07-30). Split out of payTags because it answers a different question from the payment
+// mix, not "how was this paid" but "has it been", and mixing the two beside the customer name
+// made a busy cell where the eye had to sort one kind of chip from the other.
+//
+// COMPLETE CALL and AR are mutually exclusive by construction: the office zeroed it, or it is
+// still owed. A paid invoice shows neither, which is why most rows in a closed period are blank
+// here and that blankness is the answer.
+function statusTags(l) {
+  if (!l.invoice_id) return '';
+  const tag = (text, title) => '<span class="tag" title="' + esc(title) + '">' + esc(text) + '</span>';
+  const pending = Number(l.agency_pending || 0);
+  if (pending > 0) {
+    return tag('COMPLETE CALL', 'The office zeroed ' + money(pending) + ' with COMPLETE CALL so this'
+      + ' invoice would leave AR. That is not money received, so it is not paid yet.');
+  }
+  if (!l.paid_on) return tag('AR', 'Sold, and waiting on payment.');
+  return '';
+}
+
+function financeCols(l) {
+  const fee = l.finance_fee || 0;
+  return l.basis == null ? ['', ''] : [money(l.basis + fee), fee ? money(fee) : ''];
+}
+
 // In the real portal every row deep-links its OWN work into ServiceTitan, the same way the
 // office's copy does: the customer name opens the job, the "invoice N" chip opens the invoice.
-// There is no ServiceTitan behind this demo, so the same cells render as plain text.
+// There is no ServiceTitan behind this demo, so the same cells render as plain text. cls is
+// kept so the demo styles the cell exactly as the live portal does.
 const ST_JOB = '';
 const ST_INVOICE = '';
-const stLink = (href, label) => '<span class="job">' + label + '</span>';
+const stLink = (href, label, title, cls) => '<span class="' + (cls || 'job') + '">' + label + '</span>';
 
 // The customer name, linked to the job behind it, the master's customerCell, same rule: a
 // line with no job (a manual add) is plain text, because there is nothing to open.
 function customerCell(l) {
-  const name = l.customer_name ? esc(l.customer_name) : (l.kind === 'manual' ? '' : 'unknown customer');
+  // The membership's customer as the fallback, matching the master: a backlog line whose sale
+  // invoice predates the tracker has no invoice to name the customer, and the membership does.
+  const who = l.customer_name || l.membership_customer_name;
+  const name = who ? esc(who) : (l.source === 'manual' ? '' : 'unknown customer');
   if (!name) return '';
   return l.job_id
-    ? stLink(ST_JOB + encodeURIComponent(l.job_id), '<span class="cust">' + name + '</span>',
-      'Open job ' + l.job_id + ' in ServiceTitan')
+    ? stLink(ST_JOB + encodeURIComponent(l.job_id), name, 'Open job ' + l.job_id + ' in ServiceTitan', 'job cust')
     : '<span class="cust">' + name + '</span>';
+}
+
+// A Comfort Club line, and the one date it shows, the master's isClub/lineDates, same rule and
+// same reasons: a membership is sold and invoiced on one day, so two date columns printed the
+// same date twice, and a sale older than the tracker has only its membership's sold date.
+const isClub = (l) => l.kind === 'spiff' || l.membership_id != null;
+function lineDates(l) {
+  if (!isClub(l)) return [shortDate(l.job_completed_on), shortDate(l.paid_on)];
+  const paid = shortDate(l.paid_on);
+  if (paid) return ['', paid];
+  const sold = shortDate(l.membership_sold_on);
+  return ['', sold ? '<span class="sold" title="Sold ' + esc(l.membership_sold_on)
+    + '. The sale invoice is older than this tracker, so it carries no paid date.">' + sold + '</span>' : ''];
 }
 
 // The "invoice N" text as a deep link, same as the master's invoiceRef.
@@ -754,9 +882,14 @@ const invoiceRef = (id) => stLink(ST_INVOICE + encodeURIComponent(id), 'invoice 
 // What the line is, in words, with the invoice it was written on linked beside it, the same
 // sentence the master's card shows, so a tech checking their pay against ServiceTitan reads
 // the same row the office does. A manual add has no invoice to point at.
+// Same labels as the master card, and the same reason: a tech's sheet and the Gusto column say
+// one word between them. Their note is the why and renders under the label, not as it.
+const PAY_KIND_LABEL = { bonus: 'bonus', on_call: 'on call', reimbursement: 'reimbursement', mileage: 'mileage' };
+
 function lineWhat(l) {
   const inv = l.invoice_id ? ', ' + invoiceRef(l.invoice_id) : '';
   if (l.kind === 'tnfr') return 'TNFR ' + esc(l.tnfr_scope || '') + inv;
+  if (PAY_KIND_LABEL[l.kind]) return PAY_KIND_LABEL[l.kind];
   if (l.kind === 'spiff') return (l.spiff_event === 'membership_renewal' ? 'Comfort Club renewal' : 'Comfort Club sale') + inv;
   if (l.kind === 'lead_gen') return 'turnover lead on ' + esc(l.job_type || 'the job') + inv;
   // The note is the label, exactly as on the master card: a tech reading "Comfort Club renewal:
@@ -855,6 +988,7 @@ document.addEventListener('change', (ev) => {
 });
 
 function lineRow(l) {
+  const dates = lineDates(l);
   const amount = l.zeroed
     ? '<span class="strike">' + money(l.computed_amount) + '</span> ' + money(0)
     : (l.override_amount != null
@@ -872,11 +1006,17 @@ function lineRow(l) {
     + '<td>' + customerCell(l) + '</td>'
     + '<td><span class="what">' + lineWhat(l) + '</span>'
     + (l.deferred_from_label ? '<div class="deferred-from">moved from ' + esc(l.deferred_from_label) + '</div>' : '')
-    + (l.note ? '<div class="note">' + esc(l.note) + '</div>' : '')
+    // Not under a manual line, where the note IS the label directly above it. The master's
+    // statement got this guard when lineWhat started using the note as the label; this row
+    // did not, so a tech's own page printed "Comfort Club renewal: Nordling, Elin (backlog)" and then
+    // repeated it verbatim on the line below.
+    + (l.note && l.kind !== 'manual' ? '<div class="note">' + esc(l.note) + '</div>' : '')
     + paidAheadBreakdown(l)
     + '</td>'
-    + '<td class="num muted">' + shortDate(l.job_completed_on) + '</td>'
-    + '<td class="num muted">' + shortDate(l.paid_on) + '</td>'
+    + '<td>' + statusTags(l) + payTags(l) + '</td>'
+    + '<td class="num muted">' + dates[0] + '</td>'
+    + '<td class="num muted">' + dates[1] + '</td>'
+    + financeCols(l).map((c) => '<td class="num">' + c + '</td>').join('')
     + '<td class="num">' + (l.basis == null ? '<span class="muted">flat</span>' : money(l.basis)) + '</td>'
     + rateCell
     + '<td class="num">' + amount + '</td>'
@@ -884,8 +1024,34 @@ function lineRow(l) {
     + '</tr>';
 }
 
+// wageBlock, the tech's own "My hours" table, lived here, along with the two checkboxes that
+// let them approve or dispute those hours. Gusto owns hourly pay now (the owner, 2026-07-30), so
+// this page shows a tech their commission and any bonus, on call or reimbursement written
+// for them, which is everything the tracker still knows about their pay.
+
+// Which load is the newest. A load that is no longer the newest renders nothing, so a slow
+// reply for a period nobody is looking at can never overwrite the one on screen. Deleted by
+// accident on 2026-07-30 when wageBlock came out and took the line above this comment with
+// it, which left every portal throwing "LOAD_TOKEN is not defined" and showing "Could not
+// load" for ten commits. Nothing caught it: self-check greps literals and lifts functions by
+// regex rather than executing this page, the parity suite compares shared FUNCTIONS and not
+// top-level declarations, and every Chrome verification drove commission.html instead.
+let LOAD_TOKEN = 0;
+// How many loads are on the wire, so Print can tell "nothing is happening" from "a period
+// change is landing". Without it a print fired mid-navigation claims the newest token, kills
+// the arriving period, reports itself fresh, and prints the period being navigated away from.
+let LOADS_IN_FLIGHT = 0;
 async function loadPeriod(id) {
+  const token = ++LOAD_TOKEN;
+  LOADS_IN_FLIGHT++;
+  try {
+    return await loadPeriodInner(id, token);
+  } finally { LOADS_IN_FLIGHT--; }
+}
+async function loadPeriodInner(id, token) {
   const data = demoPortalPeriod(id); // demo: built in the page, no server behind it
+  // No LOAD_TOKEN check: demoPortalPeriod is synchronous, so there is no in-flight
+  // window for a newer load to overtake, and printStatement still gets its true back.
   CURRENT = id;
   DATA = data;
   renderStamp();
@@ -894,17 +1060,16 @@ async function loadPeriod(id) {
     document.getElementById('statement').innerHTML =
       '<div class="card"><div class="empty">This page shows a commission earner their own statement. Your login has the full dashboard instead.</div></div>';
     document.getElementById('btn-print').disabled = true;
-    return;
+    return true;
   }
   document.getElementById('h-week').textContent = data.period.label;
   document.getElementById('h-range').textContent = NAV.current && id === NAV.current ? 'in progress'
     : (NAV.current && id > NAV.current ? 'not started yet' : 'complete');
   document.getElementById('s-total').innerHTML = money(data.total);
   document.getElementById('s-lines').textContent = data.lines.length;
+  // The status pill left the header (the owner, 2026-07-31: the header is tight and OPEN said
+  // nothing). status still drives the copy and the frozen banner below.
   const status = data.period.status || 'open';
-  const pill = document.getElementById('s-status');
-  pill.textContent = status;
-  pill.className = 'pill ' + status;
   document.getElementById('btn-print').disabled = false;
 
   const rows = data.lines.map(lineRow).join('');
@@ -923,7 +1088,12 @@ async function loadPeriod(id) {
       ? '<div class="scroll"><table><thead><tr>'
         + '<th style="width:60px">Approve</th><th style="width:60px">Dispute</th>'
         + '<th style="width:22%">Customer</th><th>Line</th>'
+        + '<th style="width:150px" title="How this invoice was settled, or what it is still'
+        + ' waiting on. AR means the money has not landed; COMPLETE CALL means the office zeroed it'
+        + ' off AR without receiving it.">Payment</th>'
         + '<th class="num" style="width:60px">Installed</th><th class="num" style="width:60px">Paid</th>'
+        + '<th class="num">Total</th><th class="num" title="The lender\'s fee on a financed sale.'
+        + ' The shop never receives it, so commission does not pay on it.">Financing</th>'
         + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th>'
         + '<th style="width:52px" title="Confirmed by the office">Office</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
@@ -931,21 +1101,23 @@ async function loadPeriod(id) {
     + (status === 'open' ? ''
       : '<div class="frozen">This pay period is ' + esc(status) + '. You can still Approve or Dispute a line, that is exactly what these marks are for after payday.</div>')
     + '</div>';
+  return true;
 }
 
 // ---- printable statement: same sheet the office prints, marks included ----
 function statementHtml(person, lines) {
   const marks = (l) => [l.tech_approved ? 'approved' : '', l.office_approved ? 'office approved' : '',
     l.disputed ? 'DISPUTED' : '', l.earned_amount != null ? 'paid ahead' : ''].filter(Boolean).join(', ');
-  const rows = lines.map((l) => '<tr>'
-    + '<td class="num">' + shortDate(l.job_completed_on) + '</td>'
-    + '<td class="num">' + shortDate(l.paid_on) + '</td>'
-    + '<td>' + esc(l.customer_name || (l.kind === 'manual' ? '' : 'unknown customer')) + '</td>'
+  const rows = lines.map((l) => { const dates = lineDates(l); return '<tr>'
+    + '<td class="num">' + dates[0] + '</td>'
+    + '<td class="num">' + dates[1] + '</td>'
+    + '<td>' + esc(l.customer_name || l.membership_customer_name || (l.source === 'manual' ? '' : 'unknown customer')) + '</td>'
     + '<td>' + lineWhat(l).replace(/<[^>]*>/g, '')
     + (l.deferred_from_label ? ' <em>(moved from ' + esc(l.deferred_from_label) + ')</em>' : '')
     // Same sheet, same rule: a manual line's note is already the label above it.
     + (l.note && l.kind !== 'manual' ? '<div class="stmt-line-note">' + esc(l.note) + '</div>' : '')
     + paidAheadBreakdown(l) + '</td>'
+    + financeCols(l).map((c) => '<td class="num">' + c + '</td>').join('')
     + '<td class="num">' + (l.basis == null ? 'flat' : money(l.basis)) + '</td>'
     + '<td class="num">' + (effectivePct(l) != null
       ? pct(effectivePct(l)) + (l.pct == null ? '' : '<div class="stmt-line-note">was ' + pct(l.pct) + '</div>')
@@ -953,7 +1125,7 @@ function statementHtml(person, lines) {
     + '<td class="num">' + money(l.payable)
     + (l.zeroed || l.override_amount != null ? '<div class="stmt-line-note">computed ' + money(l.computed_amount) + '</div>' : '')
     + '</td>'
-    + '<td class="mark">' + esc(marks(l)) + '</td></tr>').join('');
+    + '<td class="mark">' + esc(marks(l)) + '</td></tr>'; }).join('');
   const total = lines.reduce((s, l) => s + (l.payable || 0), 0);
   const d = DATA || {};
   return '<section class="stmt">'
@@ -965,9 +1137,12 @@ function statementHtml(person, lines) {
     + (person.note ? '<div class="stmt-person-note">' + esc(person.note) + '</div>' : '')
     + (lines.length
       ? '<table><thead><tr><th>Installed</th><th>Paid</th><th>Customer</th><th>Line</th>'
+        + '<th class="num">Total</th><th class="num">Financing</th>'
         + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th><th>Marks</th></tr></thead>'
         + '<tbody>' + rows + '</tbody>'
-        + '<tfoot><tr><td colspan="6">Total for this pay period</td>'
+        // colspan spans everything left of Amount, so it moves with the column count: the two
+        // financing columns put it at 8, then Amount, then the empty Marks cell.
+        + '<tfoot><tr><td colspan="8">Total for this pay period</td>'
         + '<td class="num">' + money(total) + '</td><td></td></tr></tfoot></table>'
       : '<div class="stmt-none">No commission lines in this pay period.</div>')
     + '<div class="stmt-foot">Printed ' + esc(new Date().toLocaleString('en-US'))
@@ -977,8 +1152,16 @@ function statementHtml(person, lines) {
 
 async function printStatement() {
   // Let every mark still in flight land, then re-read: paper from a stale snapshot is
-  // worse than paper a beat late. No fresh data, no print.
-  try { await WRITES; await loadPeriod(CURRENT); } catch (e) { toast(e.message, 'err'); return; }
+  // worse than paper a beat late. No fresh data, no print, and being OVERTAKEN is not fresh
+  // data either. A load that lost its race leaves DATA describing some other period, so
+  // printing on the back of it is the exact stale sheet this refresh exists to prevent.
+  // Refused outright while another load is on the wire, rather than starting a competing one:
+  // CURRENT still names the period being navigated AWAY from until the new one lands, so a
+  // refresh fired mid-navigation would kill the arriving period and print the old one.
+  if (LOADS_IN_FLIGHT) { toast('Still loading this pay period. Try Print again in a moment.', 'err'); return; }
+  let fresh;
+  try { await WRITES; fresh = await loadPeriod(CURRENT); } catch (e) { toast(e.message, 'err'); return; }
+  if (!fresh) { toast('The page moved on while it was refreshing. Try Print again.', 'err'); return; }
   if (!DATA || !DATA.person) return;
   document.getElementById('print-area').innerHTML = statementHtml(DATA.person, DATA.lines || []);
   // Mark the body for one print, then put the page back and empty the container. Without the
@@ -1006,13 +1189,18 @@ async function loadUpcoming() {
   const subtotal = rows.reduce((s, v) => s + (v.computed_amount || 0), 0);
   document.getElementById('upcoming-sub').textContent = 'projected ' + money(subtotal);
   document.getElementById('upcoming-list').innerHTML = '<table><thead><tr>'
-    + '<th>Customer</th><th>Line</th><th class="num" style="width:90px">Invoiced</th>'
+    // Payment column added 2026-07-30 so this table matches the master's Upcoming. It is the
+    // reason the waiting-on-payment line could be dropped here at all: this is a DIFFERENT table
+    // from the master's, with no Basis column, so removing that line without putting the chip in
+    // first would have left a tech's own Upcoming with nothing saying the invoice is
+    // agency-pending.
+    + '<th>Customer</th><th>Line</th><th style="width:150px">Payment</th>'
+    + '<th class="num" style="width:90px">Invoiced</th>'
     + '<th class="num" style="width:150px">Projected commission</th></tr></thead><tbody>'
     + rows.map((v) => '<tr>'
-      + '<td>' + customerCell(v)
-        + ((v.agency_pending || 0) > 0 ? '<span class="waiting">waiting on payment</span>' : '')
-      + '</td>'
+      + '<td>' + customerCell(v) + '</td>'
       + '<td class="what">' + lineWhat(v) + '</td>'
+      + '<td>' + statusTags(v) + payTags(v) + '</td>'
       + '<td class="num muted">' + esc(v.invoice_date || '') + '</td>'
       + '<td class="num">' + money(v.computed_amount) + '</td></tr>').join('')
     + '</tbody></table>';
@@ -1042,7 +1230,10 @@ const NAV_TOKENS = ['current', 'next', 'last'];
 function periodFromHash() {
   const h = (location.hash || '').replace(/^#/, '');
   if (NAV_TOKENS.includes(h)) return NAV[h];
-  return /^\d{4}-\d{2}-\d{2}$/.test(h) ? h : null;
+  // Date-SHAPED is not the same as being a pay period: #2026-07-22 is a Wednesday. The master
+  // stopped taking those at face value; this page kept doing it and would load a period that
+  // does not exist. The dropdown's own list is the authority on both pages.
+  return /^\d{4}-\d{2}-\d{2}$/.test(h) && PERIODS.some((p) => p.id === h) ? h : null;
 }
 let HASH_SET_BY_US = false;
 

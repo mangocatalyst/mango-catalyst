@@ -29,6 +29,16 @@ const swap = (from, to, n = 1) => {
   if (parts.length - 1 !== n) throw new Error(`anchor matched ${parts.length - 1}x, expected ${n}: ${String(from).slice(0, 90)}`);
   html = parts.join(to);
 };
+// Tolerant of an anchor upstream already removed or reworded. Same two-tier rule as
+// make-commission-demo.js: ONLY for anchors whose bad end state a guardrail at the
+// bottom independently catches, so a cosmetic drift in the donor page cannot stop the
+// nightly bake. Anchors carrying the skin, the demo engine or a chokepoint stay strict.
+const swapMaybe = (from, to) => {
+  const parts = html.split(from);
+  if (parts.length - 1 > 1)
+    throw new Error(`optional anchor matched ${parts.length - 1}x, expected 0 or 1: ${String(from).slice(0, 90)}`);
+  html = parts.join(to);
+};
 const swapRe = (re, to, n = 1) => {
   const m = html.match(re);
   if (!m || m.length !== n) throw new Error(`regex matched ${m ? m.length : 0}x, expected ${n}: ${re}`);
@@ -63,25 +73,33 @@ swap('  <div class="logo-chip"><img alt="NorthStar Heating and Cooling" src="/as
   `  <div class="logo-chip"><img alt="Boreal Comfort Co" src="${logoUri}"></div>`);
 
 /* ---------- ServiceTitan deep links: defang the shared builder ---------- */
-swap(`// The techs have ServiceTitan logins, so every row on this page deep-links its OWN work the
+swapMaybe(`// The techs have ServiceTitan logins, so every row on this page deep-links its OWN work the
 // same way the office's copy does: the customer name opens the job, the "invoice N" chip opens
 // the invoice. Targets read off ServiceTitan's own links rather than guessed. Declared here
 // because lineWhat below is the first thing that uses them.
 const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
 const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';
-const stLink = (href, label, title) => '<a class="job" href="' + href + '" target="_blank" rel="noopener"'
+// cls defaults to the plain link. customerCell passes 'job cust' because the MASTER puts both
+// classes on the anchor itself, and the two pages had drifted into styling the same cell two
+// different ways — an anchor.job.cust here, an anchor.job wrapping a span.cust there.
+const stLink = (href, label, title, cls) => '<a class="' + (cls || 'job') + '" href="' + href + '" target="_blank" rel="noopener"'
   + ' title="' + esc(title) + '">' + label + '</a>';`,
   `// In the real portal every row deep-links its OWN work into ServiceTitan, the same way the
 // office's copy does: the customer name opens the job, the "invoice N" chip opens the invoice.
-// There is no ServiceTitan behind this demo, so the same cells render as plain text.
+// There is no ServiceTitan behind this demo, so the same cells render as plain text. cls is
+// kept so the demo styles the cell exactly as the live portal does.
 const ST_JOB = '';
 const ST_INVOICE = '';
-const stLink = (href, label) => '<span class="job">' + label + '</span>';`);
+const stLink = (href, label, title, cls) => '<span class="' + (cls || 'job') + '">' + label + '</span>';`);
 
-// Same real-customer donor comment as the master card carries; same reason it is rewritten
-// here rather than left to the name scrub, which does not touch code comments.
-swap(`  // Dahl, Peg (backlog)" knows which sale this is, where "added by hand" told them only that`,
-  `  // Nordling, Elin (backlog)" knows which sale this is, where "added by hand" told them only that`);
+// A real customer's name that donor CODE COMMENTS use as their worked example. scrubNames
+// deliberately leaves comments alone, and the privacy validator rightly fails the bake on
+// the name, so it is rewritten to a fictional one here.
+// Catch-all, not an anchor: this used to pin the one comment that carried the name, and on
+// 2026-08-03 a SECOND comment upstream picked up the same example and shipped the real name
+// past the anchored swap into the artifact. Substituting the name itself covers both copies
+// and any future one, and cannot be broken by rewording the prose around it.
+html = html.split('Dahl, Peg').join('Nordling, Elin');
 
 /* ---------- the demo engine, in place of the server ---------- */
 const engine = fs.readFileSync(path.join(__dirname, 'commission-demo-engine.js'), 'utf8')
@@ -102,8 +120,14 @@ swap(`    const res = await fetch(path, { method: 'POST', headers: { 'Content-Ty
     // the server does so the error toasts are real rather than decorative.
     return demoWrite(path, body);`);
 swap(`  const data = await (await fetch('/api/period?id=' + encodeURIComponent(id), { cache: 'no-store' })).json();
+  // Overtaken while in flight: the newer load owns the page. Reported rather than just
+  // returned, because printStatement awaits this specifically to GET fresh data — a silent
+  // early return there reads as "refreshed" and prints whatever DATA happened to hold.
+  if (token !== LOAD_TOKEN) return false;
   if (data.error) throw new Error(data.error);`,
-  `  const data = demoPortalPeriod(id); // demo: built in the page, no server behind it`);
+  `  const data = demoPortalPeriod(id); // demo: built in the page, no server behind it
+  // No LOAD_TOKEN check: demoPortalPeriod is synchronous, so there is no in-flight
+  // window for a newer load to overtake, and printStatement still gets its true back.`);
 swap(`  const res = await fetch('/api/upcoming', { cache: 'no-store' });
   if (!res.ok) return; // an older server or a refusal: the section just stays hidden
   const data = await res.json();`,
@@ -133,8 +157,8 @@ for (const [from, to] of colors) {
 }
 
 /* ---------- copy ---------- */
-swap('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
-swap(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The computed number is a draft; the approved number is what pays.'
+swapMaybe('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
+swapMaybe(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The computed number is a draft; the approved number is what pays.'
     + ' Question a line by ticking Dispute on your portal, or tell Bryan.</div>'`,
   `    + '<div class="stmt-meta">Boreal Comfort Co. The computed number is a draft; the approved number is what pays.'
     + ' Question a line by ticking Dispute on your portal, or tell the office.</div>'`);
@@ -144,7 +168,7 @@ swap(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The compute
 html = html.split('StarClub').join('Comfort Club');
 
 /* ---------- version stamp ---------- */
-swap(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
+swapMaybe(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
 `, '');
 swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
   `<span>demo v${STAMP} · fictional data · edits reset on reload</span>`);
@@ -159,7 +183,7 @@ html = scrubNames(html);
 
 /* ---------- guardrails ---------- */
 assertNoRealNames(html, 'the commission portal demo');
-if (/northstar|passion one/i.test(html)) throw new Error('NS identity survived the transform');
+if (/northstar|passion one|xyops/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
