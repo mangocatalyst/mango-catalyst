@@ -6,11 +6,13 @@
 // and inlines the synthetic dataset from make-commission-data.js.
 // Writes demo/build/commission.html; bake-demo.sh validates and ships it.
 //
-// Every replacement is asserted: if the tracker drifts and an anchor string disappears,
-// this throws instead of silently shipping a half-skinned demo or, worse, an artifact
-// that still tries to reach a server. Swapping the chokepoints by name rather than
-// shimming window.fetch is the point: the guardrail at the bottom proves the shipped
-// file contains no fetch( at all.
+// Replacements are asserted in two tiers. swap() is strict: an anchor that carries the
+// skin, the palette, the demo engine, a network chokepoint or the version stamp has no
+// other proof it landed, so a miss throws rather than silently ship a half-skinned demo
+// or one that still reaches a server. swapMaybe() tolerates a missing anchor, and is
+// used only where a guardrail at the bottom independently proves the end state anyway.
+// Swapping the chokepoints by name rather than shimming window.fetch is the point: the
+// guardrail at the bottom proves the shipped file contains no fetch( at all.
 'use strict';
 const fs = require('node:fs');
 const os = require('node:os');
@@ -31,6 +33,21 @@ let html = fs.readFileSync(SRC, 'utf8');
 const swap = (from, to, n = 1) => {
   const parts = html.split(from);
   if (parts.length - 1 !== n) throw new Error(`anchor matched ${parts.length - 1}x, expected ${n}: ${String(from).slice(0, 90)}`);
+  html = parts.join(to);
+};
+// the same, but tolerant of an anchor upstream has already removed or reworded.
+// ONLY for anchors whose bad end state a guardrail at the bottom catches on its own
+// (/admin.html, servicetitan.com, northstar, xyops, a real name, an em dash): if the
+// string is gone the demo is already correct, so throwing achieves nothing except
+// stopping the nightly bake. Every break since 2026-07-30 was exactly that shape --
+// loadRegistration, the ST deep-link comment, then the Settings link, which left the
+// demo artifacts frozen for four days over a link the guardrail already proves absent.
+// Anchors with no independent guardrail (the skin, the palette, the demo engine, the
+// fetch chokepoints, the version stamp) keep using swap() and still fail loudly.
+const swapMaybe = (from, to) => {
+  const parts = html.split(from);
+  if (parts.length - 1 > 1)
+    throw new Error(`optional anchor matched ${parts.length - 1}x, expected 0 or 1: ${String(from).slice(0, 90)}`);
   html = parts.join(to);
 };
 // the same, for the one anchor that is volatile by design: the page's version stamp
@@ -76,21 +93,21 @@ swap('  <div class="logo-chip"><img alt="NorthStar Heating and Cooling" src="/as
   `  <div class="logo-chip"><img alt="Boreal Comfort Co" src="${logoUri}"></div>`);
 
 /* ---------- no settings page behind the demo: drop the gear and both admin links ---------- */
-swap(`  <div class="htools">
+swapMaybe(`  <div class="htools">
     <a class="gear" href="/admin.html" title="People and rates" aria-label="People and rates">&#9881;</a>
   </div>
 `, '');
-swap(`    <a class="btn" href="/admin.html" title="People, rates and settings">Settings</a>
+swapMaybe(`    <a class="btn" href="/admin.html" title="People, rates and settings">Settings</a>
 `, '');
-swap(`        + ', but they have no rate for this job type yet. <a class="job" href="/admin.html">Add one in settings</a>'`,
+swapMaybe(`        + ', but they have no rate for this job type yet. <a class="job" href="/admin.html">Add one in settings</a>'`,
   `        + ', but they have no rate for this job type yet. Add one in the settings page.'`);
-swap(`// linkable (admin.html's nav links back with exactly these). A raw period id works too, so`,
+swapMaybe(`// linkable (admin.html's nav links back with exactly these). A raw period id works too, so`,
   `// linkable. A raw period id works too, so`);
-swap(`    // A hash from the address bar (or from admin.html's nav) wins over the default landing.`,
+swapMaybe(`    // A hash from the address bar (or from admin.html's nav) wins over the default landing.`,
   `    // A hash from the address bar wins over the default landing.`);
 
 /* ---------- ServiceTitan deep links: defang all four builders to plain text ---------- */
-swap(`// Deep link straight to the job in ServiceTitan, so a questioned line is one click
+swapMaybe(`// Deep link straight to the job in ServiceTitan, so a questioned line is one click
 // from the evidence rather than a copied invoice number.
 const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
 // The invoice's own ST page. EditInvoice/<id> is confirmed from a local 2026-06-08
@@ -98,7 +115,12 @@ const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
 // ever moves the route this constant is the only knob; Bryan re-clicks it post-merge.
 const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';
 function customerCell(l) {
-  const name = l.customer_name ? esc(l.customer_name) : (l.kind === 'manual' ? '' : 'unknown customer');
+  // The membership's own customer is the fallback, not a second-best guess: on a backlog line
+  // whose sale invoice predates the tracker there IS no invoice to name the customer, and the
+  // membership has carried the name all along. A blank cell there said "we do not know who this
+  // was", which was never true.
+  const who = l.customer_name || l.membership_customer_name;
+  const name = who ? esc(who) : (l.source === 'manual' ? '' : 'unknown customer');
   if (!name) return '';
   return l.job_id
     ? '<a class="job cust" href="' + ST_JOB + encodeURIComponent(l.job_id) + '" target="_blank" rel="noopener"'
@@ -109,10 +131,13 @@ function customerCell(l) {
 // so a questioned line is one click from the evidence. There is no ServiceTitan behind
 // this demo, so the same cells render as text.
 function customerCell(l) {
-  const name = l.customer_name ? esc(l.customer_name) : (l.kind === 'manual' ? '' : 'unknown customer');
+  // A backlog line whose sale invoice predates the tracker has no invoice to name the
+  // customer, so the membership's own customer is the fallback rather than a blank cell.
+  const who = l.customer_name || l.membership_customer_name;
+  const name = who ? esc(who) : (l.source === 'manual' ? '' : 'unknown customer');
   return name ? '<span class="cust">' + name + '</span>' : '';
 }`);
-swap(`// The "invoice N" text as a deep link to the invoice in ServiceTitan. Customer name
+swapMaybe(`// The "invoice N" text as a deep link to the invoice in ServiceTitan. Customer name
 // keeps its job link; this points at the invoice-level view instead.
 const invoiceRef = (id) => '<a class="job" href="' + ST_INVOICE + encodeURIComponent(id)
   + '" target="_blank" rel="noopener" title="Open invoice ' + esc(id) + ' in ServiceTitan">invoice ' + esc(id) + '</a>';`,
@@ -124,10 +149,12 @@ const invoiceRef = (id) => '<a class="job" href="' + ST_INVOICE + encodeURICompo
 
 // A real customer's name in a donor comment (commission-tracker c85dcfd). The name scrub
 // leaves code comments alone, and the privacy validator rightly fails the bake on it, so
-// the example is rewritten here to a fictional one. Anchored: reword it upstream and the
-// bake stops instead of shipping the real name.
-swap(`  // A manual line's NOTE is what it is: "StarClub renewal: Dahl, Peg (backlog)" says the thing`,
-  `  // A manual line's NOTE is what it is: "StarClub renewal: Nordling, Elin (backlog)" says the thing`);
+// the example is rewritten here to a fictional one.
+// Catch-all, not an anchor: the portal's copy of this swap was pinned to the surrounding
+// prose, and on 2026-08-03 a second upstream comment adopted the same example and carried
+// the real name straight past it into the artifact. Substituting the name itself covers
+// every copy and survives any rewording.
+html = html.split('Dahl, Peg').join('Nordling, Elin');
 
 /* ---------- the demo engine, in place of the server ---------- */
 const engine = fs.readFileSync(path.join(__dirname, 'commission-demo-engine.js'), 'utf8')
@@ -150,11 +177,15 @@ swap(`    const res = await fetch(path, { method: 'POST', headers: { 'Content-Ty
     // way the server does so the error toasts are real rather than decorative.
     return demoWrite(path, body);`);
 swap(`  const data = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(id), { cache: 'no-store' })).json();
-  if (token !== LOAD_TOKEN) return;   // overtaken while in flight: the newer load owns the page
+  // Overtaken while in flight: the newer load owns the page. Reported rather than just
+  // returned, because the two print paths await this specifically to GET fresh data — a silent
+  // early return there reads as "refreshed" and prints whatever CARD_PEOPLE still holds.
+  if (token !== LOAD_TOKEN) return false;
   if (data.error) throw new Error(data.error);`,
   `  const data = demoPeriod(id); // demo: built in the page, no server behind it
   // No LOAD_TOKEN check: demoPeriod is synchronous, so there is no in-flight window
-  // for a newer load to overtake.`);
+  // for a newer load to overtake; this always runs on to the function's return true,
+  // which is the answer the print paths await.`);
 // Two more /api/period readers arrived with the compute-run watcher and the idle poll
 // (commission-tracker "Idle poll discards its own stale answer", 6e70696). Neither can
 // reach a server here. They are defanged rather than deleted so the next upstream drift
@@ -167,8 +198,10 @@ swap(`      const p = await (await fetch('/api/period?view=master&id=' + encodeU
 swap(`    const p = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(forPeriod), { cache: 'no-store' })).json();`,
   `    return; // demo: the page IS the data, so nothing can have changed underneath it
     const p = null;`);
-swap(`  const { periods, floor, current, next, previous } = await (await fetch('/api/periods?view=master', { cache: 'no-store' })).json();`,
-  `  const { periods, floor, current, next, previous } = demoPeriods(); // demo: no server behind it`);
+// `floor` left the destructure upstream when it stopped being read anywhere on the page;
+// demoPeriods() still returns it, and an unread key is harmless.
+swap(`  const { periods, current, next, previous } = await (await fetch('/api/periods?view=master', { cache: 'no-store' })).json();`,
+  `  const { periods, current, next, previous } = demoPeriods(); // demo: no server behind it`);
 swap(`    window.location = '/api/export?batch=' + encodeURIComponent(out.batch);`,
   `    demoDownloadCsv(out.batch); // demo: the payroll CSV is built and downloaded in the page`);
 
@@ -202,23 +235,29 @@ for (const [from, to] of colors) {
 }
 
 /* ---------- copy: NorthStar identity out, Boreal in ---------- */
-swap('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
-swap(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The computed number is a draft; the approved number is what pays.'
+swapMaybe('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
+swapMaybe(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The computed number is a draft; the approved number is what pays.'
     + ' Question a line by ticking Disputed on the dashboard, or tell Bryan.</div>'`,
   `    + '<div class="stmt-meta">Boreal Comfort Co. The computed number is a draft; the approved number is what pays.'
     + ' Question a line by ticking Disputed on the dashboard, or tell the office.</div>'`);
 
+// The Financing column header's tooltip, added upstream after this baker was written.
+// Found by the northstar guardrail on 2026-08-03, not by an anchor: proof the two-tier
+// split still catches a genuine leak that no swap was ever watching for.
+swapMaybe(`    + ' NorthStar never receives it, so commission does not pay on it.">Financing</th>'`,
+  `    + ' Boreal never receives it, so commission does not pay on it.">Financing</th>'`);
+
 /* ---------- copy: the owner's name out of the code comments ---------- */
-swap('// New Flat Rate tier letters spelled out, the way Bryan reads them on a line.',
+swapMaybe('// New Flat Rate tier letters spelled out, the way Bryan reads them on a line.',
   '// New Flat Rate tier letters spelled out, the way an owner reads them on a line.');
-swap('// COMPLETE CALL rows live here too (Bryan, 2026-07-23) — one Upcoming bucket per person,',
+swapMaybe('// COMPLETE CALL rows live here too (Bryan, 2026-07-23) — one Upcoming bucket per person,',
   '// COMPLETE CALL rows live here too: one Upcoming bucket per person,');
-swap(`// Navigation lives in the period dropdown (Bryan, 2026-07-22: no tab bar) and carries`,
+swapMaybe(`// Navigation lives in the period dropdown (Bryan, 2026-07-22: no tab bar) and carries`,
   `// Navigation lives in the period dropdown (no tab bar) and carries`);
-swap(`// sit in each person's Upcoming block (Bryan, 2026-07-23). Hash tokens (#last/#current/#next)`,
+swapMaybe(`// sit in each person's Upcoming block (Bryan, 2026-07-23). Hash tokens (#last/#current/#next)`,
   `// sit in each person's Upcoming block. Hash tokens (#last/#current/#next)`);
 // the internal name of the scheduler behind the nightly run
-swap('// fed by the nightly xyOps run (ST pull + compute, 05:15), so 45m would be amber from about',
+swapMaybe('// fed by the nightly xyOps run (ST pull + compute, 05:15), so 45m would be amber from about',
   '// fed by a nightly run (ST pull + compute, just after 05:00), so 45m would be amber from about');
 
 /* ---------- StarClub is NorthStar's membership brand; Boreal has its own ---------- */
@@ -227,7 +266,7 @@ swap('// fed by the nightly xyOps run (ST pull + compute, 05:15), so 45m would b
 html = html.split('StarClub').join('Comfort Club');
 
 /* ---------- version stamp: say what this is instead of which build it came from ---------- */
-swap(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
+swapMaybe(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
 `, '');
 swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
   `<span>demo v${STAMP} · fictional data · edits reset on reload</span>`);
@@ -236,14 +275,16 @@ swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
 html = html.split(' — ').join(', ');
 html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n'); // a comment clause that runs on to the next line
-swap('<span class="muted">—</span>', '<span class="muted">not recorded</span>');
+swapMaybe('<span class="muted">—</span>', '<span class="muted">not recorded</span>');
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */
 html = scrubNames(html);
 
 /* ---------- guardrails ---------- */
 assertNoRealNames(html, 'the commission demo');
-if (/northstar|passion one/i.test(html)) throw new Error('NS identity survived the transform');
+// xyops joined this list when its comment swap became optional: the anchored swap used
+// to be the only thing keeping the internal scheduler name out of a public artifact.
+if (/northstar|passion one|xyops/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
