@@ -369,6 +369,10 @@ try {
       <!-- Sold work the rates have already priced that nothing has paid yet. Its own view
            rather than a block on every card: it is a list you read once, not per person. -->
       <a class="btn" href="#upcoming" id="upcoming-tab" title="Sold work already priced, waiting on the money">Not Yet Paid</a>
+      <!-- Hidden until install_bonus_visible is set, so the page can be built and seeded with
+           real data before anyone in the office finds a half-finished bonus queue in the nav.
+           Rollout gating only: the page still answers anyone who types the URL. -->
+      <a class="btn" href="/install-bonus.html" id="install-bonus-tab" title="Per-install bonus for the install crew" hidden>Install bonus</a>
     </div>
     <div class="pgroup">
       <button class="btn go" id="btn-approve" type="button">Approve</button>
@@ -422,7 +426,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>Commission tracker</span>
-  <span>demo v2026-08-03 · fictional data · edits reset on reload</span>
+  <span>demo v2026-08-04 · fictional data · edits reset on reload</span>
 </footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1009,14 +1013,24 @@ function lineWhat(l, tnfrItems) {
   return esc(l.job_type || l.rule_job_type || 'job') + inv;
 }
 
-// The lead generator behind a sold (job_type) line, as a small neutral tag: their first
-// name only, and only when it's someone other than this card's own person, a self-generated
-// sale (the server still sends the counterpart) shows no tag. lead_gen lines show nothing;
-// their Line cell already reads "turnover lead on ...".
+// BOTH SIDES OF A TURNOVER NAME THE OTHER (the owner, 2026-08-03). A sold (job_type) line tags the
+// person who generated the lead; a lead_gen line tags the person who sold it. Only ever someone
+// OTHER than this card's own person, a self-generated sale (the server still sends the
+// counterpart) shows no tag.
+//
+// lead_gen used to show nothing here, on the reasoning that its Line cell already reads
+// "turnover lead on ...". But that sentence names the JOB, never the person, so a generator
+// could see that a lead was turned over without ever seeing who closed it (Rezk/Ehab 69844420:
+// Theo's row named Dana, Dana's row named nobody).
+//
+// A crew-share turnover has NO single seller, and the server sends the closers joined with
+// ' + '. Take the first name of EACH rather than the first word of the whole string, which
+// would have printed one name for a split and quietly dropped the others.
 function turnoverCell(l, personName) {
-  if (l.kind !== 'job_type' || !l.counterpart || l.counterpart === personName) return '';
-  const first = String(l.counterpart).trim().split(/\s+/)[0];
-  return first ? '<span class="tag">' + esc(first) + '</span>' : '';
+  if ((l.kind !== 'job_type' && l.kind !== 'lead_gen') || !l.counterpart || l.counterpart === personName) return '';
+  const firsts = String(l.counterpart).split('+')
+    .map((n) => n.trim().split(/\s+/)[0]).filter(Boolean);
+  return firsts.length ? '<span class="tag">' + esc(firsts.join(' + ')) + '</span>' : '';
 }
 
 // The qualifying items behind a TNFR basis, collapsed until asked for. Only the
@@ -1136,19 +1150,55 @@ function payTags(l) {
 // mix, not "how was this paid" but "has it been", and mixing the two beside the customer name
 // made a busy cell where the eye had to sort one kind of chip from the other.
 //
-// COMPLETE CALL and AR are mutually exclusive by construction: the office zeroed it, or it is
-// still owed. A paid invoice shows neither, which is why most rows in a closed period are blank
-// here and that blankness is the answer.
+// ALL COMPLETE CALL IS AR, BUT NOT ALL AR IS COMPLETE CALL (the owner, 2026-08-03). So COMPLETE CALL
+// REPLACES the AR chip rather than sitting beside it, both would be true, and saying both says
+// nothing. A paid invoice shows neither, which is why most rows in a closed period are blank here
+// and that blankness is the answer.
+//
+// The chips only ever describe a NOT-YET-PAID invoice, which is the only state anyone is chasing.
 function statusTags(l) {
   if (!l.invoice_id) return '';
   const tag = (text, title) => '<span class="tag" title="' + esc(title) + '">' + esc(text) + '</span>';
   const pending = Number(l.agency_pending || 0);
+  // What the CUSTOMER has actually paid against an invoice that has not settled. payment_types
+  // excludes the COMPLETE CALL type by construction (compute.js), so this sum can never count the
+  // office's zeroing as money received. NULL means never screened, which sums to 0 and shows
+  // nothing, silence is the honest answer to a question nobody asked ServiceTitan yet.
+  let part = 0;
+  try {
+    for (const t of JSON.parse(l.payment_types || '[]')) part += Number(t.amount) || 0;
+  } catch (e) { part = 0; }
+  // Rides BESIDE the state chip, never instead of it: a part-paid invoice is still AR (or still
+  // COMPLETE CALL) for everything that has not landed, and swapping the chip out would read as
+  // settled. Only on unpaid rows, on a paid one it would just restate the Paid column.
+  const partTag = (!l.paid_on && part > 0.005)
+    ? tag('PART PAID ' + money(part), money(part) + ' has landed against this invoice so far. The'
+      + ' rest is still outstanding, which is why this is not a paid invoice.')
+    : '';
   if (pending > 0) {
     return tag('COMPLETE CALL', 'The office zeroed ' + money(pending) + ' with COMPLETE CALL so this'
-      + ' invoice would leave AR. That is not money received, so it is not paid yet.');
+      + ' invoice would leave AR. That is not money received, so it is not paid yet.') + partTag;
   }
-  if (!l.paid_on) return tag('AR', 'Sold, and waiting on payment.');
+  if (!l.paid_on) return tag('AR', 'Sold, and waiting on payment.') + partTag;
   return '';
+}
+
+// THE EXACT AMOUNT STILL DUE (the owner, 2026-08-03), so a part-paid invoice does not make anyone
+// open ServiceTitan to find out what is left.
+//
+// BALANCE IS WHAT HAS NOT BEEN PAID, FROM ANY SOURCE, agency, customer, lender (the owner). It is
+// one subtraction here because compute.js makes it mean the same thing on both paths: a
+// COMPLETE CALL is not a payment, so it is never subtracted from what is owed, however the
+// invoice reached us. The COMPLETE CALL chip beside this says how much of the total the office
+// zeroed off AR; this column says what is still outstanding regardless of who owes it.
+//
+// Only on an unpaid invoice. A settled one is not owed anything, and printing $0.00 down a whole
+// closed period is noise pretending to be information.
+function dueCell(l) {
+  if (!l.invoice_id || l.paid_on) return '';
+  const due = Number(l.invoice_balance || 0);
+  if (!(due > 0.005)) return '';
+  return money(due);
 }
 
 function financeCols(l) {
@@ -1195,6 +1245,7 @@ function upcomingBlock(upcoming, open, tnfrItems) {
     + '<td class="what">' + lineWhat(u) + '</td>'
     + '<td class="what">' + turnoverCell(u, u.person) + '</td>'
     + '<td>' + statusTags(u) + payTags(u) + '</td>'
+    + '<td class="num">' + dueCell(u) + '</td>'
     // The INSTALL date, on Upcoming only (the owner, 2026-07-30). invoices.job_completed_on is
     // NULL until the job is marked complete in ServiceTitan, so its presence IS the completed
     // signal, a row with a date is installed and waiting on the money, a row without one has
@@ -1213,6 +1264,8 @@ function upcomingBlock(upcoming, open, tnfrItems) {
     + '<table><thead><tr><th style="width:20%">Customer</th><th style="width:96px">Tier</th><th>Line</th>'
     + '<th style="width:120px">Turnover</th>'
     + '<th style="width:150px">Payment</th>'
+    + '<th class="num" style="width:80px" title="The exact amount still owed on this invoice.'
+      + ' Blank once it is paid.">Due</th>'
     + '<th class="num" style="width:60px" title="When the job was completed. Blank means it has'
     + ' not been installed yet.">Installed</th>'
     + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th>'
@@ -1347,6 +1400,7 @@ function personCard(p, lines, open, tnfrItems, people) {
       + '</td>'
       + '<td class="what">' + turnoverCell(l, p.name) + '</td>'
       + '<td>' + statusTags(l) + payTags(l) + '</td>'
+      + '<td class="num">' + dueCell(l) + '</td>'
       + '<td class="num muted">' + dates[0] + '</td>'
       + '<td class="num muted">' + dates[1] + '</td>'
       + financeCols(l).map((c) => '<td class="num">' + c + '</td>').join('')
@@ -1414,6 +1468,8 @@ function personCard(p, lines, open, tnfrItems, people) {
     + '<th style="width:150px" title="How this invoice was settled, or what it is still waiting'
     + ' on. AR means the money has not landed; COMPLETE CALL means the office zeroed it off AR'
     + ' without receiving it.">Payment</th>'
+    + '<th class="num" style="width:80px" title="The exact amount still owed on this invoice.'
+      + ' Blank once it is paid.">Due</th>'
     + '<th class="num" style="width:50px">Installed</th><th class="num" style="width:50px">Paid</th>'
     + '<th class="num">Total</th><th class="num" title="The lender\'s fee on a financed sale.'
     + ' Boreal never receives it, so commission does not pay on it.">Financing</th>'
@@ -2002,6 +2058,9 @@ async function loadPeriodInner(id, token) {
   // The Gross payroll stat was here: wage pay plus commission, with a count of the people
   // whose rate was not set yet. Commission total is the only company figure this page has now.
   document.getElementById('upcoming-tab').textContent = 'Not Yet Paid' + ((data.upcoming || []).length ? ' (' + data.upcoming.length + ')' : '');
+  // Revealed by config, not by role. The server decides; the page only obeys, so turning the
+  // feature on is one settings toggle rather than a deploy.
+  document.getElementById('install-bonus-tab').hidden = !data.installBonusVisible;
   renderGates(data);
   renderUpcoming(data);
   renderDisputed(data.lines, data.tnfrItems);
@@ -2049,17 +2108,6 @@ function renderGates(data) {
         + ' can still change. The file will be marked <b>PRELIMINARY</b> in its own Memo column so'
         + ' nobody downstream mistakes it for the approved run, and the weeks stay open, so the'
         + ' real export can still go out later.');
-    }
-    // THE DOUBLE-PAY WARNING. Names the person, and says what happens in the plainest words
-    // available, because this is the one confirmation where saying yes can move money twice.
-    // With export now unlocked, this guard is what stands between a one-person file and a
-    // second payment, so the override exists but never quietly.
-    if ((PENDING_EXPORT.dupes || []).length) {
-      const who = PENDING_EXPORT.dupes.map((d) => esc(d.name) + ' (batch ' + esc(d.batch) + ')').join(', ');
-      warn.push('<b>' + who + ' already has a one-person export for these weeks.</b> '
-        + 'Exporting again <b>may pay ' + (PENDING_EXPORT.dupes.length === 1 ? 'them' : 'those people')
-        + ' twice</b> if the earlier file was imported to Gusto. Override only if you know it was'
-        + ' not, or was voided there.');
     }
     // Name the WEEK on the confirm button. Two export buttons now raise this same strip, and a
     // confirmation that does not say which one it is answering is a confirmation for whichever
@@ -2263,13 +2311,6 @@ async function setPeriodStatus(action) {
 // like OPEN_BY_HAND, it is what you are doing right now, not a preference worth storing, and a
 // confirmation that survived a reload would be a confirmation nobody gave.
 let PENDING_EXPORT = null;
-// Who this export would pay a SECOND time. Whole-period covers everyone, so every prior
-// one-person batch collides; a one-person export collides only with its own. Read from the
-// server's structured list rather than parsed out of the blocker sentence, so rewording the
-// warning cannot silently stop it naming anybody.
-const dupesFor = (personId) => (DATA && DATA.exportDuplicates ? DATA.exportDuplicates : [])
-  .filter((d) => personId == null || Number(personId) === d.person_id);
-
 // The two weeks of the period on screen, in order, from the server's own list, never derived
 // by adding 7 days here. A second copy of the pay-period arithmetic in the page is how "Week 2"
 // starts naming a different Monday than the one the export actually locks.
@@ -2307,12 +2348,14 @@ async function exportPeriod(weekId, personId, personName) {
   const week = weekId || (PENDING_EXPORT && PENDING_EXPORT.week);
   if (!week) return;
   const unapproved = (DATA && DATA.period && DATA.period.status) !== 'approved';
-  const dupes = dupesFor(personId == null ? null : Number(personId));
-  if ((unapproved || dupes.length) && !PENDING_EXPORT) {
+  // Only the UNAPPROVED confirmation is left. The duplicate one was removed (the owner, 2026-08-03):
+  // it asked a question the system could not answer, and payroll was answering it by hand on
+  // every export, from more than one machine.
+  if (unapproved && !PENDING_EXPORT) {
     // The PERIOD is part of the scope, not just the person. A confirmation is about the figures
     // that were on screen when it was asked for, and those belong to one pay period.
     PENDING_EXPORT = { period: CURRENT, week, personId: personId == null ? null : Number(personId),
-      name: personName || null, unapproved, dupes };
+      name: personName || null, unapproved };
     renderGates(DATA);
     document.getElementById('gates').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
@@ -2336,10 +2379,7 @@ async function exportPeriod(weekId, personId, personName) {
     // and locking payroll is not something a link hover should do.
     const out = await post('/api/export', { weeks: scope.week,
       person_id: scope.personId == null ? '' : scope.personId,
-      allow_unapproved: unapproved ? 1 : 0,
-      // Only ever sent off a confirmation the human actually answered: scope.dupes is set when
-      // the strip was raised, so a direct call that never showed the warning cannot carry it.
-      allow_duplicate: (scope.dupes && scope.dupes.length) ? 1 : 0 });
+      allow_unapproved: unapproved ? 1 : 0 });
     toast((out.preliminary ? 'Preliminary export: ' : 'Exported ') + out.rows + ' people, ' + money(out.total));
     demoDownloadCsv(out.batch); // demo: the payroll CSV is built and downloaded in the page
     setTimeout(() => refreshPeriods(CURRENT), 1200);

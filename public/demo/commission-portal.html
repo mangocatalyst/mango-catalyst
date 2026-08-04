@@ -246,7 +246,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>My commission portal</span>
-  <span>demo v2026-08-03 · fictional data · edits reset on reload</span>
+  <span>demo v2026-08-04 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%">Tick Approve when a line looks right, or Dispute when it does not; the office sees both right away. Nothing here changes the money itself.</span>
 </footer>
 </div>
@@ -821,19 +821,56 @@ function payTags(l) {
 // mix, not "how was this paid" but "has it been", and mixing the two beside the customer name
 // made a busy cell where the eye had to sort one kind of chip from the other.
 //
-// COMPLETE CALL and AR are mutually exclusive by construction: the office zeroed it, or it is
-// still owed. A paid invoice shows neither, which is why most rows in a closed period are blank
-// here and that blankness is the answer.
+// ALL COMPLETE CALL IS AR, BUT NOT ALL AR IS COMPLETE CALL (the owner, 2026-08-03). So COMPLETE CALL
+// REPLACES the AR chip rather than sitting beside it, both would be true, and saying both says
+// nothing. A paid invoice shows neither, which is why most rows in a closed period are blank here
+// and that blankness is the answer.
+//
+// The chips only ever describe a NOT-YET-PAID invoice, which is the only state anyone is chasing.
+// Kept verbatim in step with commission.html, the parity suite pins the pair.
 function statusTags(l) {
   if (!l.invoice_id) return '';
   const tag = (text, title) => '<span class="tag" title="' + esc(title) + '">' + esc(text) + '</span>';
   const pending = Number(l.agency_pending || 0);
+  // What the CUSTOMER has actually paid against an invoice that has not settled. payment_types
+  // excludes the COMPLETE CALL type by construction (compute.js), so this sum can never count the
+  // office's zeroing as money received. NULL means never screened, which sums to 0 and shows
+  // nothing, silence is the honest answer to a question nobody asked ServiceTitan yet.
+  let part = 0;
+  try {
+    for (const t of JSON.parse(l.payment_types || '[]')) part += Number(t.amount) || 0;
+  } catch (e) { part = 0; }
+  // Rides BESIDE the state chip, never instead of it: a part-paid invoice is still AR (or still
+  // COMPLETE CALL) for everything that has not landed, and swapping the chip out would read as
+  // settled. Only on unpaid rows, on a paid one it would just restate the Paid column.
+  const partTag = (!l.paid_on && part > 0.005)
+    ? tag('PART PAID ' + money(part), money(part) + ' has landed against this invoice so far. The'
+      + ' rest is still outstanding, which is why this is not a paid invoice.')
+    : '';
   if (pending > 0) {
     return tag('COMPLETE CALL', 'The office zeroed ' + money(pending) + ' with COMPLETE CALL so this'
-      + ' invoice would leave AR. That is not money received, so it is not paid yet.');
+      + ' invoice would leave AR. That is not money received, so it is not paid yet.') + partTag;
   }
-  if (!l.paid_on) return tag('AR', 'Sold, and waiting on payment.');
+  if (!l.paid_on) return tag('AR', 'Sold, and waiting on payment.') + partTag;
   return '';
+}
+
+// THE EXACT AMOUNT STILL DUE (the owner, 2026-08-03), so a part-paid invoice does not make anyone
+// open ServiceTitan to find out what is left.
+//
+// BALANCE IS WHAT HAS NOT BEEN PAID, FROM ANY SOURCE, agency, customer, lender (the owner). It is
+// one subtraction here because compute.js makes it mean the same thing on both paths: a
+// COMPLETE CALL is not a payment, so it is never subtracted from what is owed, however the
+// invoice reached us. The COMPLETE CALL chip beside this says how much of the total the office
+// zeroed off AR; this column says what is still outstanding regardless of who owes it.
+//
+// Only on an unpaid invoice. A settled one is not owed anything, and printing $0.00 down a whole
+// closed period is noise pretending to be information.
+function dueCell(l) {
+  if (!l.invoice_id || l.paid_on) return '';
+  const due = Number(l.invoice_balance || 0);
+  if (!(due > 0.005)) return '';
+  return money(due);
 }
 
 function financeCols(l) {
@@ -1014,6 +1051,7 @@ function lineRow(l) {
     + paidAheadBreakdown(l)
     + '</td>'
     + '<td>' + statusTags(l) + payTags(l) + '</td>'
+    + '<td class="num">' + dueCell(l) + '</td>'
     + '<td class="num muted">' + dates[0] + '</td>'
     + '<td class="num muted">' + dates[1] + '</td>'
     + financeCols(l).map((c) => '<td class="num">' + c + '</td>').join('')
@@ -1091,6 +1129,7 @@ async function loadPeriodInner(id, token) {
         + '<th style="width:150px" title="How this invoice was settled, or what it is still'
         + ' waiting on. AR means the money has not landed; COMPLETE CALL means the office zeroed it'
         + ' off AR without receiving it.">Payment</th>'
+        + '<th class="num" style="width:80px" title="The exact amount still owed on this invoice. Blank once it is paid.">Due</th>'
         + '<th class="num" style="width:60px">Installed</th><th class="num" style="width:60px">Paid</th>'
         + '<th class="num">Total</th><th class="num" title="The lender\'s fee on a financed sale.'
         + ' The shop never receives it, so commission does not pay on it.">Financing</th>'
@@ -1195,12 +1234,15 @@ async function loadUpcoming() {
     // first would have left a tech's own Upcoming with nothing saying the invoice is
     // agency-pending.
     + '<th>Customer</th><th>Line</th><th style="width:150px">Payment</th>'
+    + '<th class="num" style="width:80px" title="The exact amount still owed on this invoice.'
+      + ' Blank once it is paid.">Due</th>'
     + '<th class="num" style="width:90px">Invoiced</th>'
     + '<th class="num" style="width:150px">Projected commission</th></tr></thead><tbody>'
     + rows.map((v) => '<tr>'
       + '<td>' + customerCell(v) + '</td>'
       + '<td class="what">' + lineWhat(v) + '</td>'
       + '<td>' + statusTags(v) + payTags(v) + '</td>'
+      + '<td class="num">' + dueCell(v) + '</td>'
       + '<td class="num muted">' + esc(v.invoice_date || '') + '</td>'
       + '<td class="num">' + money(v.computed_amount) + '</td></tr>').join('')
     + '</tbody></table>';
