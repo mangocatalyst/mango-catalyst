@@ -22,9 +22,15 @@ import { ContactBand } from "@/components/sections/ContactBand";
  * demo/capture-screens.sh, which refuse to ship if any real customer or
  * employee string leaks in (demo/privacy-validator.js).
  *
- * Owner dashboard: standalone since 2026-07-16, $795 setup + $125/month, no
- * full-service retainer required. Pricing rule: state the numbers flat, never
- * justify them.
+ * Both products are standalone, same shape: $795 setup + $125/month, no
+ * full-service retainer required. Owner dashboard standalone since 2026-07-16;
+ * the commission tracker was priced 2026-07-29 (it had been quote-on-a-call).
+ * Pricing rule: state the numbers flat, never justify them.
+ *
+ * Success unit, decided 2026-07-29: land with a product, expand to the retainer.
+ * That is why the pricing lead no longer promises nobody will raise the retainer;
+ * it promises the customer starts that conversation. See the vault note
+ * mc-success-unit-decision-2026-07-29 before loosening either sentence.
  */
 
 const PATH = "/dashboards";
@@ -174,14 +180,33 @@ export default function DashboardsPage() {
               },
             ],
           },
-          /* The commission tracker carries NO offers node. Its price is a setup fee
-             plus a small monthly, quoted on the call (owner's call, 2026-07-24), and schema
-             that invents a number is worse than schema that omits one. */
-          serviceLd({
-            name: "Commission Tracker",
-            description: COMMISSION_DESCRIPTION,
-            url: `${SITE.url}${PATH}#commission`,
-          }),
+          /* The commission tracker was deliberately unpriced until 2026-07-29, on the
+             rule that schema inventing a number is worse than schema omitting one. It
+             now has a real one (owner's call, 2026-07-29): same shape as the dashboard,
+             $795 setup + $125/month. */
+          {
+            ...serviceLd({
+              name: "Commission Tracker",
+              description: COMMISSION_DESCRIPTION,
+              url: `${SITE.url}${PATH}#commission`,
+            }),
+            offers: [
+              {
+                "@type": "Offer",
+                price: "795",
+                priceCurrency: "USD",
+                description:
+                  "One-time setup: the tracker wired to your ServiceTitan, your actual pay agreements encoded, tech portals created.",
+              },
+              {
+                "@type": "Offer",
+                price: "125",
+                priceCurrency: "USD",
+                description:
+                  "Per month: hosting, the ServiceTitan sync, the tech approval portal, the payroll export, and fixes. Month to month, cancel anytime.",
+              },
+            ],
+          },
           breadcrumbLd([
             { name: "Home", url: SITE.url },
             { name: "Dashboards", url: `${SITE.url}${PATH}` },
@@ -262,7 +287,7 @@ export default function DashboardsPage() {
           <SectionHeading
             tone="light"
             title="What the owner dashboard costs"
-            lead="The dashboard is a standalone product, priced flat. It doesn't require the monthly automation service, and nobody will steer you into one. The commission tracker is quoted separately, further down."
+            lead="Both products are standalone and priced flat, each with its own setup and its own monthly: two products means two of each, not a bundle. Neither one requires the monthly automation service. Buy a dashboard, keep it, and that can be the whole relationship. If you ever want something else automated, that's a separate conversation, a separate price, and you start it."
           />
           <div className="mt-12 max-w-[30rem]">
             <Card tone="light" accent className="p-7 sm:p-9">
@@ -413,13 +438,16 @@ export default function DashboardsPage() {
               </li>
             ))}
           </ul>
-          {/* PRICING: the owner's decision, 2026-07-24. Never invent dollars here. */}
+          {/* PRICING: the owner's decision, 2026-07-29, superseding the unpriced
+              2026-07-24 posture. Never invent dollars here. The final clause is a
+              deliberate guard: tracker setup encodes real pay agreements, which vary
+              far more than a dashboard wiring job does. */}
           <p className="mt-12 max-w-[44rem] leading-[1.65] text-body">
             {
-              "Pricing works the way the dashboard's does: a one-time setup to wire it to your ServiceTitan and encode your actual pay agreements, then a small monthly to keep it running. The setup is the real work, because every shop's agreements are different, so the number comes out of a fifteen-minute call rather than off a price list. "
+              "$795 one-time to wire it to your ServiceTitan and encode your actual pay agreements, then $125 a month to keep it running. Month to month, cancel anytime. The setup is the real work, because every shop's agreements are different; if yours turn out to be unusual enough that $795 doesn't cover it, I tell you the number before I start, not after. "
             }
             <Link href="/contact#book" className="inline-link">
-              Book the call and I will quote it
+              Book a 15-minute fit call
             </Link>
             {"."}
           </p>
