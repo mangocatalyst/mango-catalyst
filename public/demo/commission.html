@@ -142,6 +142,11 @@ select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outlin
 .who .pay.wk small{font-size:10.5px;letter-spacing:.06em}
 /* Fixed width so TOTAL lines up down the whole list, which is the point of the column. */
 .who .pay.total{padding-left:14px;border-left:1px solid var(--line);text-align:right;min-width:118px}
+/* GROSS beside TOTAL, quieter than it. They answer different questions, what the tracker pays
+   out, and what the fortnight came to for the person, and the one being exported is the one
+   that stays loudest, so the new figure cannot be mistaken for the number payroll reconciles. */
+.who .pay.total.gross{color:var(--dim);font-size:15px}
+.who .pay.total.gross small{color:var(--dimmer)}
 /* The card is a disclosure now: the summary is the scan view (name, marks, what they are
    paid) and the body holds the lines, Print and the add-line control. Same rotating
    marker as details.tnfr below, so every expander on the page reads as one idiom. Cards open
@@ -211,10 +216,23 @@ th{text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
 td{padding:6px;border-bottom:1px solid var(--band);vertical-align:top}
 tr:last-child td{border-bottom:0}
 /* WEEK 2 OF THE PAY PERIOD, as a colour block rather than a divider row (the owner, 2026-08-05).
-   --hover is a palette token defined in all three theme scopes, so this follows dark mode on
-   its own; a literal hex here would be invisible or blinding in one of them. The top border is
-   what makes the boundary readable when a long list scrolls. */
-tr.wk2 td{background:var(--hover)}
+   A palette token, never a literal hex, so this follows dark mode on its own instead of being
+   invisible or blinding in one of them. The top border is what makes the boundary readable when
+   a long list scrolls.
+
+   --auto-bg, NOT --hover (the owner, 2026-08-06: the split is invisible). --hover is a cream a
+   hair off the card's own paper and the band simply did not read: 1.04:1 against it in light
+   and 1.10:1 in dark, dE 4.3 and 4.0. --auto-bg is the palette's pale teal and differs in HUE
+   rather than in lightness, which is what makes banding legible without darkening the row,
+   dE 8.6 light and 7.2 dark, twice the separation, while every text colour that lands on it
+   keeps its contrast (ink 11.8:1 light / 11.4:1 dark, dim 5.7:1 / 6.9:1). */
+tr.wk2 td{background:var(--auto-bg)}
+/* A CHIP WHOSE OWN BACKGROUND IS NOW THE ROW'S. .tier and .flag.deferred are both --auto-bg
+   pills, so on a banded row they lost their shape and read as loose coloured text. They keep
+   their colour and gain an edge, inset so nothing moves: --auto against --auto-bg is 5.7:1 in
+   light and 6.1:1 in dark, which is a clearly drawn pill. Scoped to the banded rows, because
+   that is the only place the collision exists. */
+tr.wk2 .tier, tr.wk2 .flag.deferred{box-shadow:inset 0 0 0 1px var(--auto)}
 /* The boundary itself: the first week-2 row is the one that FOLLOWS a week-1 row. Written as an
    adjacent-sibling rule because there is no "first element carrying this class" selector, and
    :first-of-type would match the first <tr> in the table whatever week it belongs to. */
@@ -1015,6 +1033,16 @@ function demoPortalUpcoming() {
 // stray "<" would otherwise become markup.
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = (n) => (n == null ? '' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+// A FIGURE THAT ONLY EXISTS ONCE A RATE WAS SNAPSHOTTED, hourly pay, an overtime premium, the
+// gross they add to. null is a MISSING INPUT and never a zero: no base rate was on file when
+// those hours were imported, and $0.00 in its place reads as a settled answer somebody could
+// act on. ONE definition of both the rule and the sentence, because it is said in two places now
+//, the week headers on the card and the worksheet at the bottom of it, and two copies of a
+// sentence about money is how the two start disagreeing about what a blank means.
+const rateCell = (v) => (v == null ? '<span class="muted" title="No base rate was on file for'
+  + ' them when these hours were imported. Setting one on the settings page fills in every period'
+  + ' that had none; changing an existing rate deliberately leaves past periods where they are,'
+  + ' so re-import a period to price it at a new rate.">no rate at import</span>' : money(v));
 // Commission rates are whole numbers, so a whole rate shows NO decimals (3%, not 3.0%).
 // A genuinely non-integer rate shows one decimal so its real value is never hidden
 // (a derived override rate like 9.2%). Display only; storage/compute unchanged.
@@ -1436,10 +1464,38 @@ const weekClass = (l) => (weekIndex(l) === 1 ? ' class="wk2"' : '');
 // Comfort Club is inside BONUS, not commission, in both places (the owner, 2026-07-31 and again 08-05).
 // TOTAL is SUM(payable) and is NOT these four added up: on call, reimbursement and mileage are
 // payable too, and a total that quietly dropped a fuel reimbursement would be wrong by it.
-function weekPay(p) {
+// THE WEEK HEADERS CARRY THE HOURS TOO (the owner, 2026-08-06). He was reading the pay-for-time
+// block at the bottom of the card and expecting these figures up here, which is the right
+// instinct: this line is the scan view, and a week's hourly pay and its overtime are as much
+// "what did this week come to" as its commission and bonus are.
+//
+// EVERY FIGURE COMES OFF payrollRows AS PRICED. straight_time and premium per week, and the
+// fortnight's gross, which IS week 1 + week 2 across commission, bonus, hourly and overtime,
+// because that is what flsaWeek put in each week's gross. Nothing is re-derived here; a header
+// doing its own arithmetic is a second answer waiting to disagree with the worksheet under it.
+//
+// `wage` is absent for anybody with no hours imported, and then the header is exactly what it
+// was, a person paid purely on commission has no hours half, and two blank lines under their
+// money would say the opposite. An UNPRICED week says so through rateCell, the same sentence the
+// worksheet uses, rather than showing $0.00 hourly for somebody whose rate nobody has set.
+function weekPay(p, wage) {
+  const wk = (wage && wage.weeks) || [];
+  // The two hours lines for one week, or the reason there are none. SAID ONCE, not repeated into
+  // both slots: the phrase is longer than the figures it stands in for, and four copies of it
+  // down a card is a header nobody reads rather than one that answers a question. Same shape the
+  // collapsed worksheet summary settled on, for the same reason.
+  const hours = (i) => {
+    if (!wage) return '';
+    const week = wk[i] || {};
+    if (week.straight_time == null) return '<br>' + rateCell(null);
+    return '<br>' + rateCell(week.straight_time) + ' <small>hourly</small>'
+      + '<br>' + rateCell(week.premium) + ' <small>OT</small>';
+  };
   const w = (n, label) => '<span class="pay wk"><small>' + label + '</small>'
     + '<br>' + money(p['w' + n + '_commission'] || 0) + ' <small>comm</small>'
-    + '<br>' + money(p['w' + n + '_bonus'] || 0) + ' <small>bonus</small></span>';
+    + '<br>' + money(p['w' + n + '_bonus'] || 0) + ' <small>bonus</small>'
+    + hours(n - 1)
+    + '</span>';
   const weeks = PERIOD_WEEKS();
   // WRAPPED, so the whole money group pins to the right edge of every card and the TOTAL column
   // lines up down a long list. margin-left:auto on the first block alone does NOT do this: the
@@ -1448,7 +1504,18 @@ function weekPay(p) {
   return '<span class="payset">'
     + w(1, 'Week 1' + (weeks[0] ? ' · ' + weekLabel(weeks[0]) : ''))
     + w(2, 'Week 2' + (weeks[1] ? ' · ' + weekLabel(weeks[1]) : ''))
-    + '<span class="pay total">' + money(p.payable) + '<br><small>TOTAL</small></span></span>';
+    // TWO TOTALS, and they are different questions, so both are labelled rather than one being
+    // quietly widened into the other. TOTAL is what the tracker PAYS and the file exports,
+    // every payable kind, reimbursement and mileage included. GROSS is what the fortnight came
+    // to for the person: hourly and overtime as well, and neither of the two repayments, because
+    // a reimbursement is not earnings. Neither contains the other, which is exactly why printing
+    // one of them under both names would be wrong.
+    + '<span class="pay total">' + money(p.payable) + '<br><small>TOTAL</small></span>'
+    + (wage ? '<span class="pay total gross" title="Week 1 + week 2 across commission, bonus,'
+      + ' hourly pay and overtime, what this pay period came to. Not the same as TOTAL, which is'
+      + ' what the tracker pays out and includes reimbursements.">'
+      + rateCell(wage.gross) + '<br><small>Gross</small></span>' : '')
+    + '</span>';
 }
 
 // THE HOURS HALF of a person's pay, under their lines. Gusto's imported hours priced per
@@ -1468,16 +1535,10 @@ function payrollBlock(r, forPrint) {
   if (!r) return '';
   const hrs = (v) => Number(v || 0).toFixed(2);
   // A missing base rate is not a rate of zero, so the cell says so rather than printing $0.00
-  // and letting somebody read it as a settled answer.
-  //
-  // "WHEN THESE WERE IMPORTED" is the exact claim, and it has to be: the rate is the one
-  // snapshotted at import, so a raise never reaches a fortnight already paid. Setting a FIRST
-  // rate does reach it, patchPerson fills the periods that were imported with none, because a
-  // gap is not a rate somebody set, so the fix named here is the one that actually works.
-  const cell = (v) => (v == null ? '<span class="muted" title="No base rate was on file for them'
-    + ' when these hours were imported. Setting one on the settings page fills in every period'
-    + ' that had none; changing an existing rate deliberately leaves past periods where they are,'
-    + ' so re-import a period to price it at a new rate.">no rate at import</span>' : money(v));
+  // and letting somebody read it as a settled answer. rateCell is shared with the week headers
+  // (weekPay) since 2026-08-06: the same figures are stated in two places on this card now, and
+  // the blank has to mean the same thing in both.
+  const cell = rateCell;
   // The regular rate is a RATE, at four places. Rounded to cents it stops explaining the premium
   // beside it: $19.4444 x 0.5 x 5 hrs is the $48.61 shown, $19.44 would say $48.60.
   const rate = (v) => (v == null ? '<span class="muted">&mdash;</span>' : '$' + Number(v).toFixed(4));
@@ -1765,7 +1826,7 @@ function personCard(p, lines, open, tnfrItems, people, wage) {
       + ' person; the lines below are what they earned.">commission</span>')
     + (badges.length ? '<span class="muted" style="font-size:12px">' + esc(badges.join(' · ')) + '</span>' : '')
     + (p.disputed ? '<span class="badge-disputed" style="font-size:12px">' + p.disputed + ' disputed</span>' : '')
-    + weekPay(p)
+    + weekPay(p, wage)
     + '</div></summary>'
     + '<div class="scroll"><table><thead><tr>'
     + '<th style="width:24px" title="Tech approved">T</th><th style="width:24px" title="Office approved">&#10003;</th><th style="width:24px" title="Disputed">!</th>'
