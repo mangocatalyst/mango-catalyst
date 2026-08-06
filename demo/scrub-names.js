@@ -56,7 +56,13 @@ function betweenPayloads(html, fn) {
 function scrubNames(html) {
   return betweenPayloads(html, (segment) => {
     for (const [real, fake] of NAME_MAP) {
-      segment = segment.split(new RegExp(`\\b${real}\\b`, 'g')).join(fake);
+      // Case-insensitive, because assertNoRealNames below is: a scrub that only
+      // caught 'Bryan' while the check also caught 'BRYAN' meant an upstream
+      // comment in caps sailed through the rewrite and then failed the assert,
+      // which reads like a leak but is really a hole in this line (2026-08-06).
+      // Match case on the way out so a shouted comment stays shouted.
+      segment = segment.replace(new RegExp(`\\b${real}\\b`, 'gi'),
+        (m) => (m === m.toUpperCase() ? fake.toUpperCase() : fake));
     }
     return segment;
   });
@@ -82,3 +88,21 @@ function assertNoRealNames(html, what) {
 }
 
 module.exports = { NAME_MAP, scrubNames, assertNoRealNames };
+
+// node demo/scrub-names.js — the scrub and the assert must agree on case, or a
+// name slips the rewrite and only surfaces as a failed bake.
+if (require.main === module) {
+  const eq = (got, want) => {
+    if (got !== want) { console.error(`FAIL\n  got:  ${got}\n  want: ${want}`); process.exitCode = 1; }
+  };
+  eq(scrubNames('// Bryan said so'), '// the owner said so');
+  eq(scrubNames("// IN BRYAN'S OWN WORDS"), "// IN THE OWNER'S OWN WORDS");
+  eq(scrubNames('// ask bryan'), '// ask the owner');
+  eq(scrubNames('// Corey and Zack'), '// Eli and Miguel');
+  eq(scrubNames('// bryanesque, ironclad'), '// bryanesque, ironclad'); // word boundaries hold
+  for (const s of ['// Bryan', "// BRYAN'S", '// ask bryan']) {
+    try { assertNoRealNames(scrubNames(s), 'self-check'); }
+    catch (e) { console.error(`FAIL assert still fires after scrub: ${s} -> ${e.message}`); process.exitCode = 1; }
+  }
+  if (!process.exitCode) console.log('scrub-names self-check passed: scrub and assert agree on case');
+}

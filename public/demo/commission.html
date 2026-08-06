@@ -142,11 +142,13 @@ select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outlin
 .who .pay.wk small{font-size:10.5px;letter-spacing:.06em}
 /* Fixed width so TOTAL lines up down the whole list, which is the point of the column. */
 .who .pay.total{padding-left:14px;border-left:1px solid var(--line);text-align:right;min-width:118px}
-/* GROSS beside TOTAL, quieter than it. They answer different questions, what the tracker pays
-   out, and what the fortnight came to for the person, and the one being exported is the one
-   that stays loudest, so the new figure cannot be mistaken for the number payroll reconciles. */
-.who .pay.total.gross{color:var(--dim);font-size:15px}
-.who .pay.total.gross small{color:var(--dimmer)}
+/* COMMISSION beside TOTAL, quieter than it (the owner, 2026-08-06). TOTAL is the everything number
+   and is the one being asked for, so it keeps the loud treatment and the rightmost column;
+   COMMISSION is what the tracker pays out and sits beside it, muted. The modifier only applies
+   when there IS a TOTAL to be quieter than, on a card with no hours imported, COMMISSION is the
+   only figure on the line and muting it would leave the row with nothing to read. */
+.who .pay.total.commission{color:var(--dim);font-size:15px}
+.who .pay.total.commission small{color:var(--dimmer)}
 /* The card is a disclosure now: the summary is the scan view (name, marks, what they are
    paid) and the body holds the lines, Print and the add-line control. Same rotating
    marker as details.tnfr below, so every expander on the page reads as one idiom. Cards open
@@ -446,7 +448,15 @@ try {
 </header>
 
 <div class="strip">
-  <div class="stat"><div class="k">Commission total</div><div class="v" id="s-total">$0</div></div>
+  <!-- ONE VOCABULARY, TOP TO BOTTOM (the owner, 2026-08-06). These are the same three names a person
+       card uses for the same three things, COMMISSION what the tracker pays out, PAY FOR TIME
+       what the hours came to, TOTAL the two added, so the strip reads as the company's copy of
+       a card rather than as a second set of words for the same money.
+       The last two are hidden until a period actually has priced hours: a missing import is not
+       a zero, and neither is a fortnight nobody has set a rate for yet. -->
+  <div class="stat"><div class="k">Commission</div><div class="v" id="s-total">$0</div></div>
+  <div class="stat" id="s-time-stat" hidden><div class="k">Pay for time</div><div class="v" id="s-time">$0</div></div>
+  <div class="stat" id="s-grand-stat" hidden><div class="k">Total</div><div class="v" id="s-grand">$0</div></div>
   <div class="stat"><div class="k">Lines</div><div class="v" id="s-lines">0</div></div>
   <div class="stat"><div class="k">Needs a look</div><div class="v" id="s-attn">0</div></div>
   <!-- Two groups (the owner, 2026-07-31): where-am-I on the left, the period dropdown and the
@@ -1480,22 +1490,46 @@ const weekClass = (l) => (weekIndex(l) === 1 ? ' class="wk2"' : '');
 // worksheet uses, rather than showing $0.00 hourly for somebody whose rate nobody has set.
 function weekPay(p, wage) {
   const wk = (wage && wage.weeks) || [];
-  // The two hours lines for one week, or the reason there are none. SAID ONCE, not repeated into
-  // both slots: the phrase is longer than the figures it stands in for, and four copies of it
-  // down a card is a header nobody reads rather than one that answers a question. Same shape the
-  // collapsed worksheet summary settled on, for the same reason.
-  const hours = (i) => {
-    if (!wage) return '';
-    const week = wk[i] || {};
-    if (week.straight_time == null) return '<br>' + rateCell(null);
-    return '<br>' + rateCell(week.straight_time) + ' <small>hourly</small>'
-      + '<br>' + rateCell(week.premium) + ' <small>OT</small>';
+  // WHETHER THE HOURS ARE PRICED AT ALL. straight_time is null when no rate was on file at
+  // import, which is a GAP and never a zero, so it takes the no-rate line below and never
+  // reaches the zero rule. base_rate is one snapshot per period row, so the two weeks are priced
+  // together or not at all; `every` is belt for a shape that cannot currently occur.
+  const rated = !!wage && wk.length > 0 && wk.every((w) => w && w.straight_time != null);
+  // A ZERO IS NOT NEWS (the owner, 2026-08-06). Theo will never have hours or overtime, and four
+  // lines of $0.00 down his card is clutter standing where a figure would be. So a KIND drops
+  // out when it is exactly zero in BOTH weeks, and it drops from BOTH, which is the whole
+  // reason the rule is pairwise: a line kept in one week and dropped in the other would leave
+  // the two columns reading at different heights, and the eye compares them across.
+  //
+  // Zero, not falsy. A kind absent from the aggregate is somebody with no lines of it, which
+  // genuinely is zero; an unpriced hours week is a missing input and is not in this list at all.
+  const at0 = (v) => (v == null ? 0 : v);
+  const KINDS = [
+    { label: 'comm', at: (i) => at0(p['w' + (i + 1) + '_commission']) },
+    { label: 'bonus', at: (i) => at0(p['w' + (i + 1) + '_bonus']) },
+    ...(rated ? [
+      { label: 'hourly', at: (i) => at0(wk[i] && wk[i].straight_time) },
+      { label: 'OT', at: (i) => at0(wk[i] && wk[i].premium) },
+    ] : []),
+  ];
+  const shown = KINDS.filter((k) => k.at(0) !== 0 || k.at(1) !== 0);
+  // The reason there are no hours figures, when there is an hours row but no rate behind it.
+  // SAID ONCE per week, not repeated into both slots: the phrase is longer than the figures it
+  // stands in for, and four copies of it down a card is a header nobody reads rather than one
+  // that answers a question. Same shape the collapsed worksheet summary settled on.
+  // ...and NEVER for an exempt person: they have no rate because the overtime calculation does
+  // not apply to them, which is a settled answer and not a gap to go and fill. Four of the five
+  // people this covers had been carrying that nag on every card since the calculation shipped.
+  const gap = wage && !wage.exempt && !rated ? '<br>' + rateCell(null) : '';
+  const w = (n, label) => {
+    const lines = shown.map((k) => '<br>' + money(k.at(n - 1)) + ' <small>' + k.label + '</small>').join('');
+    // NOTHING LEFT TO SAY. Every kind was zero in both weeks and there are no hours to explain,
+    // so the block would be a date with blank space under it. The COMMISSION and TOTAL figures
+    // below still render, which is what keeps a card from ever going blank, and because the
+    // rule is pairwise, both week blocks empty together and the columns stay aligned.
+    if (!lines && !gap) return '';
+    return '<span class="pay wk"><small>' + label + '</small>' + lines + gap + '</span>';
   };
-  const w = (n, label) => '<span class="pay wk"><small>' + label + '</small>'
-    + '<br>' + money(p['w' + n + '_commission'] || 0) + ' <small>comm</small>'
-    + '<br>' + money(p['w' + n + '_bonus'] || 0) + ' <small>bonus</small>'
-    + hours(n - 1)
-    + '</span>';
   const weeks = PERIOD_WEEKS();
   // WRAPPED, so the whole money group pins to the right edge of every card and the TOTAL column
   // lines up down a long list. margin-left:auto on the first block alone does NOT do this: the
@@ -1504,17 +1538,29 @@ function weekPay(p, wage) {
   return '<span class="payset">'
     + w(1, 'Week 1' + (weeks[0] ? ' · ' + weekLabel(weeks[0]) : ''))
     + w(2, 'Week 2' + (weeks[1] ? ' · ' + weekLabel(weeks[1]) : ''))
-    // TWO TOTALS, and they are different questions, so both are labelled rather than one being
-    // quietly widened into the other. TOTAL is what the tracker PAYS and the file exports,
-    // every payable kind, reimbursement and mileage included. GROSS is what the fortnight came
-    // to for the person: hourly and overtime as well, and neither of the two repayments, because
-    // a reimbursement is not earnings. Neither contains the other, which is exactly why printing
-    // one of them under both names would be wrong.
-    + '<span class="pay total">' + money(p.payable) + '<br><small>TOTAL</small></span>'
-    + (wage ? '<span class="pay total gross" title="Week 1 + week 2 across commission, bonus,'
-      + ' hourly pay and overtime, what this pay period came to. Not the same as TOTAL, which is'
-      + ' what the tracker pays out and includes reimbursements.">'
-      + rateCell(wage.gross) + '<br><small>Gross</small></span>' : '')
+    // TWO FIGURES, TWO NAMES, IN THE OWNER'S OWN VOCABULARY (2026-08-06). The everything number,
+    // week 1 + week 2 across commission, bonus, hourly and overtime, is what he calls the
+    // TOTAL, so that is what it is called, everywhere. It shipped for a day as "Gross" beside a
+    // "TOTAL" that meant the smaller thing, which is the one arrangement guaranteed to be read
+    // wrong: the word people trust was on the figure they were not asking about.
+    //
+    // COMMISSION is the other one, and the label is now what it is FOR rather than what it is
+    // the biggest of: what the tracker pays out and the Gusto file carries. Strictly it is every
+    // payable kind, so a reimbursement and a mileage run are inside it too, the title says so,
+    // because the label is the owner's word for this money and the precision belongs on hover rather
+    // than in a name nobody says out loud.
+    //
+    // Neither figure contains the other. COMMISSION has the two repayments and no hours; TOTAL
+    // has the hours and neither repayment. That is exactly why they cannot share a name.
+    + '<span class="pay total' + (wage ? ' commission' : '') + '" title="What the tracker pays'
+      + ' out for this pay period and the Gusto file carries: commission and bonus, plus any'
+      + ' on-call, reimbursement or mileage written by hand. It does not include hourly pay or'
+      + ' overtime, which Gusto pays.">'
+      + money(p.payable) + '<br><small>Commission</small></span>'
+    + (wage ? '<span class="pay total" title="Week 1 + week 2 across commission, bonus, hourly'
+      + ' pay and overtime, what this pay period came to. Reimbursements and mileage are not in'
+      + ' it: they repay money somebody spent, they are not earnings.">'
+      + rateCell(wage.gross) + '<br><small>Total</small></span>' : '')
     + '</span>';
 }
 
@@ -1538,22 +1584,72 @@ function payrollBlock(r, forPrint) {
   // and letting somebody read it as a settled answer. rateCell is shared with the week headers
   // (weekPay) since 2026-08-06: the same figures are stated in two places on this card now, and
   // the blank has to mean the same thing in both.
+  //
+  // AN EXEMPT PERSON IS NOT AN UNPRICED ONE, and the two must not look alike. Somebody who is
+  // 100% commission or salaried has no straight time, no regular rate and no premium because the
+  // overtime calculation does not apply to them (the owner, 2026-08-06), that is a settled answer,
+  // not a gap, so their cells read as an em-dash and never as a nag to go and set a rate.
   const cell = rateCell;
   // The regular rate is a RATE, at four places. Rounded to cents it stops explaining the premium
   // beside it: $19.4444 x 0.5 x 5 hrs is the $48.61 shown, $19.44 would say $48.60.
   const rate = (v) => (v == null ? '<span class="muted">&mdash;</span>' : '$' + Number(v).toFixed(4));
-  const week = (w) => '<tr>'
-    + '<td class="num wk">' + esc(w.label) + '</td>'
-    + '<td class="num">' + hrs(w.hours) + '</td>'
+  // WHY there is nothing to price, said once at the top of the block rather than implied by four
+  // em-dashes somebody has to work out for themselves.
+  const EXEMPT_WHY = { commission: '100% commission, exempt from the overtime calculation',
+    salary: 'salaried, exempt from the overtime calculation' };
+  const exemptNote = r.exempt
+    ? '<span class="flag" title="Gusto still tracks their time, so the hours are shown as a fact.'
+      + ' No hourly rate, regular rate or overtime premium is derived for them, because the'
+      + ' overtime calculation does not apply to this pay type.">'
+      + esc(EXEMPT_WHY[r.pay_type] || 'exempt from the overtime calculation') + '</span>'
+    : '';
+  const weeks = r.weeks || [];
+  const otSum = () => weeks.reduce((n, w) => n + (w.ot_hours || 0), 0);
+  // ONE COLUMN LIST, read by the header, the week rows and the total row alike. It was three
+  // separate lists, and that is exactly how an exempt person shipped with a "Reg rate" header
+  // over a column of em-dashes: the CELLS were taught about the exemption and the HEADERS were
+  // never told. A column that drops now drops from all three by construction.
+  //
+  // `prices` marks the three that state a RATE. They are dropped whole, header and cells, for
+  // anybody the overtime calculation does not apply to, because a blank column under a heading
+  // reads as a figure that failed to load rather than as a question nobody asked.
+  const COLS = [
+    { th: 'Week', w: 104, cell: (w) => '<td class="num wk">' + esc(w.label) + '</td>',
+      total: '<td class="num wk">Pay period</td>' },
+    { th: 'Hours', w: 70, cell: (w) => '<td class="num">' + hrs(w.hours) + '</td>',
+      total: '<td class="num">' + hrs(r.hours) + '</td>' },
     // A week that ran no overtime says so in grey, so the eye lands on the week that did. That
     // is the whole point of splitting the fortnight: one 89-hour line never said which week.
-    + '<td class="num' + (w.ot_hours ? '' : ' muted') + '">' + hrs(w.ot_hours) + '</td>'
-    + '<td class="num">' + money(w.earnings || 0) + '</td>'
-    + '<td class="num">' + cell(w.straight_time) + '</td>'
-    + '<td class="num">' + rate(w.rrp) + '</td>'
-    + '<td class="num">' + cell(w.premium) + '</td>'
-    + '<td class="num"><b>' + cell(w.gross) + '</b></td></tr>';
-  const weeks = r.weeks || [];
+    { th: 'OT hrs', w: 70, title: 'Hours over 40 in that workweek',
+      cell: (w) => '<td class="num' + (w.ot_hours ? '' : ' muted') + '">' + hrs(w.ot_hours) + '</td>',
+      total: '<td class="num">' + hrs(otSum()) + '</td>' },
+    { th: 'Earnings', w: 100,
+      title: 'Commission, bonus and on call earned in that week. Non-discretionary, so it counts'
+        + ' toward the regular rate.',
+      cell: (w) => '<td class="num">' + money(w.earnings || 0) + '</td>',
+      total: '<td class="num">' + money(r.earnings || 0) + '</td>' },
+    { th: 'Straight', w: 110, prices: true,
+      title: 'Base rate x every hour worked, overtime hours included',
+      cell: (w) => '<td class="num">' + cell(w.straight_time) + '</td>',
+      total: '<td class="num">' + cell(r.straight_time) + '</td>' },
+    { th: 'Reg rate', w: 110, prices: true,
+      title: 'Regular rate of pay: (straight time + earnings) / hours worked',
+      cell: (w) => '<td class="num">' + rate(w.rrp) + '</td>',
+      // NO fortnight regular rate, deliberately. The regular rate is a weekly average and there
+      // is no such thing as the average of two of them: printing one would invite exactly the
+      // per-period arithmetic the FLSA does not do.
+      total: '<td class="num muted" title="The regular rate is a weekly figure. A pay period has'
+        + ' two of them and no single one.">&mdash;</td>' },
+    { th: 'OT premium', w: 100, prices: true,
+      title: 'Half the regular rate, on the hours over 40',
+      cell: (w) => '<td class="num">' + cell(w.premium) + '</td>',
+      total: '<td class="num">' + cell(r.premium) + '</td>' },
+    { th: 'Total', w: 110,
+      title: "That week's straight time, earnings and overtime premium added: what the week came to.",
+      cell: (w) => '<td class="num"><b>' + cell(w.gross) + '</b></td>',
+      total: '<td class="num"><b>' + cell(r.gross) + '</b></td>' },
+  ].filter((c) => !(c.prices && r.exempt));
+  const week = (w) => '<tr>' + COLS.map((c) => c.cell(w)).join('') + '</tr>';
   // One box, holding week one. Its placeholder is the assumed split, so an empty box reads as
   // "this is what we guessed" rather than as nothing at all; clearing it goes back to the guess,
   // which is a real answer and not the same as typing 0.
@@ -1582,16 +1678,25 @@ function payrollBlock(r, forPrint) {
   const wsum = (w, n) => '<span class="ws"><small>Week ' + n + '</small>'
     + '<br>' + cell(w && w.straight_time) + ' <small>hourly</small>'
     + '<br>' + cell(w && w.premium) + ' <small>OT</small></span>';
-  const summary = r.gross == null
-    ? '<span class="wagesum"><span class="muted" title="No base rate was on file for them when'
-      + ' these hours were imported, so there is no hourly pay or overtime premium to add up.'
-      + ' Set a rate on the settings page.">no rate at import, nothing to total</span></span>'
-    : '<span class="wagesum">' + wsum(weeks[0], 1) + wsum(weeks[1], 2)
-      + '<span class="ws tot">' + money(r.gross) + '<br><small>Total</small></span></span>';
+  // AN EXEMPT PERSON'S CLOSED LINE IS THEIR HOURS AND THEIR TOTAL. Printing "hourly, OT" for
+  // them would be four em-dashes standing where figures go on everybody else's card, which reads
+  // as something missing rather than as something that does not apply. The hours are the fact
+  // worth having here; the note in the header says why there is nothing beside them.
+  const hsum = (w, n) => '<span class="ws"><small>Week ' + n + '</small>'
+    + '<br>' + hrs(w && w.hours) + ' <small>hrs</small></span>';
+  const summary = r.exempt
+    ? '<span class="wagesum">' + hsum(weeks[0], 1) + hsum(weeks[1], 2)
+      + '<span class="ws tot">' + money(r.gross) + '<br><small>Total</small></span></span>'
+    : r.gross == null
+      ? '<span class="wagesum"><span class="muted" title="No base rate was on file for them when'
+        + ' these hours were imported, so there is no hourly pay or overtime premium to add up.'
+        + ' Set a rate on the settings page.">no rate at import, nothing to total</span></span>'
+      : '<span class="wagesum">' + wsum(weeks[0], 1) + wsum(weeks[1], 2)
+        + '<span class="ws tot">' + money(r.gross) + '<br><small>Total</small></span></span>';
   // OPEN WHEN PRINTING. A collapsed disclosure prints collapsed, and the printed statement is
   // the sheet the premium actually gets checked from, the worksheet is the point of it.
   return '<details class="wagerow" id="hours-' + r.person_id + '"' + (forPrint ? ' open' : '') + '>'
-    + '<summary><span class="wagehead">Pay for time</span>'
+    + '<summary><span class="wagehead">Pay for time</span>' + exemptNote
     // Said only where it can change the money: an assumed split with no overtime in it pays
     // exactly what any other split would, and flagging that every fortnight for every hourly
     // person is how a warning stops being read.
@@ -1609,29 +1714,11 @@ function payrollBlock(r, forPrint) {
     + summary + '</summary>'
     + split
     + '<div class="scroll"><table><thead><tr>'
-    + '<th class="num" style="width:104px">Week</th>'
-    + '<th class="num" style="width:70px">Hours</th>'
-    + '<th class="num" style="width:70px" title="Hours over 40 in that workweek">OT hrs</th>'
-    + '<th class="num" style="width:100px" title="Commission and bonus earned in that week.'
-    + ' Non-discretionary, so it counts toward the regular rate.">Earnings</th>'
-    + '<th class="num" style="width:110px" title="Base rate x every hour worked, overtime hours included">Straight</th>'
-    + '<th class="num" style="width:110px" title="Regular rate of pay: (straight time + earnings) / hours worked">Reg rate</th>'
-    + '<th class="num" style="width:100px" title="Half the regular rate, on the hours over 40">OT premium</th>'
-    + '<th class="num" style="width:110px">Gross</th>'
+    + COLS.map((c) => '<th class="num" style="width:' + c.w + 'px"'
+      + (c.title ? ' title="' + esc(c.title) + '"' : '') + '>' + esc(c.th) + '</th>').join('')
     + '</tr></thead><tbody>'
     + weeks.map(week).join('')
-    + '<tr class="tot"><td class="num wk">Pay period</td>'
-    + '<td class="num">' + hrs(r.hours) + '</td>'
-    + '<td class="num">' + hrs(weeks.reduce((s, w) => s + (w.ot_hours || 0), 0)) + '</td>'
-    + '<td class="num">' + money(r.earnings || 0) + '</td>'
-    + '<td class="num">' + cell(r.straight_time) + '</td>'
-    // NO fortnight regular rate, deliberately. The regular rate is a weekly average and there
-    // is no such thing as the average of two of them: printing one would invite exactly the
-    // per-period arithmetic the FLSA does not do.
-    + '<td class="num muted" title="The regular rate is a weekly figure. A pay period has two of'
-    + ' them and no single one.">&mdash;</td>'
-    + '<td class="num">' + cell(r.premium) + '</td>'
-    + '<td class="num"><b>' + cell(r.gross) + '</b></td></tr>'
+    + '<tr class="tot">' + COLS.map((c) => c.total).join('') + '</tr>'
     + '</tbody></table></div></details>';
 }
 
@@ -1913,13 +2000,26 @@ function paidAheadBreakdown(l) {
 function stmtWeekSummary(p) {
   if (p.w1_commission == null && p.w2_commission == null) return '';
   const weeks = PERIOD_WEEKS();
+  // THE SAME ZERO RULE THE CARD HEADER USES (the owner, 2026-08-06), here as columns rather than
+  // lines: a kind that is exactly zero in both weeks is not printed at all. A column of $0.00
+  // down a statement is the same clutter the header had, and paper is where it is least worth
+  // the ink. Dropped whole, so the two week rows can never disagree about their columns.
+  const KINDS = [['Commission', 'commission'], ['Bonus', 'bonus']];
+  const shown = KINDS.filter(([, k]) => (p['w1_' + k] || 0) !== 0 || (p['w2_' + k] || 0) !== 0);
   const col = (n) => '<td>Week ' + n + (weeks[n - 1] ? ' &middot; ' + esc(weekLabel(weeks[n - 1])) : '') + '</td>'
-    + '<td class="num">' + money(p['w' + n + '_commission'] || 0) + '</td>'
-    + '<td class="num">' + money(p['w' + n + '_bonus'] || 0) + '</td>';
-  return '<table class="stmt-weeks"><thead><tr><th>Week</th><th class="num">Commission</th>'
-    + '<th class="num">Bonus</th></tr></thead><tbody>'
+    + shown.map(([, k]) => '<td class="num">' + money(p['w' + n + '_' + k] || 0) + '</td>').join('');
+  return '<table class="stmt-weeks"><thead><tr><th>Week</th>'
+    + shown.map(([label]) => '<th class="num">' + label + '</th>').join('')
+    + '</tr></thead><tbody>'
     + '<tr>' + col(1) + '</tr><tr>' + col(2) + '</tr>'
-    + '<tr><td><b>TOTAL</b></td><td class="num" colspan="2"><b>' + money(p.payable || 0) + '</b></td></tr>'
+    // COMMISSION, matching the card. This table is the commission half of the sheet; the hours
+    // half prints below it and carries the TOTAL that includes them.
+    // colspan FOLLOWS the columns that survived. Hardcoded at 2 it spilled past the table the
+    // moment a kind dropped out, which is the sort of thing that looks fine on screen and prints
+    // as a total hanging off the edge of its own row. At least 1, so an all-zero sheet still has
+    // a cell to put the figure in.
+    + '<tr><td><b>COMMISSION</b></td><td class="num" colspan="' + Math.max(1, shown.length) + '"><b>'
+    + money(p.payable || 0) + '</b></td></tr>'
     + '</tbody></table>';
 }
 
@@ -2420,6 +2520,18 @@ async function loadPeriodInner(id, token) {
   document.getElementById('h-range').textContent = data.isCurrent ? 'in progress'
     : (NAV.current && id > NAV.current ? 'not started yet' : 'complete');
   document.getElementById('s-total').innerHTML = money(data.total);
+  // PAY FOR TIME and TOTAL, from the server's own sum of the rows the cards are built from,
+  // nothing re-added here, so the strip and the twelve blocks under it cannot drift. Both hide
+  // together when there is nothing priced: they are one statement in two halves, and a TOTAL
+  // that quietly equalled the commission beside it would read as a figure rather than as an
+  // absence.
+  const timeTotal = data.payrollTotal;
+  document.getElementById('s-time-stat').hidden = timeTotal == null;
+  document.getElementById('s-grand-stat').hidden = timeTotal == null;
+  if (timeTotal != null) {
+    document.getElementById('s-time').innerHTML = money(timeTotal);
+    document.getElementById('s-grand').innerHTML = money(data.grandTotal);
+  }
   document.getElementById('s-lines').textContent = data.lines.length;
   document.getElementById('s-attn').textContent = data.unmatched.length;
   // The status pill left the header (the owner, 2026-07-31: the header is tight and OPEN said
@@ -2489,9 +2601,11 @@ async function loadPeriodInner(id, token) {
     : '<div class="card"><div class="empty">Nobody is active, so there is nothing to review.'
       + ' Add people on the settings page.</div></div>')
     + (open ? '' : '<div class="frozen">This pay period is ' + esc(status) + ', so its lines are locked. Corrections go in as a manual line in the current pay period.</div>');
-  // The Gross payroll stat was here: wage pay plus commission, with a count of the people
-  // whose rate was not set yet. Commission total is the only company figure this page has now,
-  // the hours side is per person, on the cards, because the tracker pays none of it.
+  // The Gross payroll stat was here: wage pay plus commission, with a count of the people whose
+  // rate was not set yet. Its descendant is back on the strip since 2026-08-06 and is a different
+  // thing in two ways: it states PAY FOR TIME on its own beside the commission rather than
+  // folding them into one number, and it says nothing at all when there is nothing priced, where
+  // the old one printed a total and a count of who was missing from it.
   renderHours(data);
   document.getElementById('upcoming-tab').textContent = 'Not Yet Paid' + ((data.upcoming || []).length ? ' (' + data.upcoming.length + ')' : '');
   // Revealed by config, not by role. The server decides; the page only obeys, so turning the

@@ -608,7 +608,7 @@
 
   // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
   const DEMO_SALES = {
- "generatedAt": "2026-08-06T12:49:22.953Z",
+ "generatedAt": "2026-08-06T18:04:28.948Z",
  "revenue": {
   "daily": [
    {
@@ -1328,12 +1328,9 @@
     load(); // resync with reality
     setTimeout(() => { $("error").style.display = "none"; }, 8000);
   }
-  async function del(rowId) {
-    const r = await fetch("/api/delete", { method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rowId, source: "web" }) });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
-    load(); // the row is gone; re-fetch rather than patch the local copy
+  async function del(rowId) { // demo: drop the row from the copy in this page
+    board.rows = (board.rows || []).filter((r) => r.rowId !== rowId);
+    render();
   }
   tbody.addEventListener("click", (ev) => {
     const hb = ev.target.closest(".histbtn");

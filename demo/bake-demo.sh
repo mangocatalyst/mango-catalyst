@@ -6,6 +6,7 @@
 set -e
 cd "$(dirname "$0")"
 
+node scrub-names.js   # the scrub and its assert must agree on case before any of it runs
 node make-template.js
 node make-demo-data.js
 NSDASH_DIR="$PWD/build" node ~/Projects/mango-automation/scripts/nsdash/ns-dash-bake.js

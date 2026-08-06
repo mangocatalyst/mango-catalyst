@@ -1219,7 +1219,11 @@ function weekPay(data, status) {
     + w(1, 'Week 1' + (weeks[0] ? ' · ' + weekLabel(weeks[0]) : ''))
     + w(2, 'Week 2' + (weeks[1] ? ' · ' + weekLabel(weeks[1]) : ''))
     + '<span class="pay total">' + money(data.total)
-    + '<br><small>' + (status === 'open' ? 'TOTAL so far' : 'TOTAL') + '</small></span></span>';
+    // COMMISSION, matching the dashboard (the owner, 2026-08-06). This page shows no hours at all,
+    // so this is the only money figure on it, and calling it TOTAL while TOTAL means the
+    // everything number on the office's copy is the two pages disagreeing about one word, on the
+    // page a tech checks their payslip against.
+    + '<br><small>' + (status === 'open' ? 'Commission so far' : 'Commission') + '</small></span></span>';
 }
 
 // The reason box the Dispute tick reveals, and the sentence once it exists. Mirrors the
@@ -1381,13 +1385,23 @@ async function loadPeriodInner(id, token) {
 function stmtWeekSummary(d, total) {
   if (d.w1_commission == null && d.w2_commission == null) return '';
   const weeks = (d.period && d.period.weeks) || [];
+  // The master's zero rule, same words: a kind that is exactly zero in both weeks is not printed.
+  // Both sheets, because a tech comparing their statement against the office's should not find
+  // one carrying a column the other left out.
+  const KINDS = [['Commission', 'commission'], ['Bonus', 'bonus']];
+  const shown = KINDS.filter(([, k]) => (d['w1_' + k] || 0) !== 0 || (d['w2_' + k] || 0) !== 0);
   const col = (n) => '<td>Week ' + n + (weeks[n - 1] ? ' &middot; ' + esc(weekLabel(weeks[n - 1])) : '') + '</td>'
-    + '<td class="num">' + money(d['w' + n + '_commission'] || 0) + '</td>'
-    + '<td class="num">' + money(d['w' + n + '_bonus'] || 0) + '</td>';
-  return '<table class="stmt-weeks"><thead><tr><th>Week</th><th class="num">Commission</th>'
-    + '<th class="num">Bonus</th></tr></thead><tbody>'
+    + shown.map(([, k]) => '<td class="num">' + money(d['w' + n + '_' + k] || 0) + '</td>').join('');
+  return '<table class="stmt-weeks"><thead><tr><th>Week</th>'
+    + shown.map(([label]) => '<th class="num">' + label + '</th>').join('')
+    + '</tr></thead><tbody>'
     + '<tr>' + col(1) + '</tr><tr>' + col(2) + '</tr>'
-    + '<tr><td><b>TOTAL</b></td><td class="num" colspan="2"><b>' + money(total) + '</b></td></tr>'
+    // colspan FOLLOWS the columns that survived. Hardcoded at 2 it spilled past the table the
+    // moment a kind dropped out, which is the sort of thing that looks fine on screen and prints
+    // as a total hanging off the edge of its own row. At least 1, so an all-zero sheet still has
+    // a cell to put the figure in.
+    + '<tr><td><b>COMMISSION</b></td><td class="num" colspan="' + Math.max(1, shown.length) + '"><b>'
+    + money(total) + '</b></td></tr>'
     + '</tbody></table>';
 }
 

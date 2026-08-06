@@ -233,6 +233,20 @@ swap(`  async function loadRegistration() {
     renderRegistration();
     if (board) render();
   }`);
+// Deleting a row is the last call with a server behind it. Splice the local copy
+// rather than calling load(), which reassigns board = DEMO_BOARD and would put the
+// row straight back.
+swap(`  async function del(rowId) {
+    const r = await fetch("/api/delete", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rowId, source: "web" }) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || \`HTTP \${r.status}\`);
+    load(); // the row is gone; re-fetch rather than patch the local copy
+  }`,
+  `  async function del(rowId) { // demo: drop the row from the copy in this page
+    board.rows = (board.rows || []).filter((r) => r.rowId !== rowId);
+    render();
+  }`);
 swap(`  async function equipAction(stEquipmentId, action, value) {
     const my = ++regSeq;
     const mine = (unitSeq.get(stEquipmentId) || 0) + 1; // per-unit, see below
@@ -318,10 +332,15 @@ html = scrubNames(html);
 /* ---------- guardrails ---------- */
 assertNoRealNames(html, 'the whiteboard demo');
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
-const live = html.match(/[^\n]*(servicetitan\.com|slack\.com|\/api\/flip|\/api\/equipment|\/api\/equip|\/api\/history|whiteboard\.json|sales-summary\.json)[^\n]*/gi);
+if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
+// Any /api/, not a list of the four we happened to think of: the hand-written list
+// is how /api/delete shipped for weeks behind a guard that looked like it covered it.
+const live = html.match(/[^\n]*(servicetitan\.com|slack\.com|\/api\/|whiteboard\.json|sales-summary\.json)[^\n]*/gi);
 if (live) throw new Error(`live endpoint survived the transform (${live.length}):\n` +
   live.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
-for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
+const dashes = html.match(/[^\n]*[–—][^\n]*/g);
+if (dashes) throw new Error(`em/en dash in demo artifact (${dashes.length}):\n` +
+  dashes.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
 
 fs.writeFileSync(OUT, html);
 console.log(`whiteboard demo written: ${OUT} (${Math.round(fs.statSync(OUT).size / 1024)} KB)`);

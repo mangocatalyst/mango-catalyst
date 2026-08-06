@@ -186,7 +186,9 @@ assertNoRealNames(html, 'the commission portal demo');
 if (/northstar|passion one|xyops/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
-for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
+const dashes = html.match(/[^\n]*[–—][^\n]*/g);
+if (dashes) throw new Error(`em/en dash in demo artifact (${dashes.length}):\n` +
+  dashes.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
 
 fs.writeFileSync(OUT, html);
 console.log(`commission portal demo written: ${OUT} (${Math.round(fs.statSync(OUT).size / 1024)} KB)`);

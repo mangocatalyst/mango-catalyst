@@ -141,6 +141,52 @@ swap(`    const typeLink = j => j.jobIds && j.jobIds.length
       : \`<span class="hint">\${esc(j.type)}</span>\`;`,
   `    const typeLink = j => \`<span class="hint">\${esc(j.type)}</span>\`; // demo: ServiceTitan deep links disabled`);
 
+/* ---------- no server behind the demo: every call becomes a local edit ----------
+   The demo is one self-contained file on a static host, so anything that POSTs
+   or polls resolves to mangocatalyst.com and 404s. Left alone that shows as a
+   dismissed flag springing back. Each of these keeps the local half of the work
+   (localStorage, the re-render) and drops the round trip, so the control does
+   what it looks like it does and the edit lasts until reload. */
+swap(`    fSync(); renderFlags();
+    try {
+      const r = await fetch('/api/flag', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, undo }) });
+      if (!r.ok) throw new Error(\`HTTP \${r.status}\`);
+    } catch (e) {
+      if (undo) fGone.add(key); else fGone.delete(key);
+      localStorage.setItem('nsFlagsDismissed', JSON.stringify([...fGone]));
+      fSync(); renderFlags();
+    }
+  });`,
+  `    fSync(); renderFlags(); // demo: the dismissal lives in this browser, nothing to POST
+  });`);
+swap(`  /* Union, not replace: this machine's just-clicked dismissals are already POSTed,
+     and what comes back adds whatever was resolved on another machine. */
+  fetch('/api/flags', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(d => {
+    if (!d || !Array.isArray(d.keys)) return;
+    const before = fGone.size;
+    d.keys.forEach(k => fGone.add(k));
+    if (fGone.size !== before) {
+      localStorage.setItem('nsFlagsDismissed', JSON.stringify([...fGone]));
+      fSync(); renderFlags();
+    }
+  }).catch(() => {});
+}`,
+  `  // demo: no other machine to union dismissals from
+}`);
+// The pager HEADs tomorrow's report to see whether the link should appear. The demo
+// publishes exactly one report (make-demo-data.js clears the archive first), so there
+// is never a next page, and the probe would 404 against the static host anyway.
+swap(`if (PG.next && location.protocol.startsWith('http')) {
+  fetch(PG.next, {method: 'HEAD'}).then(r => { if (r.ok) { const a = $('#pg-next'); a.href = PG.next; a.textContent = \`\${PG.nextLabel} →\`; a.style.display = 'inline-block'; } }).catch(() => {});
+}`,
+  `// demo: one report, so there is never a next page to probe for`);
+swap(`  try {
+    const r = await fetch('/api/layout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(L) });
+    b.textContent = r.ok ? 'Saved ✓ (default for every fresh browser)' : 'Save failed';
+  } catch { b.textContent = 'Save failed'; }`,
+  `  b.textContent = 'Saved ✓ (this browser, for the demo)'; // demo: nothing to POST to`);
+
 /* ---------- demo chrome ---------- */
 // the north-star star field is NorthStar brand, not MC
 swap('<div class="stars"></div><div class="polaris" aria-hidden="true"></div>', '');
@@ -176,7 +222,17 @@ if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived t
 const stLeft = html.match(/[^\n]*go\.servicetitan\.com[^\n]*/g);
 if (stLeft) throw new Error(`live ServiceTitan link survived the transform (${stLeft.length}):\n` +
   stLeft.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
-for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo template');
+// The demo is a static file with no server behind it, so nothing may call one.
+// Two checks, because they catch different things: fetch( is any network call at
+// all (the commission bake has proved this the strongest form), and /api/ also
+// catches an endpoint reached by navigation or a form action rather than fetch.
+if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
+const live = html.match(/[^\n]*(\/api\/|slack\.com)[^\n]*/gi);
+if (live) throw new Error(`live endpoint survived the transform (${live.length}):\n` +
+  live.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
+const dashes = html.match(/[^\n]*[–—][^\n]*/g);
+if (dashes) throw new Error(`em/en dash in demo template (${dashes.length}):\n` +
+  dashes.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
 
 fs.writeFileSync(path.join(OUT_DIR, 'index.template.html'), html);
 console.log('demo template written:', path.join(OUT_DIR, 'index.template.html'));

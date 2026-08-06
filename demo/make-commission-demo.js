@@ -275,7 +275,7 @@ swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
 html = html.split(' — ').join(', ');
 html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n'); // a comment clause that runs on to the next line
-html = html.split("'— ").join("'"); // a dash opening a status string, as hours-state does
+html = html.replace(/(['"])— /g, '$1'); // a dash opening a quoted string, as hours-state does
 swapMaybe('<span class="muted">—</span>', '<span class="muted">not recorded</span>');
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */
@@ -288,7 +288,9 @@ assertNoRealNames(html, 'the commission demo');
 if (/northstar|passion one|xyops/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
-for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
+const dashes = html.match(/[^\n]*[–—][^\n]*/g);
+if (dashes) throw new Error(`em/en dash in demo artifact (${dashes.length}):\n` +
+  dashes.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
 
 fs.writeFileSync(OUT, html);
 console.log(`commission demo written: ${OUT} (${Math.round(fs.statSync(OUT).size / 1024)} KB)`);
