@@ -275,6 +275,7 @@ swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
 html = html.split(' — ').join(', ');
 html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n'); // a comment clause that runs on to the next line
+html = html.split("'— ").join("'"); // a dash opening a status string, as hours-state does
 swapMaybe('<span class="muted">—</span>', '<span class="muted">not recorded</span>');
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */

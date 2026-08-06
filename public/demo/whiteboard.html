@@ -155,6 +155,16 @@
      installers) absorb the leftover width. */
   th.st, td.st { width: 86px; min-width: 86px; padding: 8px 6px; text-align: center; }
   th.st { white-space: normal; } /* header label stays on one line; the AUTO tag drops below it */
+  /* Outstanding-registration count, beside the Registered pill. Amber = a human owes
+     work; it is a button because it navigates. Zero never renders. */
+  .regchip { margin-left: 5px; min-width: 18px; height: 18px; padding: 0 5px; border: 0; border-radius: 9px;
+    font: 700 11px/18px var(--font, inherit); cursor: pointer; vertical-align: middle;
+    background: #b45309; color: #fff; }
+  .regchip:hover { background: #92400e; }
+  .regchip:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  @media (prefers-color-scheme: dark) { .regchip { background: #d97706; color: #1c1917; } }
+  #reg-tbl tbody tr.jumped { animation: jumpflash 2s ease-out; }
+  @keyframes jumpflash { from { background: rgba(217,119,6,.35); } to { background: transparent; } }
   th.w-sched { width: 96px; }
   th.w-type  { width: 106px; }
   th.w-ca    { width: 70px; }
@@ -185,6 +195,8 @@
   .job .sub { color: var(--ink-faint); font-size: 12px; }
   .job .sub a { color: var(--auto); text-decoration: none; }
   .job .sub a:hover { text-decoration: underline; }
+  .job .flag[data-regjump] { cursor: pointer; }
+  .job .flag[data-regjump]:hover { filter: brightness(1.15); }
   .job .flag { display:inline-block; margin-top:3px; padding:1px 6px; border-radius:5px; font-size:10px; font-weight:700; letter-spacing:.02em; color:var(--warn); background:var(--warn-bg); }
   .meta { color: var(--ink-soft); font-size: 12.5px; font-variant-numeric: tabular-nums; }
   .price { font-weight: 600; }
@@ -274,6 +286,32 @@
     padding: 0 2px; margin-left: 3px; vertical-align: middle; line-height: 1; }
   .histbtn:hover { color: var(--auto); }
   .histbtn svg { display: block; }
+  /* Confirm dialog for ticking Registered while units are still unregistered.
+     A real dialog, not window.confirm(): a native modal blocks the page (and any
+     automation driving it) and cannot show the unit list that makes the decision. */
+  /* Registered cell when units at that install are still unregistered. The box is
+     where the eye lands, so flag it there too, the row flag can scroll off, and a
+     completed job hides the row entirely until "Show completed jobs" is on. */
+  td.st.needsreg { background: var(--warn-bg); box-shadow: inset 0 0 0 1px var(--warn); border-radius: 6px; }
+  td.st.needsreg input[type=checkbox] { accent-color: var(--warn); }
+  .modalback { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.45);
+    display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal { width: min(430px, 100%); background: var(--paper); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 50px rgba(0,0,0,.32);
+    padding: 18px 20px; font-size: 13px; }
+  .modal h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+  .modal .sub { color: var(--ink-faint); margin: 0 0 12px; line-height: 1.45; }
+  .modal ul { margin: 0 0 14px; padding: 0; list-style: none; max-height: 190px; overflow-y: auto;
+    border: 1px solid var(--line-soft); border-radius: 8px; }
+  .modal li { padding: 7px 10px; border-top: 1px solid var(--line-soft); display: flex;
+    justify-content: space-between; gap: 10px; }
+  .modal li:first-child { border-top: none; }
+  .modal li .st { font-size: 11px; font-weight: 700; color: var(--warn); white-space: nowrap; }
+  .modal .btns { display: flex; justify-content: flex-end; gap: 8px; }
+  .modal button { font: inherit; font-weight: 700; padding: 7px 14px; border-radius: 8px;
+    border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+  .modal button.go { background: var(--warn); border-color: var(--warn); color: #fff; }
+  .modal button:hover { filter: brightness(1.08); }
   .histpop { position: absolute; z-index: 60; width: 300px; max-height: 320px; overflow-y: auto;
     background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
     box-shadow: 0 10px 34px rgba(0,0,0,.20); padding: 11px 13px; font-size: 12.5px; color: var(--ink); }
@@ -333,19 +371,20 @@
   .regbtn { border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); font: inherit; font-size: 11.5px; font-weight: 600; padding: 4px 9px; border-radius: 7px; cursor: pointer; transition: border-color .12s, color .12s; }
   .regbtn:hover { border-color: var(--teal); color: var(--teal); }
   .regbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
-  /* status filter dropdown: a .fbtn summary + tickbox menu, matching the chips' look */
-  .statusdd { position: relative; }
-  .statusdd > summary { list-style: none; cursor: pointer; }
-  .statusdd > summary::-webkit-details-marker { display: none; }
-  .statusdd > summary::after { content: "\25BE"; margin-left: 6px; font-size: 10px; opacity: .8; }
-  .statusdd[open] > summary { background: var(--teal); color: #fff; border-color: var(--teal); }
-  .dd-menu { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; min-width: 210px; max-height: 300px; overflow-y: auto;
-    background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.18); padding: 6px; }
-  .dd-menu label { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 13px; color: var(--ink); cursor: pointer; }
-  .dd-menu label:hover { background: var(--hover); }
-  .dd-menu input { accent-color: var(--teal); width: 15px; height: 15px; flex: none; }
-  /* per-status count, so a status with nothing in it is visibly empty rather than missing */
-  .dd-n { margin-left: auto; color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 12px; }
+  /* Search replaced the per-status tickbox dropdown. The chips already partition every
+     unit, so the dropdown was a second control over the same axis, and it persisted
+     per browser, so the owner's four machines quietly disagreed about what the board showed.
+     One box that matches customer / brand / model / serial / status covers what the
+     dropdown was really used for and finds a customer without scrolling 140 rows. */
+  .regq { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 8px; min-width: 210px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+  .regq::placeholder { color: var(--ink-faint); }
+  .regq:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--teal); }
+  /* Row held visible for a beat after a status change moved it out of the filter, so a
+     mis-click is correctable instead of instantly gone. Fades to signal it is leaving. */
+  @keyframes regfade { 0%, 55% { opacity: 1; } 100% { opacity: .3; } }
+  #reg-tbl tbody tr.fading { animation: regfade 6s ease-in forwards; }
+  #reg-tbl tbody tr.fading .undo { color: var(--warn); font-weight: 700; }
 
   /* ---- sales role view: per-person cards (ported from the owner dashboard's Sales
      view, scoped under .rview and remapped onto the board's CSS variables) ---- */
@@ -498,10 +537,8 @@
         <button class="fbtn regf" data-regf="queued">Queued <span class="cnt" id="rc-queued">0</span></button>
         <button class="fbtn regf" data-regf="registered">Registered <span class="cnt" id="rc-registered">0</span></button>
         <button class="fbtn regf" data-regf="all">All <span class="cnt" id="rc-all">0</span></button>
-        <details class="statusdd" id="reg-statusdd">
-          <summary class="fbtn" id="reg-status-summary">Status</summary>
-          <div class="dd-menu" id="reg-status-menu"></div>
-        </details>
+        <input type="search" id="reg-q" class="regq" placeholder="Search customer, serial, model…"
+          aria-label="Search registration units">
         <button class="qbtn" id="reg-queue" disabled>Queue selected for registration</button>
       </div>
       <div class="scroll">
@@ -517,13 +554,18 @@
       <div class="reg-hint">Tick the units that make up one system (condenser + its heads), then Queue.
         They clear from Needs Action once queued; repeat for the next system.
         The Registration link opens the brand's portal and copies that unit's details to your clipboard, 
-        paste, check it against the screen, submit, then click the status pill on to Registration Verified
-        (click advances, shift-click goes back).</div>
+        paste, check it against the screen, submit, then click the status pill to mark it Registration Verified.
+        The pill cycles Verified → Ignore → New (shift-click goes back); everything else is set by the scripts.
+        A row you just changed sticks around for a few seconds with an Undo before it leaves the filter.</div>
       <div class="empty" id="reg-empty">Nothing matches this filter.</div>
     </div>
   </div><!-- /#tab-registration -->
 
-  <div class="foot">Install White Board · <span id="ver">v2026-07-30.1</span></div>
+  <!-- Stamp namespace is "wb", NOT the bare "v" the owner-dash template uses
+       (index.template.html). Both artifacts live in this repo and both shipped
+       on 2026-08-04, so a bare v2026-08-04.4 grepped to two unrelated builds.
+       One number, one artifact. -->
+  <div class="foot">Install White Board · <span id="ver">wb2026-08-04.7</span></div>
 </div>
 
 <script>
@@ -566,32 +608,24 @@
 
   // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
   const DEMO_SALES = {
- "generatedAt": "2026-08-04T10:45:02.301Z",
+ "generatedAt": "2026-08-06T12:44:35.537Z",
  "revenue": {
   "daily": [
    {
-    "date": "2026-07-05",
-    "value": 0
-   },
-   {
-    "date": "2026-07-06",
-    "value": 41699
-   },
-   {
     "date": "2026-07-07",
-    "value": 40886
+    "value": 40280
    },
    {
     "date": "2026-07-08",
-    "value": 41722
+    "value": 27677
    },
    {
     "date": "2026-07-09",
-    "value": 39791
+    "value": 61803
    },
    {
     "date": "2026-07-10",
-    "value": 28010
+    "value": 35717
    },
    {
     "date": "2026-07-11",
@@ -603,27 +637,27 @@
    },
    {
     "date": "2026-07-13",
-    "value": 37842
+    "value": 25521
    },
    {
     "date": "2026-07-14",
-    "value": 61438
+    "value": 39280
    },
    {
     "date": "2026-07-15",
-    "value": 36691
+    "value": 35688
    },
    {
     "date": "2026-07-16",
-    "value": 33702
+    "value": 31555
    },
    {
     "date": "2026-07-17",
-    "value": 31239
+    "value": 33619
    },
    {
     "date": "2026-07-18",
-    "value": 9000
+    "value": 5000
    },
    {
     "date": "2026-07-19",
@@ -631,27 +665,27 @@
    },
    {
     "date": "2026-07-20",
-    "value": 37113
+    "value": 31142
    },
    {
     "date": "2026-07-21",
-    "value": 39111
+    "value": 32600
    },
    {
     "date": "2026-07-22",
-    "value": 37100
+    "value": 29704
    },
    {
     "date": "2026-07-23",
-    "value": 38646
+    "value": 39165
    },
    {
     "date": "2026-07-24",
-    "value": 25866
+    "value": 34173
    },
    {
     "date": "2026-07-25",
-    "value": 6000
+    "value": 0
    },
    {
     "date": "2026-07-26",
@@ -659,27 +693,27 @@
    },
    {
     "date": "2026-07-27",
-    "value": 27386
+    "value": 30147
    },
    {
     "date": "2026-07-28",
-    "value": 36548
+    "value": 24091
    },
    {
     "date": "2026-07-29",
-    "value": 26113
+    "value": 24691
    },
    {
     "date": "2026-07-30",
-    "value": 37947
+    "value": 29343
    },
    {
     "date": "2026-07-31",
-    "value": 38610
+    "value": 41271
    },
    {
     "date": "2026-08-01",
-    "value": 5000
+    "value": 4000
    },
    {
     "date": "2026-08-02",
@@ -687,245 +721,254 @@
    },
    {
     "date": "2026-08-03",
-    "value": 37764
+    "value": 33978
+   },
+   {
+    "date": "2026-08-04",
+    "value": 39665
+   },
+   {
+    "date": "2026-08-05",
+    "value": 28916
    }
   ],
-  "rev7": 181982,
-  "mtd": 42764,
-  "priorMonthTotal": 849392,
-  "rolling7": 181982,
-  "prev7": 174109
+  "rev7": 177173,
+  "mtd": 106559,
+  "priorMonthTotal": 797633,
+  "rolling7": 177173,
+  "prev7": 152267
  },
  "estimates": {
-  "sold": 80,
-  "dismissed": 21,
-  "open": 101,
-  "total": 202,
+  "sold": 76,
+  "dismissed": 29,
+  "open": 94,
+  "total": 199,
   "closeRate": null,
   "todaySold": 2,
-  "todayTotal": 10,
-  "unsoldPipeline": 835044
+  "todayTotal": 9,
+  "unsoldPipeline": 751907
  },
  "wip": {
   "count": 10,
-  "value": 160000,
-  "count30dAgo": 9,
-  "value30dAgo": 160000
+  "value": 169000,
+  "count30dAgo": 11,
+  "value30dAgo": 169000
  },
  "advisors": [
   {
-   "name": "Sam",
-   "soldCount": 14,
-   "soldValue": 66867,
-   "installSoldCount": 4,
-   "installSoldValue": 49243,
-   "openCount": 46,
-   "openValue": 228725,
-   "oldestOpen": "2026-06-17"
-  },
-  {
-   "name": "Jenna",
+   "name": "Victor",
    "soldCount": 4,
-   "soldValue": 21285,
-   "installSoldCount": 1,
-   "installSoldValue": 15836,
-   "openCount": 59,
-   "openValue": 255277,
-   "oldestOpen": "2026-06-05"
+   "soldValue": 37332,
+   "installSoldCount": 2,
+   "installSoldValue": 33727,
+   "openCount": 28,
+   "openValue": 121725,
+   "oldestOpen": "2026-06-10"
   },
   {
-   "name": "Marcus",
-   "soldCount": 2,
-   "soldValue": 3371,
-   "installSoldCount": 0,
-   "installSoldValue": 0,
-   "openCount": 24,
-   "openValue": 132803,
+   "name": "Sam",
+   "soldCount": 13,
+   "soldValue": 25486,
+   "installSoldCount": 1,
+   "installSoldValue": 11143,
+   "openCount": 44,
+   "openValue": 206106,
    "oldestOpen": "2026-06-08"
   },
   {
-   "name": "Victor",
-   "soldCount": 1,
-   "soldValue": 1552,
+   "name": "Jenna",
+   "soldCount": 6,
+   "soldValue": 8857,
    "installSoldCount": 0,
    "installSoldValue": 0,
-   "openCount": 34,
-   "openValue": 142890,
+   "openCount": 47,
+   "openValue": 193452,
    "oldestOpen": "2026-06-09"
   },
   {
    "name": "Dana",
-   "soldCount": 0,
-   "soldValue": 0,
+   "soldCount": 1,
+   "soldValue": 1781,
    "installSoldCount": 0,
    "installSoldValue": 0,
-   "openCount": 26,
-   "openValue": 112968,
-   "oldestOpen": "2026-06-07"
+   "openCount": 30,
+   "openValue": 154143,
+   "oldestOpen": "2026-06-09"
+  },
+  {
+   "name": "Marcus",
+   "soldCount": 1,
+   "soldValue": 1371,
+   "installSoldCount": 0,
+   "installSoldValue": 0,
+   "openCount": 18,
+   "openValue": 87026,
+   "oldestOpen": "2026-06-15"
   }
  ],
  "salesRole": {
-  "reportDate": "2026-08-03",
+  "reportDate": "2026-08-05",
   "advisors": [
    {
     "name": "Sam Okafor",
-    "soldValue": 66867,
-    "sold": 14,
-    "soldValuePrev": 19892,
+    "soldValue": 25486,
+    "sold": 13,
+    "soldValuePrev": 21673,
     "salesRun": 0,
     "cohort": {
-     "sold": 32,
-     "dismissed": 6,
-     "pending": 30,
+     "sold": 26,
+     "dismissed": 12,
+     "pending": 28,
      "missed": 0
     },
     "ytd": null,
-    "openValue": 228725,
-    "openN": 46,
-    "openOldest": "2026-06-17",
+    "openValue": 206106,
+    "openN": 44,
+    "openOldest": "2026-06-08",
     "soldWk": {
-     "2026-05-18": 47913,
-     "2026-05-11": 24350,
-     "2026-05-25": 38411,
-     "2026-06-01": 21909,
-     "2026-06-08": 48978,
-     "2026-06-15": 8971,
-     "2026-06-22": 21259,
-     "2026-06-29": 57514,
-     "2026-07-06": 21420,
-     "2026-07-13": 41260,
-     "2026-07-20": 32915,
-     "2026-07-27": 53232,
-     "2026-08-03": 14926
+     "2026-05-11": 8828,
+     "2026-05-18": 32756,
+     "2026-05-25": 4902,
+     "2026-06-01": 39368,
+     "2026-06-08": 64637,
+     "2026-06-15": 20554,
+     "2026-06-22": 29862,
+     "2026-06-29": 23756,
+     "2026-07-06": 57514,
+     "2026-07-13": 21420,
+     "2026-07-20": 41260,
+     "2026-07-27": 22655,
+     "2026-08-03": 7042
     },
     "opps": [
      {
-      "customer": "Thorvald, Cliff & Ray",
+      "customer": "Lofgren, Arvid",
       "value": 21193,
-      "created": "2026-06-19",
+      "created": "2026-06-26",
       "link": null
      },
      {
-      "customer": "Dresden, Otto & Opal",
+      "customer": "Thorvald, June",
       "value": 19950,
-      "created": "2026-07-14",
+      "created": "2026-07-21",
       "link": null
      },
      {
-      "customer": "Hollis, Ray",
-      "value": 18873,
-      "created": "2026-08-03",
+      "customer": "Holmquist, Opal & June",
+      "value": 18619,
+      "created": "2026-07-04",
       "link": null
      }
     ]
    },
    {
     "name": "Jenna Marsh",
-    "soldValue": 21285,
-    "sold": 4,
-    "soldValuePrev": 20102,
+    "soldValue": 8857,
+    "sold": 6,
+    "soldValuePrev": 23588,
     "salesRun": 0,
     "cohort": {
-     "sold": 22,
-     "dismissed": 5,
-     "pending": 31,
-     "missed": 3
+     "sold": 21,
+     "dismissed": 11,
+     "pending": 23,
+     "missed": 1
     },
     "ytd": null,
-    "openValue": 255277,
-    "openN": 59,
-    "openOldest": "2026-06-05",
+    "openValue": 193452,
+    "openN": 47,
+    "openOldest": "2026-06-09",
     "soldWk": {
-     "2026-05-11": 2539,
-     "2026-05-04": 1701,
-     "2026-05-18": 2966,
-     "2026-05-25": 29544,
-     "2026-06-01": 24744,
-     "2026-06-08": 28221,
-     "2026-06-15": 34468,
-     "2026-06-22": 17669,
-     "2026-06-29": 23810,
-     "2026-07-13": 27382,
-     "2026-07-06": 28495,
-     "2026-07-20": 22398,
-     "2026-07-27": 23610
+     "2026-05-18": 4837,
+     "2026-05-11": 18522,
+     "2026-06-01": 20276,
+     "2026-05-25": 12044,
+     "2026-06-08": 579,
+     "2026-06-15": 22087,
+     "2026-06-22": 18423,
+     "2026-06-29": 16512,
+     "2026-07-06": 23810,
+     "2026-07-20": 27382,
+     "2026-07-13": 28495,
+     "2026-07-27": 11151,
+     "2026-08-03": 4134
     },
     "opps": [
      {
-      "customer": "Slagle, Liv",
-      "value": 20520,
-      "created": "2026-06-05",
+      "customer": "Pallesen, Petra",
+      "value": 21811,
+      "created": "2026-07-27",
       "link": null
      },
      {
-      "customer": "Eikland, Ray",
-      "value": 20201,
-      "created": "2026-07-26",
-      "link": null
-     },
-     {
-      "customer": "Brandvold, Ingrid",
+      "customer": "Thorvald, Arvid & Wade",
       "value": 20089,
-      "created": "2026-07-09",
+      "created": "2026-07-16",
+      "link": null
+     },
+     {
+      "customer": "Pallesen, Roald & Mabel",
+      "value": 15596,
+      "created": "2026-06-20",
       "link": null
      }
     ]
    },
    {
     "name": "Victor Reyes",
-    "soldValue": 1552,
-    "sold": 1,
-    "soldValuePrev": 56931,
+    "soldValue": 37332,
+    "sold": 4,
+    "soldValuePrev": 33789,
     "salesRun": 0,
     "cohort": {
-     "sold": 14,
-     "dismissed": 3,
-     "pending": 17,
-     "missed": 2
+     "sold": 13,
+     "dismissed": 2,
+     "pending": 18,
+     "missed": 3
     },
     "ytd": null,
-    "openValue": 142890,
-    "openN": 34,
-    "openOldest": "2026-06-09",
+    "openValue": 121725,
+    "openN": 28,
+    "openOldest": "2026-06-10",
     "soldWk": {
+     "2026-05-18": 12295,
      "2026-05-11": 1871,
-     "2026-05-25": 37027,
-     "2026-05-18": 4310,
-     "2026-06-01": 3185,
-     "2026-06-08": 8770,
-     "2026-06-15": 2734,
-     "2026-06-22": 5863,
-     "2026-06-29": 4349,
-     "2026-07-06": 45778,
-     "2026-07-13": 57053,
-     "2026-07-27": 24756,
-     "2026-07-20": 33727
+     "2026-05-25": 51779,
+     "2026-06-01": 47531,
+     "2026-06-08": 12059,
+     "2026-06-15": 21943,
+     "2026-06-22": 2613,
+     "2026-06-29": 12304,
+     "2026-07-06": 4349,
+     "2026-07-13": 45778,
+     "2026-07-20": 57053,
+     "2026-08-03": 3605,
+     "2026-07-27": 33727
     },
     "opps": [
      {
-      "customer": "Pallesen, Emil",
-      "value": 22552,
-      "created": "2026-06-10",
+      "customer": "Brandvold, Wade",
+      "value": 21010,
+      "created": "2026-08-03",
       "link": null
      },
      {
-      "customer": "Nordling, Arvid & Arvid",
+      "customer": "Kettunen, June",
       "value": 19325,
-      "created": "2026-07-07",
+      "created": "2026-07-14",
       "link": null
      },
      {
-      "customer": "Pekkala, Gus",
+      "customer": "Thorvald, Wade",
       "value": 14756,
-      "created": "2026-07-14",
+      "created": "2026-07-21",
       "link": null
      }
     ]
    }
   ],
   "team": {
-   "unsoldValue": 835044,
-   "unsoldGroups": 180,
+   "unsoldValue": 751907,
+   "unsoldGroups": 161,
    "todayPresets": 7,
    "todayTurnovers": 2
   }
@@ -939,13 +982,8 @@
   // tags + paired serials; Gree/Bosch have no warranty window so show no badge. ----
   const DEMO_EQUIPMENT = {
     deadlines: { maytag_rheem: 60, mitsubishi: 90, mitsubishi_cutoff: "03-31", fujitsu: 60 },
-    // Mirrors server.js REG_STATUSES. Without it regStatuses stays [] and the
-    // status pill is a dead control in the demo (it cycles this list, not the
-    // statuses present in the rows).
-    statuses: ["New", "Queued for Registration", "Queued for ST", "Needs Grouping",
-      "Needs Manual Registration", "Registered", "Registration Verified",
-      "No Registration Verified", "Equipment Received ST", "Error",
-      "Error - Registration", "No Equipment Listed", "Ignore"],
+    // No statuses list: upstream dropped regStatuses when the pill stopped cycling
+    // the server's allowlist, so the chip counts come from the rows themselves.
     units: [
       { customer: "Havermark, Petra", brand: "Fujitsu", model: "AOU12RLFW", serial: "FUJ-8823-C", installDate: D(-55), status: "Needs registration", stEquipmentId: "EQ-102", groupTag: "", pairedSerial: "" },
       { customer: "Brandvold, Roald", brand: "Maytag", model: "PSA4BF", serial: "MAY-3391-B", installDate: D(-48), status: "Needs registration", stEquipmentId: "EQ-103", groupTag: "", pairedSerial: "" },
@@ -1004,6 +1042,85 @@
   let board = null;
   let sort = JSON.parse(localStorage.getItem("wbSort") || "null"); // {key, dir} or null = board order
   let filter = "all";
+
+  // Units still needing a human on the Registration tab, counted per install location.
+  // Same needsAction() the Registration tab filters on, so the chip and the tab can
+  // never disagree, "Needs Manual Registration" is just one of the statuses it covers
+  // (the owner 2026-08-04: manual registration IS needs-action, not a separate track).
+  // Rebuilt on every regData load; empty until that first fetch lands, which is why
+  // render() re-runs when it does.
+  let needsByLocation = new Map();
+  function buildNeedsByLocation(units) {
+    const m = new Map();
+    for (const u of units || []) {
+      if (!needsAction(u)) continue;
+      const k = String(u.locationId ?? "");
+      if (!k) continue;
+      m.set(k, (m.get(k) || 0) + 1);
+    }
+    needsByLocation = m;
+  }
+  // The chip sits beside the Registered pill: a count of that install's outstanding
+  // units, and a click jumps to the Registration tab. Nothing renders at zero, an
+  // install with nothing to register should look finished, not decorated.
+  //
+  // It disagrees with a ticked Registered box on purpose. That cell is AUTO only
+  // while PENDING, so a human can tick it early and the sync will never correct
+  // them: Joel White was marked registered on 2026-08-03 (source `web`) while both
+  // of his Trane units still sat at New, four days after they landed. The checkbox
+  // cannot show that. The chip is the only thing on the board that can.
+  // Registered is ticked while units at this install are still outstanding. That
+  // combination is only reachable by hand, the AUTO path writes to a PENDING cell
+  // only, so once a human ticks the box the sync can never walk it back (Joel White,
+  // 2026-08-03: ticked `web` while both Trane units sat at New, four days after they
+  // landed). Manual ticks are meant to stick, so this does not un-tick anything; it
+  // says so on the row, next to CANCELLED and the stalled flag, and clicks through to
+  // the units in question.
+  // Ticking Registered while units are outstanding is allowed, the manual tick is
+  // the escape hatch for a registration the automation cannot see (the owner 2026-08-04,
+  // "we do need to manually tick"). It just should not happen by accident, so name
+  // the units and make it a deliberate second click. Resolves true to proceed.
+  function confirmRegister(row, units) {
+    return new Promise((resolve) => {
+      const back = document.createElement("div");
+      back.className = "modalback";
+      const n = units.length;
+      back.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="rcq">
+        <h3 id="rcq">${n} unit${n === 1 ? "" : "s"} at this install ${n === 1 ? "is" : "are"} not registered</h3>
+        <p class="sub">${esc(row.name)}, ticking Registered will not change these unit records, and the
+          sync cannot undo a manual tick. The row will stay flagged until they are registered.</p>
+        <ul>${units.map((u) => `<li><span>${esc(u.brand || ", ")} ${esc(u.model || "")}
+          <span style="color:var(--ink-faint)">${esc(u.serial || "")}</span></span>
+          <span class="st">${esc(u.status || "")}</span></li>`).join("")}</ul>
+        <div class="btns"><button class="cancel">Cancel</button><button class="go">Tick anyway</button></div>
+      </div>`;
+      const done = (v) => { back.remove(); document.removeEventListener("keydown", key); resolve(v); };
+      const key = (e) => { if (e.key === "Escape") done(false); };
+      back.querySelector(".cancel").addEventListener("click", () => done(false));
+      back.querySelector(".go").addEventListener("click", () => done(true));
+      back.addEventListener("click", (e) => { if (e.target === back) done(false); });
+      document.addEventListener("keydown", key);
+      document.body.appendChild(back);
+      back.querySelector(".cancel").focus();
+    });
+  }
+  // Outstanding units at an install, for the dialog's list.
+  const unitsNeeding = (r) => (regData?.units || [])
+    .filter((u) => String(u.locationId ?? "") === String(r.locationId ?? "") && needsAction(u));
+
+  function regFlag(r) {
+    if (r.registered !== "done") return "";
+    const n = needsByLocation.get(String(r.locationId ?? "")) || 0;
+    if (!n) return "";
+    return `<span class="flag flag-open" data-regjump="${esc(r.locationId)}" role="button" tabindex="0"
+      title="Registered is ticked, but ${n} unit${n === 1 ? " is" : "s are"} still unregistered, open the Registration tab">${n} UNIT${n === 1 ? "" : "S"} NOT REGISTERED</span>`;
+  }
+
+  function regChip(r) {
+    const n = needsByLocation.get(String(r.locationId ?? "")) || 0;
+    if (!n) return "";
+    return `<button class="regchip" data-regjump="${esc(r.locationId)}" title="${n} unit${n === 1 ? "" : "s"} still need registering, open the Registration tab">${n}</button>`;
+  }
 
   const steps = (r) => ["tls", "permit", "subs", "rebate", "inspection", "equip", "registered", "payment", "thankyou"].filter((k) => r[k] !== null && r[k] !== undefined);
   const closed = (v) => v === "done" || v === "na";
@@ -1087,7 +1204,7 @@
         ? `<span class="flag">CANCELLED</span><button class="delbtn" data-del="${esc(r.rowId)}" title="Cancelled in ServiceTitan · remove this row from the board">Delete</button>`
         : "";
       tr.innerHTML = `
-        <td class="job"><div class="cust">${nameHtml}<button class="histbtn" data-hist="${esc(r.rowId)}" title="Change history" aria-label="Change history">${CLOCK}</button></div><div class="sub">${sub}</div>${stalled(r) ? `<span class="flag">OPEN ${age(r)}d · 0 STEPS</span>` : ""}${cancelHtml}</td>
+        <td class="job"><div class="cust">${nameHtml}<button class="histbtn" data-hist="${esc(r.rowId)}" title="Change history" aria-label="Change history">${CLOCK}</button></div><div class="sub">${sub}</div>${stalled(r) ? `<span class="flag">OPEN ${age(r)}d · 0 STEPS</span>` : ""}${regFlag(r)}${cancelHtml}</td>
         <td class="meta">${fmtDate(r.sched)}</td>
         <td class="meta">${TYPE[r.type] || esc(r.type) || "-"}</td>
         <td class="meta">${esc(r.advisor) || "-"}</td>
@@ -1099,7 +1216,7 @@
         <td class="st">${pill(r, "rebate")}</td>
         <td class="st">${pill(r, "inspection")}</td>
         <td class="st">${pill(r, "equip")}</td>
-        <td class="st">${pill(r, "registered")}</td>
+        <td class="st${(needsByLocation.get(String(r.locationId ?? "")) || 0) ? " needsreg" : ""}">${pill(r, "registered")}${regChip(r)}</td>
         <td class="st">${pill(r, "payment")}</td>
         <td class="st">${pill(r, "thankyou")}</td>
         <td class="st"><input type="checkbox" class="donebox" data-row="${esc(r.rowId)}" ${r.done ? "checked" : ""} title="Mark job complete"></td>
@@ -1258,9 +1375,22 @@
     if (!cb) return;
     const row = board.rows.find((r) => r.rowId === cb.dataset.row);
     if (!row) return;
-    if (cb.dataset.col) { // TLS / Payment checkbox columns
-      row[cb.dataset.col] = cb.checked ? "done" : "pending"; render(); // optimistic
-      flip(row.rowId, cb.dataset.col, cb.checked ? "done" : "pending").catch(fail);
+    if (cb.dataset.col) { // TLS / Payment / Registered checkbox columns
+      const val = cb.checked ? "done" : "pending";
+      if (cb.dataset.col === "registered" && cb.checked) {
+        const open = unitsNeeding(row);
+        if (open.length) {
+          cb.checked = false; // hold the tick until the dialog says go
+          confirmRegister(row, open).then((ok) => {
+            if (!ok) return;
+            row.registered = "done"; render();
+            flip(row.rowId, "registered", "done").catch(fail);
+          });
+          return;
+        }
+      }
+      row[cb.dataset.col] = val; render(); // optimistic
+      flip(row.rowId, cb.dataset.col, val).catch(fail);
     } else { // Done = job status
       row.done = cb.checked; render(); // optimistic
       flip(row.rowId, "status", cb.checked ? "done" : "active").catch(fail);
@@ -1323,10 +1453,15 @@
   function stamp() { $("stamp").textContent = "demo · fictional data · edits reset on reload"; }
   async function load() { board = DEMO_BOARD; render(); stamp(); }
 
-  document.querySelectorAll(".fbtn").forEach((btn) => {
+  // Scoped to the board's own toolbar. Unscoped, this matched the Registration tab's
+  // chips too (they share .fbtn), those carry no data-filter, so clicking one set the
+  // board's filter to undefined and applyFilter's `tr.dataset[undefined] !== "1"` then
+  // hid EVERY board row. Filter on Registration, come back to Board, find it blank with
+  // no chip lit. Same bug reached the Status dropdown's summary.
+  document.querySelectorAll(".bottlenecks .fbtn").forEach((btn) => {
     btn.addEventListener("click", () => {
       filter = btn.dataset.filter;
-      document.querySelectorAll(".fbtn").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+      document.querySelectorAll(".bottlenecks .fbtn").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
       applyFilter();
     });
   });
@@ -1349,10 +1484,12 @@
   const histTime = (ts) => new Date(ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   async function openHistory(btn) {
     const rowId = btn.dataset.hist;
+    // Board rows resolve their name off the board; registration units carry it on the
+    // button, since their rowId is an stEquipmentId and never matches a board row.
     const row = board?.rows.find((r) => r.rowId === rowId);
     if (!histpop) { histpop = document.createElement("div"); histpop.className = "histpop"; document.body.appendChild(histpop); }
     const pop = histpop;
-    const head = `<h4>${esc(row?.name || "History")}</h4>`;
+    const head = `<h4>${esc(row?.name || btn.dataset.name || "History")}</h4>`;
     pop.hidden = false;
     pop.innerHTML = head + `<div class="hempty">Loading…</div>`;
     // position under the button, clamped into the viewport
@@ -1541,7 +1678,7 @@
   });
 
   // ---- registration tab (2b) ----
-  let regData = null, regReady = false, regFilter = "needs", regStatuses = [];
+  let regData = null, regReady = false, regFilter = "needs";
   // Last request STARTED wins. The 60s poll and a save both write regData, and the poll's
   // payload is the bigger one: a poll that left before a save could land after it and put
   // the pre-save status back on screen for a minute while the DB already held the new one.
@@ -1551,24 +1688,37 @@
   // "Registration Verified", not just "Registered" (renamed from "…by Human" 2026-07-29).
   const isRegistered = (s) => /^\s*(registered|registration verified)/i.test(s || "");
   const isQueued = (s) => /^queued/i.test(s || "");
-  const needsAction = (u) => !isRegistered(u.status) && !isQueued(u.status);
+  // Parked: real statuses, but not a job anybody has to do. They used to sit in Needs
+  // Action forever and were only pushed out of sight by the per-status dropdown; with
+  // that gone they need a definition, not a hiding place. Still reachable under All and
+  // by search, and Ignore is now the deliberate "get this off my list" move, which is
+  // exactly why it stays a status.
+  const PARKED = new Set(["Ignore", "No Equipment Listed"]);
+  const needsAction = (u) =>
+    !isRegistered(u.status) && !isQueued(u.status) && !PARKED.has(u.status || "");
 
-  // The status cell IS the editor (the owner 2026-07-29), and it clicks like the Board tab's
-  // pills rather than opening a dropdown: tap to advance to the next status, shift-tap to
-  // go back. The sequence is the server's REG_STATUSES in lifecycle order, so the move
-  // this tab exists for (Registered -> Registration Verified) is one tap.
+  // The status cell IS the editor (the owner 2026-07-29): tap to advance, shift-tap to go
+  // back, no dropdown. It used to cycle all 13 of the server's statuses in lifecycle
+  // order, which broke the stated goal two ways, a New unit was six taps from verified,
+  // and one tap PAST "Registration Verified" landed on "No Registration Verified", which
+  // fails the ^-anchored isRegistered test and silently un-ticks that install's Registered
+  // cell on the Board. So the cycle is now only what a human should ever set by hand.
+  // Everything else is a machine's word and stays display-only; the two Queue actions
+  // have their own buttons. A manual tick is a feature and must stay reachable in one
+  // click (the owner 2026-08-04), hence Verified first, from any machine status.
+  const HUMAN_STATUSES = ["Registration Verified", "Ignore", "New"];
   function statusPill(u) {
     const s = u.status || "";
     const cls = isRegistered(s) ? "done" : isQueued(s) ? "auto" : "pend";
     return `<span class="pill click ${cls}" data-eq="${esc(u.stEquipmentId)}" data-act="status" data-status="${esc(s)}"
       title="Click for the next status, shift-click for the previous"><span class="dot"></span>${esc(s || "-")}</span>`;
   }
-  // A status the server does not list (an old sheet value) sits at -1, so the first tap
-  // lands on the first listed status instead of getting stuck.
+  // A machine status is not in the cycle, so it sits at -1 and the first tap lands on
+  // Registration Verified, the move this tab exists for, and 121 of 140 units' end state.
   const nextStatus = (cur, back) => {
-    if (!regStatuses.length) return null;
-    const i = regStatuses.indexOf(cur);
-    return regStatuses[(i + (back ? -1 : 1) + regStatuses.length) % regStatuses.length];
+    const i = HUMAN_STATUSES.indexOf(cur);
+    if (i < 0) return HUMAN_STATUSES[0];
+    return HUMAN_STATUSES[(i + (back ? -1 : 1) + HUMAN_STATUSES.length) % HUMAN_STATUSES.length];
   };
   // Registration link: the brand's own registration / warranty-lookup page, opened in a
   // new tab with the unit's details copied to the clipboard so the human pastes, eyeballs
@@ -1630,9 +1780,13 @@
       b.mapsUrl ? `<a href="${esc(b.mapsUrl)}" target="_blank">${esc(b.city)}</a>` : esc(b.city || ""),
       b.slackUrl ? `<a href="${esc(b.slackUrl)}" target="_blank">Slack</a>` : "",
     ].filter(Boolean).join(" · ") : "";
-    return `<tr data-need="${needsAction(u) ? 1 : 0}" data-queued="${isQueued(u.status) ? 1 : 0}" data-reg="${isRegistered(u.status) ? 1 : 0}" data-status="${esc(u.status || "")}">
+    // one lowercased haystack per row, built once here rather than walking cells on every
+    // keystroke, the search box tests against it directly
+    const q = [u.customer, u.brand, u.model, u.serial, u.status, b?.city]
+      .filter(Boolean).join(" ").toLowerCase();
+    return `<tr data-eq="${esc(u.stEquipmentId)}" data-loc="${esc(u.locationId ?? "")}" data-need="${needsAction(u) ? 1 : 0}" data-queued="${isQueued(u.status) ? 1 : 0}" data-reg="${isRegistered(u.status) ? 1 : 0}" data-status="${esc(u.status || "")}" data-q="${esc(q)}">
       <td class="sel">${needsAction(u) ? `<input type="checkbox" class="selbox" data-eq="${esc(u.stEquipmentId)}" title="Select for registration">` : ""}</td>
-      <td class="job"><div class="cust">${nameHtml}</div>${sub ? `<div class="sub">${sub}</div>` : ""}</td>
+      <td class="job"><div class="cust">${nameHtml}<button class="histbtn" data-hist="${esc(u.stEquipmentId)}" data-name="${esc(u.customer || "")}" title="Change history" aria-label="Change history">${CLOCK}</button></div>${sub ? `<div class="sub">${sub}</div>` : ""}</td>
       <td><input type="text" class="fld f-brand" data-eq="${esc(u.stEquipmentId)}" data-act="brand" value="${esc(u.brand || "")}" placeholder="brand" maxlength="100"></td>
       <td><input type="text" class="fld f-model" data-eq="${esc(u.stEquipmentId)}" data-act="model" value="${esc(u.model || "")}" placeholder="model" maxlength="100"></td>
       <td><input type="text" class="fld f-serial" data-eq="${esc(u.stEquipmentId)}" data-act="serial" value="${esc(u.serial || "")}" placeholder="serial" maxlength="100"></td>
@@ -1646,35 +1800,43 @@
         : `<span class="nolink" title="No portal mapped for this brand">-</span>`}</td>
       <td class="reg-actions">
         <button class="regbtn" data-eq="${esc(u.stEquipmentId)}" data-act="queue_st">Queue ST</button>
+        ${canUndo(u.stEquipmentId)
+          ? `<button class="regbtn undo" data-eq="${esc(u.stEquipmentId)}" data-act="undo"
+               title="Put this unit back to ${esc(grace.get(u.stEquipmentId).prev)}">Undo</button>`
+          : ""}
       </td>
     </tr>`;
   }
-  // Status dropdown: a tickbox per distinct status in the data, controlling visibility
-  // as a layer AFTER the chip/toggle filtering. regHidden = the set of unticked (hidden)
-  // statuses, persisted. First-ever load defaults to hiding "Ignore", showing the rest.
-  // the stored set holds status STRINGS, so the 2026-07-29 rename is migrated on read;
-  // without it a browser that had hidden the old tag silently starts showing it again
-  let regHidden = (() => { const s = localStorage.getItem("wbRegHidden");
-    return s ? new Set(JSON.parse(s).map((v) => v === "Registration Verified by Human" ? "Registration Verified" : v)) : null; })();
-  const saveRegHidden = () => localStorage.setItem("wbRegHidden", JSON.stringify([...(regHidden || [])]));
-  // EVERY status the pill can set, not just the ones some unit happens to hold right now
-  // (the owner 2026-07-29: "make sure they are all there"). Listing only what was in the data
-  // meant a status you had just clicked a unter INTO could be missing from its own filter,
-  // and there was no way to pre-hide a status before the first unit reached it. Server
-  // order is lifecycle order; anything in the data the server does not list is appended so
-  // an old sheet value can still be filtered.
-  function renderStatusMenu(units) {
-    const inData = units.map((u) => u.status).filter(Boolean);
-    const statuses = [...regStatuses, ...inData.filter((s) => !regStatuses.includes(s))]
-      .filter((s, i, a) => a.indexOf(s) === i);
-    if (regHidden === null) { regHidden = new Set(statuses.filter((s) => s.toLowerCase() === "ignore")); saveRegHidden(); }
-    const n = (s) => inData.filter((x) => x === s).length;
-    $("reg-status-menu").innerHTML = statuses.length
-      ? statuses.map((s) => `<label><input type="checkbox" data-status="${esc(s)}" ${regHidden.has(s) ? "" : "checked"}>${esc(s)}
-          <span class="dd-n">${n(s)}</span></label>`).join("")
-      : `<label style="color:var(--ink-faint)">No statuses</label>`;
-    const shownN = statuses.filter((s) => !regHidden.has(s)).length;
-    $("reg-status-summary").textContent = shownN < statuses.length ? `Status (${shownN}/${statuses.length})` : "Status";
+  // ---- mis-click grace ----
+  // A status change round-trips to the server and rebuilds the whole tbody, so the row
+  // you just clicked vanished from the current filter instantly, with nothing to grab.
+  // Hold it visible for a beat, fade it, and offer a real Undo. Keyed by stEquipmentId
+  // and NOT by the DOM node, because renderRegistration() replaces every <tr>.
+  const GRACE_MS = 6000;
+  const grace = new Map(); // stEquipmentId -> { prev, to, timer }
+  // `to` is what this click wrote. Undo checks it against the unit's current status and
+  // backs off if they differ, because six seconds is long enough for a registration
+  // script to land a real result on that unit, putting `prev` back would throw away a
+  // pipeline write and leave the board claiming a status the DB no longer holds.
+  // Only a status the server will actually accept can be undone into; a blank `prev`
+  // (a unit that arrived with no status at all) would 400, so it gets no Undo button.
+  const canUndo = (id) => {
+    const g = grace.get(id);
+    if (!g || !g.prev) return false;
+    const cur = (regData?.units || []).find((u) => u.stEquipmentId === id);
+    return !cur || cur.status === g.to;
+  };
+  function holdRow(id, prev, to) {
+    clearTimeout(grace.get(id)?.timer);
+    // applyRegFilter as well as the render: renderRegistration deliberately bails while a
+    // field is focused, and without this the row would sit half-faded until the next poll
+    grace.set(id, { prev, to, timer: setTimeout(() => {
+      grace.delete(id); renderRegistration(); applyRegFilter();
+    }, GRACE_MS) });
+  }
+  function clearGrace(id) {
+    clearTimeout(grace.get(id)?.timer);
+    grace.delete(id);
   }
   // One customer's units render as one block, whatever the filters hide. Source order is
   // registration-sheet order, so a customer with a condenser plus two heads could arrive
@@ -1703,66 +1865,57 @@
     const units = regData.units || [];
     document.querySelector("#reg-tbl tbody").innerHTML = groupByCustomer(units).map(regRow).join("");
     $("reg-stamp").textContent = `${units.length} unit${units.length === 1 ? "" : "s"}`;
-    renderStatusMenu(units); // initializes regHidden on first load; must run before counting
     updateRegCounts(units);
     applyRegFilter();
     updateQueueBtn(); // fresh tbody = no ticks; reset the button
   }
-  // chip counts skip statuses hidden by the dropdown (Ignore by default), so the
-  // badge only ever counts rows that are actually findable in the table
+  // Chip counts are the whole data set now. The dropdown used to hide statuses from
+  // under them, which meant a chip could read 15 while the table showed 12.
   function updateRegCounts(units) {
-    const vis = units.filter((u) => !(regHidden && regHidden.has(u.status || "")));
-    $("rc-needs").textContent = vis.filter(needsAction).length;
-    $("rc-queued").textContent = vis.filter((u) => isQueued(u.status)).length;
-    $("rc-registered").textContent = vis.filter((u) => isRegistered(u.status)).length;
-    $("rc-all").textContent = vis.length;
+    $("rc-needs").textContent = units.filter(needsAction).length;
+    $("rc-queued").textContent = units.filter((u) => isQueued(u.status)).length;
+    $("rc-registered").textContent = units.filter((u) => isRegistered(u.status)).length;
+    $("rc-all").textContent = units.length;
   }
-  // The three chips partition the board: Needs Action is neither queued nor registered,
-  // Queued is waiting on a script, Registered is done. Queued had no chip, so ten units
-  // sat in a state you could only reach through All, and All did not show them either,
-  // because it hid registered rows unless a toggle was on. All means all now (minus what
-  // the Status dropdown hides), and the toggle is gone: it did nothing in the other two
-  // views, so its only real effect was making All a lie.
+  // One axis, one control. The chips split the units by what a human has to do, 
+  // Needs Action, Queued (waiting on a script), Registered, All, and search narrows
+  // whatever the chip picked. The per-status dropdown that used to AND itself on top of
+  // this was a second control over the same axis: it could empty the table while the
+  // chip still read 15, and it persisted per browser, so the owner's four machines each
+  // remembered a different set of hidden statuses.
   function applyRegFilter() {
-    let shown = 0, statusHid = 0;
+    let shown = 0, held = 0;
     document.querySelectorAll("#reg-tbl tbody tr").forEach((tr) => {
       let hide = regFilter === "needs" ? tr.dataset.need !== "1"
         : regFilter === "queued" ? tr.dataset.queued !== "1"
         : regFilter === "registered" ? tr.dataset.reg !== "1"
         : false;
-      // status dropdown is the visibility layer applied AFTER the chips
-      if (!hide && regHidden && regHidden.has(tr.dataset.status)) { hide = true; statusHid++; }
+      if (!hide && regQ && !tr.dataset.q.includes(regQ)) hide = true;
+      // a row whose own click filtered it away stays put until the grace timer ends
+      const holding = hide && grace.has(tr.dataset.eq);
+      if (holding) { hide = false; held++; }
+      tr.classList.toggle("fading", holding);
       tr.style.display = hide ? "none" : "";
       if (!hide) shown++;
     });
     $("reg-empty").style.display = shown === 0 ? "block" : "none";
     const parts = [`${shown} shown`];
     if (regFilter !== "all") parts.push("filtered");
-    if (statusHid) parts.push(`${statusHid} hidden by Status`);
+    if (regQ) parts.push(`matching "${regQ}"`);
+    if (held) parts.push(`${held} leaving`);
     $("reg-count").textContent = parts.join(" · ");
   }
-  // Click anywhere outside an open dropdown closes it, native <details> only toggles from
-  // its own summary, and testers kept clicking away and finding the menu still up. Class
-  // selector, not #reg-statusdd, so any future .statusdd gets it for free.
-  document.addEventListener("click", (ev) => {
-    document.querySelectorAll("details.statusdd[open]").forEach((d) => {
-      if (!d.contains(ev.target)) d.open = false;
-    });
-  });
-  $("reg-status-menu").addEventListener("change", (ev) => {
-    const cb = ev.target.closest("input[data-status]");
-    if (!cb) return;
-    regHidden ||= new Set();
-    if (cb.checked) regHidden.delete(cb.dataset.status); else regHidden.add(cb.dataset.status);
-    saveRegHidden();
-    if (regData) { renderStatusMenu(regData.units || []); updateRegCounts(regData.units || []); }
+  let regQ = "";
+  $("reg-q").addEventListener("input", () => {
+    regQ = $("reg-q").value.trim().toLowerCase();
     applyRegFilter();
   });
   async function loadRegistration() { // demo: inlined synthetic equipment, no server
     regData = DEMO_EQUIPMENT;
-    regStatuses = regData.statuses || regStatuses; // same mirror as live: the pill cycles this list
+    buildNeedsByLocation(regData.units || []); // same as live: board chips follow this data
     if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
     renderRegistration();
+    if (board) render();
   }
   async function equipAction(stEquipmentId, action, value) { // demo: edits live in-page, reset on reload
     const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
@@ -1778,19 +1931,57 @@
     }
     renderRegistration();
   }
+  // Chip click: open the Registration tab on Needs Action and flash that install's
+  // rows. Delegated because board rows are rebuilt on every render.
+  document.addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-regjump]");
+    if (!chip) return;
+    const loc = chip.dataset.regjump;
+    selectTab("registration");
+    const needsBtn = document.querySelector('.regf[data-regf="needs"]');
+    if (needsBtn && regFilter !== "needs") needsBtn.click();
+    const first = document.querySelector(`#reg-tbl tbody tr[data-loc="${CSS.escape(loc)}"]`);
+    if (first) {
+      first.scrollIntoView({ block: "center", behavior: "smooth" });
+      document.querySelectorAll(`#reg-tbl tbody tr[data-loc="${CSS.escape(loc)}"]`)
+        .forEach((tr) => { tr.classList.add("jumped"); setTimeout(() => tr.classList.remove("jumped"), 2000); });
+    }
+  });
+
   document.querySelectorAll(".regf").forEach((btn) => btn.addEventListener("click", () => {
     regFilter = btn.dataset.regf;
     document.querySelectorAll(".regf").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
     applyRegFilter();
   }));
-  localStorage.removeItem("wbShowReg"); // retired with the Show-registered toggle
+  localStorage.removeItem("wbShowReg");   // retired with the Show-registered toggle
+  localStorage.removeItem("wbRegHidden"); // retired with the per-status dropdown
   document.querySelector("#reg-tbl tbody").addEventListener("click", (ev) => {
+    // history first: the clock button lives inside the row like any other control, and
+    // the history endpoint is already keyed by stEquipmentId (the audit table overloads rowId),
+    // so registration units have had a change trail all along with nothing rendering it.
+    const hb = ev.target.closest(".histbtn");
+    if (hb) { openHistory(hb); return; }
+    // undo before the generic .regbtn branch, it shares the class but is not an action
+    // the server knows about, it just writes the previous status back
+    const un = ev.target.closest('.regbtn[data-act="undo"]');
+    if (un) {
+      const id = un.dataset.eq;
+      // re-check at click time, not just at render: the button was drawn up to six
+      // seconds ago and a script may have written this unit since
+      const ok = canUndo(id), prev = grace.get(id)?.prev;
+      clearGrace(id);
+      if (ok) equipAction(id, "status", prev);
+      else { renderRegistration(); applyRegFilter(); }
+      return;
+    }
     const b = ev.target.closest(".regbtn");
     if (b) { equipAction(b.dataset.eq, b.dataset.act); return; }
     const p = ev.target.closest('.pill[data-act="status"]');
     if (p) {
       const to = nextStatus(p.dataset.status, ev.shiftKey);
-      if (to) equipAction(p.dataset.eq, "status", to);
+      // remember where it came from BEFORE the save, so the row can be held on screen
+      // and put back if the tap was wrong
+      if (to) { holdRow(p.dataset.eq, p.dataset.status, to); equipAction(p.dataset.eq, "status", to); }
       return;
     }
     // Registration link: copy this unit's details, then let the anchor open the portal.

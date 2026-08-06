@@ -118,6 +118,33 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dimmer);font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}
 td{padding:6px;border-bottom:1px solid var(--band);vertical-align:top}
 tr:last-child td{border-bottom:0}
+/* WEEK 2 OF THE PAY PERIOD, as a colour block rather than a divider row, the master's rule,
+   same tokens. --hover is defined in every theme scope, so this follows dark mode on its own;
+   the top border marks the boundary and is written as an adjacent-sibling rule because there is
+   no "first element carrying this class" selector. */
+tr.wk2 td{background:var(--hover)}
+tr:not(.wk2) + tr.wk2 td{border-top:2px solid var(--line)}
+/* Raising a dispute: the reason box the tick reveals, and the sentence it leaves behind. */
+.notebox{display:flex;gap:5px}
+/* Why a dispute was refused, under the box still holding the text. Empty on every line that has
+   not failed, so it takes no room until it has something to say. */
+.dispute-err{font-size:11.5px;color:var(--warn);line-height:1.35;margin-top:4px}
+.dispute-err:empty{display:none}
+/* display:flex on a class BEATS the browser's own [hidden]{display:none}, so without this the
+   reason box sits open on every row and the tick reveals nothing. */
+.notebox[hidden]{display:none}
+.notebox input{flex:1 1 90px;min-width:0;font-family:var(--body);font-size:12px;padding:4px 7px;
+  border-radius:7px;border:1px solid var(--line);background:var(--band);color:var(--cream)}
+.notebox button[disabled]{opacity:.45;cursor:not-allowed}
+.disputed-why{font-size:11.5px;color:var(--warn);line-height:1.35}
+/* The money line is three blocks now: week 1, week 2, TOTAL. Wrapped so the group pins to the
+   right edge, the name is a <span> too, so margin-left:auto on `.pay.wk:first-of-type` matches
+   nothing and the figures land wherever the name happens to end. Master's rule, same words. */
+.who .payset{margin-left:auto;display:flex;align-items:baseline;gap:14px}
+.who .payset .pay{margin-left:0}
+.who .pay.wk{font-size:14px;text-align:right;color:var(--dim);min-width:132px}
+.who .pay.wk small{font-size:10.5px;letter-spacing:.06em}
+.who .pay.total{padding-left:14px;border-left:1px solid var(--line);text-align:right;min-width:118px}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .muted{color:var(--dim)}
 .strike{text-decoration:line-through;color:var(--dimmer)}
@@ -180,6 +207,13 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;font-si
   .stmt .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .stmt tfoot td{border-top:1.5px solid #000;border-bottom:0;font-weight:700;padding-top:7px}
   .stmt .mark{font-size:8.5pt;font-weight:700}
+  /* The week 1 / week 2 / TOTAL summary above the lines, and week 2 on paper. Browsers drop
+     background colour when printing unless told not to, so the top border is what always
+     survives and is doing the real work of showing where the week changes. */
+  .stmt .stmt-weeks{width:auto;min-width:52%;margin:0 0 12px}
+  .stmt .stmt-weeks td{border-bottom:1px solid #ddd}
+  .stmt tr.wk2 td{background:#f2f2f2;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .stmt tr:not(.wk2) + tr.wk2 td{border-top:1.5px solid #000}
   .stmt .stmt-foot{margin-top:16px;font-size:8.5pt;color:#555;border-top:1px solid #ccc;padding-top:8px}
   .stmt .stmt-none{padding:14px 0;color:#555}
   a{color:#000;text-decoration:none}
@@ -246,7 +280,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>My commission portal</span>
-  <span>demo v2026-08-04 · fictional data · edits reset on reload</span>
+  <span>demo v2026-08-06 · fictional data · edits reset on reload</span>
   <span id="foot-note" style="flex-basis:100%">Tick Approve when a line looks right, or Dispute when it does not; the office sees both right away. Nothing here changes the money itself.</span>
 </footer>
 </div>
@@ -1008,21 +1042,206 @@ async function post(path, body) {
   return done;
 }
 
-async function mark(lineId, action, value) {
+// TYPED-BUT-UNSUBMITTED DISPUTE REASONS, keyed by line id, and the errors that stopped them.
+//
+// Theo lost two of these on 2026-08-05, one saying a line was a turnover, one about the split,
+// and neither reached anybody: the audit trail holds no line write at all for that day. The
+// sentence somebody types here is the whole value of the feature and it is the ONLY thing on
+// this page that cannot be recovered by reloading, because it exists nowhere but in that box.
+// Three separate paths were destroying it, and they are one defect: the table is re-rendered
+// wholesale after every save, and a re-render builds every reason box empty and hidden from the
+// server payload, which is correct, because the server has never heard of an unsubmitted one.
+//
+// So the page holds them. A draft survives any number of re-renders and is dropped only when the
+// server has actually taken it, which is the one event that means the box has done its job.
+const DISPUTE_DRAFTS = new Map();
+const DISPUTE_ERRORS = new Map();
+
+// Put the drafts back after a render, with any error beside the box that earned it. Runs on
+// EVERY render, not only after a failure: an approve tick on some other line re-renders this
+// table too, and that quietly ate a half-typed reason three rows down.
+function restoreDisputeDrafts() {
+  for (const [id, text] of DISPUTE_DRAFTS) {
+    const box = document.querySelector('.notebox[data-for="' + id + '"]');
+    // The line is gone, or it is disputed now and renders its sentence instead of a box. Either
+    // way the draft has nothing to go back into, so it stops being one.
+    if (!box) { DISPUTE_DRAFTS.delete(id); DISPUTE_ERRORS.delete(id); continue; }
+    box.hidden = false;
+    const input = box.querySelector('input');
+    const btn = box.querySelector('button[data-dispute]');
+    if (input) input.value = text;
+    if (btn) btn.disabled = !text.trim();
+    const err = DISPUTE_ERRORS.get(id);
+    const slot = box.parentNode && box.parentNode.querySelector('[data-dispute-error]');
+    if (slot) slot.textContent = err || '';
+  }
+}
+
+async function mark(lineId, action, value, extra) {
   try {
-    await post('/api/line', { id: Number(lineId), action, value });
+    await post('/api/line', { id: Number(lineId), action, value, ...extra });
+    // TAKEN. Only here is the draft dropped, the server has it, and the row that comes back
+    // renders the sentence rather than the box.
+    DISPUTE_DRAFTS.delete(String(lineId));
+    DISPUTE_ERRORS.delete(String(lineId));
     await loadPeriod(CURRENT);
     toast('Saved');
-  } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
+  } catch (e) {
+    // THE REASON SURVIVES A REFUSAL. The reload below is still right, it resyncs the ticks with
+    // what the server actually holds, but it used to rebuild the reason box empty, so a dispute
+    // the server rejected took the sentence with it and the person had nothing left to retry.
+    // The draft is kept, and the error is recorded AGAINST THE LINE rather than left to a toast
+    // that wipes itself after six seconds: this is the one failure on the page where the next
+    // step is the person re-reading what they wrote.
+    if (extra && extra.reason != null) DISPUTE_ERRORS.set(String(lineId), e.message);
+    toast(e.message, 'err');
+    await loadPeriod(CURRENT);
+  }
+}
+
+// Show the reason box for one line and put the cursor in it, so the person who just said "this
+// is wrong" is already typing why.
+function revealDispute(lineId) {
+  const box = document.querySelector('.notebox[data-for="' + lineId + '"]');
+  if (!box) return;
+  box.hidden = false;
+  const input = box.querySelector('input');
+  if (input) input.focus();
+}
+
+// Send whatever is in one line's reason box, from the button or from Enter. Both have to go
+// through the same call: they are the same act, and the second one existing only as a button
+// handler is why Enter did nothing at all.
+function submitDispute(lineId) {
+  const input = document.querySelector('input[data-dispute-input="' + lineId + '"]');
+  const reason = input ? input.value.trim() : '';
+  if (!reason) return;
+  // Held BEFORE the request, so a failure has something to restore and a refresh mid-flight
+  // does not lose it either. mark() drops it on success.
+  DISPUTE_DRAFTS.set(String(lineId), reason);
+  DISPUTE_ERRORS.delete(String(lineId));
+  const btn = document.querySelector('button[data-dispute="' + lineId + '"]');
+  if (btn) btn.disabled = true; // one dispute per click; the re-render replaces this button anyway
+  mark(lineId, 'disputed', 1, { reason });
 }
 
 // One delegated listener; the table re-renders after every save.
 document.addEventListener('change', (ev) => {
   const t = ev.target;
-  if (t.dataset && t.dataset.line && (t.dataset.act === 'tech_approved' || t.dataset.act === 'disputed')) {
+  if (!t.dataset || !t.dataset.line) return;
+  // TICKING ASKS FOR THE REASON, it does not raise the dispute (the owner, 2026-08-05). The tick
+  // goes straight back off: the mark and its reason are written together by the server, and a
+  // box left checked with nothing saved would be lying about the line. Unticking is unchanged,
+  // withdrawing an objection needs no sentence.
+  if (t.dataset.act === 'disputed' && t.checked) {
+    t.checked = false;
+    revealDispute(t.dataset.line);
+    return;
+  }
+  if (t.dataset.act === 'tech_approved' || t.dataset.act === 'disputed') {
     mark(t.dataset.line, t.dataset.act, t.checked ? 1 : 0);
   }
 });
+
+// The Dispute button is dead until there is real text in the reason. The server refuses an empty
+// one and the schema will not store it; this is only so the refusal never has to happen.
+//
+// EVERY KEYSTROKE IS ALSO HELD, which is what makes an unsubmitted reason survive somebody
+// ticking Approve on another line, the save that follows re-renders this whole table.
+// Hold one line's typed reason, and drop any refusal it was carrying, that refusal was about
+// the sentence which has just changed. Its OWN function so the suite can RUN it rather than grep
+// for it: this is the half of the fix that makes an unsubmitted reason survive somebody ticking
+// Approve three rows down, and a listener body is not liftable. Answers whether an error was
+// cleared, so the caller can blank the slot it was in.
+function holdDisputeDraft(id, value) {
+  if (value.trim()) DISPUTE_DRAFTS.set(id, value); else DISPUTE_DRAFTS.delete(id);
+  return DISPUTE_ERRORS.delete(id);
+}
+
+document.addEventListener('input', (ev) => {
+  const t = ev.target;
+  if (!t.dataset || !t.dataset.disputeInput) return;
+  const id = t.dataset.disputeInput;
+  const btn = document.querySelector('button[data-dispute="' + id + '"]');
+  if (btn) btn.disabled = !t.value.trim();
+  if (holdDisputeDraft(id, t.value)) {
+    const slot = t.closest('td') && t.closest('td').querySelector('[data-dispute-error]');
+    if (slot) slot.textContent = '';
+  }
+});
+
+// ENTER SUBMITS, exactly as the button does. It did nothing at all before, the box sits in no
+// <form>, so there was no implicit submit to inherit, and "type the reason and press Enter" is
+// what everybody does. Theo's two lost reasons on 2026-08-05 went this way: typed, Entered, and
+// the page simply sat there looking as though it had taken them.
+document.addEventListener('keydown', (ev) => {
+  const t = ev.target;
+  if (ev.key !== 'Enter' || !t.dataset || !t.dataset.disputeInput) return;
+  ev.preventDefault();
+  submitDispute(t.dataset.disputeInput);
+});
+
+document.addEventListener('click', (ev) => {
+  const t = ev.target;
+  if (!t.dataset || !t.dataset.dispute) return;
+  submitDispute(t.dataset.dispute);
+});
+
+// The two weeks of the period on screen, READ FROM THE PAYLOAD, never derived by adding 7 days
+// here. The master carries the same warning: a second copy of the pay-period arithmetic in a
+// page is how "Week 2" starts naming a different Monday than the one the export locks.
+const PERIOD_WEEKS = () => ((DATA && DATA.period && DATA.period.weeks) || []);
+// The 7-day span a week id covers, for a label. Arithmetic on the END of a known Monday, which
+// is display only, it never decides which week anything pays in.
+const weekLabel = (w) => {
+  if (!w) return '';
+  const md = (d) => { const [, m, dd] = d.split('-'); return `${+m}/${+dd}`; };
+  const end = new Date(Date.UTC(...w.split('-').map((n, i) => (i === 1 ? +n - 1 : +n))));
+  end.setUTCDate(end.getUTCDate() + 6);
+  return `${md(w)} - ${end.getUTCMonth() + 1}/${end.getUTCDate()}`;
+};
+// Which week of the pay period a line pays in, off the period's own week list. Same rule as the
+// master: week_id, never paid_on, a deferred line's money moved in a week it is not paid in.
+const weekIndex = (l) => { const i = PERIOD_WEEKS().indexOf(l.week_id); return i < 0 ? 9 : i; };
+const byWeek = (lines) => lines.map((l, i) => [l, i])
+  .sort((a, b) => weekIndex(a[0]) - weekIndex(b[0]) || a[1] - b[1]).map(([l]) => l);
+
+// Week 1 / week 2 / TOTAL. The four week figures come from the server off the SAME predicates
+// the Gusto file is built with, so what a tech reads here and what their payslip says cannot
+// drift apart. TOTAL is every kind, on call and reimbursements are pay too, so it is not
+// these four added up.
+function weekPay(data, status) {
+  const w = (n, label) => '<span class="pay wk"><small>' + label + '</small>'
+    + '<br>' + money(data['w' + n + '_commission'] || 0) + ' <small>comm</small>'
+    + '<br>' + money(data['w' + n + '_bonus'] || 0) + ' <small>bonus</small></span>';
+  const weeks = PERIOD_WEEKS();
+  return '<span class="payset">'
+    + w(1, 'Week 1' + (weeks[0] ? ' · ' + weekLabel(weeks[0]) : ''))
+    + w(2, 'Week 2' + (weeks[1] ? ' · ' + weekLabel(weeks[1]) : ''))
+    + '<span class="pay total">' + money(data.total)
+    + '<br><small>' + (status === 'open' ? 'TOTAL so far' : 'TOTAL') + '</small></span></span>';
+}
+
+// The reason box the Dispute tick reveals, and the sentence once it exists. Mirrors the
+// dashboard's copy of this, deliberately, since the two pages render different tables and the
+// shared piece is the flow, not the row.
+function disputeCell(l) {
+  if (l.disputed) {
+    return '<div class="disputed-why"><b>Disputed</b>'
+      + (l.dispute_reason ? ' · ' + esc(l.dispute_reason) : '') + '</div>';
+  }
+  return '<div class="notebox" data-for="' + l.id + '" hidden>'
+    + '<input type="text" maxlength="500" data-dispute-input="' + l.id + '" placeholder="why?"'
+    + ' aria-label="Reason for the dispute">'
+    + '<button class="btn" type="button" data-dispute="' + l.id + '" disabled>Dispute</button>'
+    + '</div>'
+    // WHY IT DID NOT GO, beside the box holding what did not go. A toast wipes itself after six
+    // seconds and this is the one failure on the page whose next step is re-reading the sentence
+    // you just wrote; six seconds is not long enough to read an error, look at your text and
+    // decide. Filled by restoreDisputeDrafts from DISPUTE_ERRORS, cleared on the next keystroke.
+    // Empty and inert on every line that has not failed, so it costs a row nothing.
+    + '<div class="dispute-err" data-dispute-error="' + l.id + '" role="alert"></div>';
+}
 
 function lineRow(l) {
   const dates = lineDates(l);
@@ -1037,7 +1256,7 @@ function lineRow(l) {
     : '<td class="num muted">' + (l.pct == null ? '' : pct(l.pct)) + '</td>';
   const markCell = (act, on, label) => '<td style="text-align:center"><input type="checkbox" data-line="' + l.id
     + '" data-act="' + act + '"' + (on ? ' checked' : '') + ' aria-label="' + label + '" title="' + label + '"></td>';
-  return '<tr>'
+  return '<tr' + (weekIndex(l) === 1 ? ' class="wk2"' : '') + '>'
     + markCell('tech_approved', l.tech_approved, 'Approve, this line looks right to me')
     + markCell('disputed', l.disputed, 'Dispute, I question this line')
     + '<td>' + customerCell(l) + '</td>'
@@ -1059,6 +1278,12 @@ function lineRow(l) {
     + rateCell
     + '<td class="num">' + amount + '</td>'
     + '<td style="text-align:center">' + (l.office_approved ? '<span class="office-ok" title="Confirmed by the office">&#10003;</span>' : '') + '</td>'
+    // The reason box, and the sentence once it is written. This is the FIRST text input this
+    // page has ever had: a tech could say "this is wrong" and not one word about why, and the
+    // office then chased it by phone. Same shape the dashboard uses, same server refusal behind
+    // it, and still no confirm()/prompt(), a native modal blocks the automation these pages
+    // are verified with.
+    + '<td>' + disputeCell(l) + '</td>'
     + '</tr>';
 }
 
@@ -1110,7 +1335,7 @@ async function loadPeriodInner(id, token) {
   const status = data.period.status || 'open';
   document.getElementById('btn-print').disabled = false;
 
-  const rows = data.lines.map(lineRow).join('');
+  const rows = byWeek(data.lines).map(lineRow).join('');
   // The office-preview banner: an admin opened this tech's portal hostname. Same payload
   // a tech gets, said out loud so it never reads as the portal leaking the master view.
   const preview = data.preview
@@ -1120,7 +1345,10 @@ async function loadPeriodInner(id, token) {
     : '';
   document.getElementById('statement').innerHTML = preview + '<div class="card">'
     + '<div class="who"><span class="name">' + esc(data.person.name) + '</span>'
-    + '<span class="pay">' + money(data.total) + '<br><small>' + (status === 'open' ? 'so far this period' : 'this period') + '</small></span></div>'
+    // THE SAME BREAKDOWN THE OFFICE SEES. A pay period is two workweeks and Gusto is now paid
+    // per week, so a tech checking their statement against their payslip needs the same four
+    // figures the file carries, one fortnight total cannot be reconciled against it.
+    + weekPay(data, status) + '</div>'
     + (data.person.note ? '<div class="person-note">' + esc(data.person.note) + '</div>' : '')
     + (data.lines.length
       ? '<div class="scroll"><table><thead><tr>'
@@ -1135,19 +1363,40 @@ async function loadPeriodInner(id, token) {
         + ' The shop never receives it, so commission does not pay on it.">Financing</th>'
         + '<th class="num">Basis</th><th class="num">Rate</th><th class="num">Amount</th>'
         + '<th style="width:52px" title="Confirmed by the office">Office</th>'
+        + '<th style="width:170px" title="Why you disputed this line">Why</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
       : '<div class="empty">No commission lines in this pay period.</div>')
     + (status === 'open' ? ''
       : '<div class="frozen">This pay period is ' + esc(status) + '. You can still Approve or Dispute a line, that is exactly what these marks are for after payday.</div>')
     + '</div>';
+  // LAST, after the table exists. Every reason somebody has typed and not yet had taken goes
+  // back into its box, including the one whose POST was just refused, which is why the failure
+  // path can go on reloading to resync the ticks without eating the sentence.
+  restoreDisputeDrafts();
   return true;
+}
+
+// Week 1 / week 2 / TOTAL for the printed sheet. Reads the four figures off the payload, which
+// the server computed with the same predicates the Gusto file uses.
+function stmtWeekSummary(d, total) {
+  if (d.w1_commission == null && d.w2_commission == null) return '';
+  const weeks = (d.period && d.period.weeks) || [];
+  const col = (n) => '<td>Week ' + n + (weeks[n - 1] ? ' &middot; ' + esc(weekLabel(weeks[n - 1])) : '') + '</td>'
+    + '<td class="num">' + money(d['w' + n + '_commission'] || 0) + '</td>'
+    + '<td class="num">' + money(d['w' + n + '_bonus'] || 0) + '</td>';
+  return '<table class="stmt-weeks"><thead><tr><th>Week</th><th class="num">Commission</th>'
+    + '<th class="num">Bonus</th></tr></thead><tbody>'
+    + '<tr>' + col(1) + '</tr><tr>' + col(2) + '</tr>'
+    + '<tr><td><b>TOTAL</b></td><td class="num" colspan="2"><b>' + money(total) + '</b></td></tr>'
+    + '</tbody></table>';
 }
 
 // ---- printable statement: same sheet the office prints, marks included ----
 function statementHtml(person, lines) {
   const marks = (l) => [l.tech_approved ? 'approved' : '', l.office_approved ? 'office approved' : '',
     l.disputed ? 'DISPUTED' : '', l.earned_amount != null ? 'paid ahead' : ''].filter(Boolean).join(', ');
-  const rows = lines.map((l) => { const dates = lineDates(l); return '<tr>'
+  const rows = byWeek(lines).map((l) => { const dates = lineDates(l); return '<tr'
+    + (weekIndex(l) === 1 ? ' class="wk2"' : '') + '>'
     + '<td class="num">' + dates[0] + '</td>'
     + '<td class="num">' + dates[1] + '</td>'
     + '<td>' + esc(l.customer_name || l.membership_customer_name || (l.source === 'manual' ? '' : 'unknown customer')) + '</td>'
@@ -1164,7 +1413,10 @@ function statementHtml(person, lines) {
     + '<td class="num">' + money(l.payable)
     + (l.zeroed || l.override_amount != null ? '<div class="stmt-line-note">computed ' + money(l.computed_amount) + '</div>' : '')
     + '</td>'
-    + '<td class="mark">' + esc(marks(l)) + '</td></tr>'; }).join('');
+    // The written reason rides with the mark, on the sheet the dispute is usually raised from.
+    + '<td class="mark">' + esc(marks(l))
+    + (l.disputed && l.dispute_reason ? '<div class="stmt-line-note">' + esc(l.dispute_reason) + '</div>' : '')
+    + '</td></tr>'; }).join('');
   const total = lines.reduce((s, l) => s + (l.payable || 0), 0);
   const d = DATA || {};
   return '<section class="stmt">'
@@ -1174,6 +1426,9 @@ function statementHtml(person, lines) {
     + '<div class="stmt-meta">Boreal Comfort Co. The computed number is a draft; the approved number is what pays.'
     + ' Question a line by ticking Dispute on your portal, or tell the office.</div>'
     + (person.note ? '<div class="stmt-person-note">' + esc(person.note) + '</div>' : '')
+    // The same week 1 / week 2 / TOTAL breakdown the screen shows, so the printed sheet can be
+    // held against a Gusto payslip that now pays the two weeks into separate columns.
+    + stmtWeekSummary(d, total)
     + (lines.length
       ? '<table><thead><tr><th>Installed</th><th>Paid</th><th>Customer</th><th>Line</th>'
         + '<th class="num">Total</th><th class="num">Financing</th>'

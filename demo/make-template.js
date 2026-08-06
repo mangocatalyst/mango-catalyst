@@ -130,6 +130,16 @@ swap(
   'const cLink = m => m.cust ? `<a href="https://go.servicetitan.com/#/Customer/${m.cust}" target="_blank" rel="noopener" style="color:var(--teal-bri);text-decoration:none;font-weight:600">${esc(m.name)}</a>` : esc(m.name);',
   'const cLink = m => esc(m.name); // demo: ServiceTitan deep links disabled'
 );
+// Job Costing (donor 25010ea/3f0ceca, hidden beta) brought two more deep links.
+// Each collapses to the inert branch it already carries, so the cells read the same.
+swap(`    const custLink = j => j.custId
+      ? \`<a href="https://go.servicetitan.com/#/Customer/\${j.custId}" target="_blank" rel="noopener" style="color:var(--teal-bri);text-decoration:none">\${esc(j.customer || 'unknown')}</a>\`
+      : esc(j.customer || 'unknown');`,
+  `    const custLink = j => esc(j.customer || 'unknown'); // demo: ServiceTitan deep links disabled`);
+swap(`    const typeLink = j => j.jobIds && j.jobIds.length
+      ? \`<a href="https://go.servicetitan.com/#/Job/Index/\${j.jobIds[0]}" target="_blank" rel="noopener" class="hint" style="color:var(--teal-bri);text-decoration:none">\${esc(j.type)}</a>\`
+      : \`<span class="hint">\${esc(j.type)}</span>\`;`,
+  `    const typeLink = j => \`<span class="hint">\${esc(j.type)}</span>\`; // demo: ServiceTitan deep links disabled`);
 
 /* ---------- demo chrome ---------- */
 // the north-star star field is NorthStar brand, not MC
@@ -140,7 +150,7 @@ swap('<button class="chip" id="w-default">Save as default for everyone</button>'
   '<button class="chip" id="w-default" style="display:none">Save as default for everyone</button>');
 // demo's own version stamp
 swap(/<span>v(\d{4}-\d{2}-\d{2}\.\d+)<\/span>/.source.length && html.match(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/)[0],
-  '<span>demo v2026-07-13.1</span>');
+  '<span>demo v2026-08-06.1</span>');
 
 // a code comment names real NS installers; caught by the validator 2026-07-14
 swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap from
@@ -163,7 +173,9 @@ html = scrubNames(html);
 /* ---------- guardrails ---------- */
 assertNoRealNames(html, 'the demo template');
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
-if (/go\.servicetitan\.com/.test(html)) throw new Error('live ServiceTitan link survived the transform');
+const stLeft = html.match(/[^\n]*go\.servicetitan\.com[^\n]*/g);
+if (stLeft) throw new Error(`live ServiceTitan link survived the transform (${stLeft.length}):\n` +
+  stLeft.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo template');
 
 fs.writeFileSync(path.join(OUT_DIR, 'index.template.html'), html);

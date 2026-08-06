@@ -135,13 +135,8 @@ swap('<script>\n  const TYPE = {', `<script>
   // tags + paired serials; Gree/Bosch have no warranty window so show no badge. ----
   const DEMO_EQUIPMENT = {
     deadlines: { maytag_rheem: 60, mitsubishi: 90, mitsubishi_cutoff: "03-31", fujitsu: 60 },
-    // Mirrors server.js REG_STATUSES. Without it regStatuses stays [] and the
-    // status pill is a dead control in the demo (it cycles this list, not the
-    // statuses present in the rows).
-    statuses: ["New", "Queued for Registration", "Queued for ST", "Needs Grouping",
-      "Needs Manual Registration", "Registered", "Registration Verified",
-      "No Registration Verified", "Equipment Received ST", "Error",
-      "Error - Registration", "No Equipment Listed", "Ignore"],
+    // No statuses list: upstream dropped regStatuses when the pill stopped cycling
+    // the server's allowlist, so the chip counts come from the rows themselves.
     units: [
       { customer: "Havermark, Petra", brand: "Fujitsu", model: "AOU12RLFW", serial: "FUJ-8823-C", installDate: D(-55), status: "Needs registration", stEquipmentId: "EQ-102", groupTag: "", pairedSerial: "" },
       { customer: "Brandvold, Roald", brand: "Maytag", model: "PSA4BF", serial: "MAY-3391-B", installDate: D(-48), status: "Needs registration", stEquipmentId: "EQ-103", groupTag: "", pairedSerial: "" },
@@ -225,16 +220,18 @@ swap(`  async function loadRegistration() {
       const fresh = await r.json();
       if (my !== regSeq) return; // a save started after this poll; its answer is newer
       regData = fresh;
-      regStatuses = regData.statuses || regStatuses; // server owns the allowlist; page mirrors it
+      buildNeedsByLocation(regData.units || []); // board chips follow the same data
       if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
       renderRegistration();
+      if (board) render(); // chips live on board rows, so they need this data to redraw
     } catch (e) { /* leave hidden; board unaffected */ }
   }`,
   `  async function loadRegistration() { // demo: inlined synthetic equipment, no server
     regData = DEMO_EQUIPMENT;
-    regStatuses = regData.statuses || regStatuses; // same mirror as live: the pill cycles this list
+    buildNeedsByLocation(regData.units || []); // same as live: board chips follow this data
     if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
     renderRegistration();
+    if (board) render();
   }`);
 swap(`  async function equipAction(stEquipmentId, action, value) {
     const my = ++regSeq;
@@ -309,13 +306,21 @@ swap('Zack is off Mondays.', 'Eli is off Mondays.');
 // newline. Eating the newline would pull the next line of code into a comment.
 html = html.replace(/ *[–—] */g, ', ');
 
+// A comment that merely NAMES an endpoint is inert, but the guard below is a string
+// scan and cannot tell prose from a fetch. Rewrite the mention, keep the sentence.
+// Anchorless on purpose: upstream adds comments like this constantly, and a comment
+// must never be the thing that stops the demo from baking.
+html = html.replace(/(\/\/[^\n]*?)\/api\/(\w+)/g, '$1the $2 endpoint');
+
 /* ---------- names: the catch-all, after every anchored swap ---------- */
 html = scrubNames(html);
 
 /* ---------- guardrails ---------- */
 assertNoRealNames(html, 'the whiteboard demo');
 if (/northstar|passion one/i.test(html)) throw new Error('NS branding survived the transform');
-if (/servicetitan\.com|slack\.com|\/api\/flip|\/api\/equipment|\/api\/equip|\/api\/history|whiteboard\.json|sales-summary\.json/i.test(html)) throw new Error('live endpoint survived the transform');
+const live = html.match(/[^\n]*(servicetitan\.com|slack\.com|\/api\/flip|\/api\/equipment|\/api\/equip|\/api\/history|whiteboard\.json|sales-summary\.json)[^\n]*/gi);
+if (live) throw new Error(`live endpoint survived the transform (${live.length}):\n` +
+  live.map(l => '  ' + l.trim().slice(0, 120)).join('\n'));
 for (const ch of ['–', '—']) if (html.includes(ch)) throw new Error('em/en dash in demo artifact');
 
 fs.writeFileSync(OUT, html);

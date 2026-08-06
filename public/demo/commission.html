@@ -133,6 +133,15 @@ select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal-bri);outlin
 .who .name{font-family:var(--body);font-weight:600;font-size:17px;letter-spacing:.01em;color:var(--cream)}
 .who .pay{margin-left:auto;font-weight:600;font-size:19px;color:var(--num);font-variant-numeric:tabular-nums}
 .who .pay small{font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+/* THE MONEY LINE IS THREE BLOCKS NOW: week 1, week 2, TOTAL. Only the first gets margin-left
+   auto, so the three stay together on the right instead of spreading across the row. The two
+   week blocks are quieter than the total on purpose, the total is the number being paid. */
+.who .payset{margin-left:auto;display:flex;align-items:baseline;gap:14px}
+.who .payset .pay{margin-left:0}
+.who .pay.wk{font-size:14px;text-align:right;color:var(--dim);min-width:132px}
+.who .pay.wk small{font-size:10.5px;letter-spacing:.06em}
+/* Fixed width so TOTAL lines up down the whole list, which is the point of the column. */
+.who .pay.total{padding-left:14px;border-left:1px solid var(--line);text-align:right;min-width:118px}
 /* The card is a disclosure now: the summary is the scan view (name, marks, what they are
    paid) and the body holds the lines, Print and the add-line control. Same rotating
    marker as details.tnfr below, so every expander on the page reads as one idiom. Cards open
@@ -149,6 +158,42 @@ details.person[open]>summary{margin-bottom:10px}
 /* The card's footer: Print, and the add-line row. Keeps the dashed rule the wage table used
    to share, because it still separates the lines above from the controls below. */
 .cardfoot{display:flex;align-items:flex-end;gap:12px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+/* THE HOURS HALF of a person's pay, under their lines: Gusto's imported hours at the FLSA
+   regular rate for each workweek. Same dashed rule and muted heading Upcoming uses, so a card
+   reads as sections rather than as one long table. Nothing in it is money this page pays.
+
+   A DISCLOSURE SINCE 2026-08-06 (the owner): closed it says what the fortnight came to, open it
+   shows the worksheet those figures came out of. Same rotating marker as details.tnfr, so
+   every expander on the page still reads as one idiom. */
+details.wagerow{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+details.wagerow>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:8px}
+details.wagerow>summary::-webkit-details-marker{display:none}
+details.wagerow>summary::before{content:'\25B8';font-size:10px;color:var(--dimmer);align-self:center;
+  transition:transform .15s ease}
+details.wagerow[open]>summary::before{transform:rotate(90deg)}
+details.wagerow>summary:hover .wagehead{color:var(--teal)}
+.wagehead{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dimmer)}
+/* WHAT THE FORTNIGHT CAME TO, on the closed line: week 1, week 2 and the total they add to.
+   Deliberately the same shape as the card's own money line above it (.payset) one size down,
+   that one breaks commission and bonus out per week, this one breaks hourly and overtime out
+   per week, and reading them as a pair is the whole point of putting them in the same idiom. */
+.wagesum{margin-left:auto;display:flex;align-items:baseline;gap:14px;text-align:right;
+  font-variant-numeric:tabular-nums;font-weight:600;font-size:13px;color:var(--dim)}
+.wagesum small{font-size:10px;color:var(--dim);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.wagesum .ws{min-width:104px}
+/* Fixed width and a rule, so TOTAL lines up down a long list exactly as the money line's does. */
+.wagesum .tot{padding-left:14px;border-left:1px solid var(--line);min-width:104px;color:var(--num);font-size:15px}
+/* The split control, in the BODY and never in the summary: a form field inside a <summary>
+   toggles the disclosure on the way to its own click, which is the same trap the Print button
+   hit on the card itself. Typing a week-1 figure must not slam the worksheet shut. */
+.wagesplit{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);margin:8px 0 4px}
+.wagesplit input{width:74px}
+.wagesplit label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dimmer);font-weight:600}
+/* The week a payroll row covers. Not a number despite sitting in a .num column, so it keeps the
+   right alignment of its neighbours without their tabular figures fighting the hyphen. */
+.wagerow .wk{color:var(--dim);font-variant-numeric:normal;white-space:nowrap}
+/* The TOTAL line under the two weeks, which is the two of them added and nothing else. */
+.wagerow tr.tot td{border-top:1px solid var(--line);font-weight:600}
 /* A date that is a SOLD date standing in the Paid column, because the sale invoice is older
    than this tracker. Italic so it never passes for the paid date beside it. */
 .sold{font-style:italic}
@@ -165,6 +210,24 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dimmer);font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}
 td{padding:6px;border-bottom:1px solid var(--band);vertical-align:top}
 tr:last-child td{border-bottom:0}
+/* WEEK 2 OF THE PAY PERIOD, as a colour block rather than a divider row (the owner, 2026-08-05).
+   --hover is a palette token defined in all three theme scopes, so this follows dark mode on
+   its own; a literal hex here would be invisible or blinding in one of them. The top border is
+   what makes the boundary readable when a long list scrolls. */
+tr.wk2 td{background:var(--hover)}
+/* The boundary itself: the first week-2 row is the one that FOLLOWS a week-1 row. Written as an
+   adjacent-sibling rule because there is no "first element carrying this class" selector, and
+   :first-of-type would match the first <tr> in the table whatever week it belongs to. */
+tr:not(.wk2) + tr.wk2 td{border-top:2px solid var(--line)}
+/* Raising a dispute: the reason box the tick reveals, and the sentence it leaves behind. */
+.notebox{display:flex;gap:5px;margin-top:5px}
+/* display:flex on a class BEATS the browser's own [hidden]{display:none}, so without this the
+   reason box sits open on every row in the table and the tick reveals nothing. */
+.notebox[hidden]{display:none}
+.notebox input{flex:1 1 90px;min-width:0;font-family:var(--body);font-size:12px;padding:4px 7px;
+  border-radius:7px;border:1px solid var(--line);background:var(--band);color:var(--cream)}
+.notebox button[disabled]{opacity:.45;cursor:not-allowed}
+.disputed-why{font-size:11.5px;color:var(--warn);margin-top:4px;line-height:1.35}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .muted{color:var(--dim)}
 .strike{text-decoration:line-through;color:var(--dimmer)}
@@ -318,6 +381,15 @@ input[type=checkbox][data-act=disputed]:checked{accent-color:var(--warn)}
   .stmt .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .stmt tfoot td{border-top:1.5px solid #000;border-bottom:0;font-weight:700;padding-top:7px}
   .stmt .mark{font-size:8.5pt;font-weight:700}
+  /* The week 1 / week 2 / TOTAL summary, above the lines: narrow, because it is three rows of
+     two figures and a full-width table would read as the statement itself. */
+  .stmt .stmt-weeks{width:auto;min-width:52%;margin:0 0 12px}
+  .stmt .stmt-weeks td{border-bottom:1px solid #ddd}
+  /* WEEK 2, ON PAPER. Browsers drop background colour when printing unless told not to, so the
+     rule that reads on screen would print as nothing at all, the top border is what survives
+     either way and is doing the real work of showing where the week changes. */
+  .stmt tr.wk2 td{background:#f2f2f2;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .stmt tr:not(.wk2) + tr.wk2 td{border-top:1.5px solid #000}
   .stmt .stmt-foot{margin-top:16px;font-size:8.5pt;color:#555;border-top:1px solid #ccc;padding-top:8px}
   .stmt .stmt-none{padding:14px 0;color:#555}
   a{color:#000;text-decoration:none}
@@ -378,9 +450,18 @@ try {
       <button class="btn go" id="btn-approve" type="button">Approve</button>
       <button class="btn warn" id="btn-reopen" type="button" style="display:none">Reopen</button>
       <button class="btn" id="btn-print-all" type="button" title="One printable statement per person, page-break between them">Print all statements</button>
-      <!-- ONE WEEK PER FILE (the owner, 2026-07-31). Commission changes the regular rate an hour of
-           overtime is paid at, and Gusto gets that right on its own PROVIDED it is told which
-           workweek the money belongs to. A fortnight in one file cannot say. -->
+      <!-- ONE FILE PER PAY PERIOD (the owner, 2026-08-05), because Gusto accepts exactly one and
+           two weekly files could never both be imported. The reason the weekly split existed is
+           unchanged and still right, commission changes the regular rate an hour of overtime is
+           paid at, and Gusto needs to know which workweek the money is from, so the workweek is
+           said in the COLUMNS instead of in the file boundary. See DEFAULT_GUSTO_COLUMNS.
+
+           THE TWO WEEKLY BUTTONS STAY for now. The week-2 columns do not exist in Gusto yet
+           (the owner has no access until roughly 08-19), so the period export correctly refuses
+           until they do, and these are the only way payroll goes out in the meantime. They come
+           out once one real import has proved the one-file path. -->
+      <button class="btn go" id="btn-export-period" type="button"
+        title="One file for the whole pay period, week 1 and week 2 in their own columns">Export pay period</button>
       <button class="btn" id="btn-export-w1" type="button">Export Week 1</button>
       <button class="btn" id="btn-export-w2" type="button">Export Week 2</button>
     </div>
@@ -392,6 +473,23 @@ try {
      from in there. -->
 <div id="period-view">
 <div id="gates"></div>
+
+<!-- GUSTO'S TIMESHEET FILE, for the pay period on screen. Its regular_hours/overtime_hours are
+     PERIOD totals and it carries no dates at all, so which week a fortnight's hours fell in is
+     entered per person on the cards below. NOTHING HERE IS EXPORTED, Gusto pays the hours; this
+     is what lets the tracker work out the overtime premium those hours should have earned once
+     the week's commission and bonuses are counted, so the payslip can be checked against it.
+     Collapsed by default: it is a once-a-fortnight job on a page read every day. -->
+<details class="card" id="hours">
+  <summary><b>Payroll hours</b> <span class="muted" id="hours-state"></span></summary>
+  <div class="muted" style="font-size:13px;margin:10px 0 8px">Download the timesheet export from
+    Gusto for this pay period (Payroll &rarr; the pay period &rarr; import timesheet) and paste
+    the whole file in, header row included. Re-importing replaces this period's hours.</div>
+  <textarea id="hours-text" rows="5" spellcheck="false"
+    style="width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px"
+    placeholder="last_name,first_name,title,gusto_employee_id,regular_hours,overtime_hours,&hellip;"></textarea>
+  <div class="cardfoot"><button class="btn go" id="hours-save" type="button">Import hours</button></div>
+</details>
 
 <h2>By person</h2>
 <div class="people" id="people"></div>
@@ -426,7 +524,7 @@ try {
   <span style="margin-left:auto;display:flex;gap:6px"><button class="btn" id="theme-btn" type="button">Dark mode</button><button class="btn" id="fs-btn" type="button">Aa M</button></span>
   <span>Boreal Comfort Co</span>
   <span>Commission tracker</span>
-  <span>demo v2026-08-04 · fictional data · edits reset on reload</span>
+  <span>demo v2026-08-06 · fictional data · edits reset on reload</span>
 </footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1309,8 +1407,215 @@ function deferBlock(l, open) {
 // each card, its rate cells, its PTO and on-call boxes and the three sign-off checkboxes on
 // it. Gusto owns hourly pay now (the owner, 2026-07-30) and none of it has a source any more.
 
-function personCard(p, lines, open, tnfrItems, people) {
-  const rows = lines.map((l) => {
+// WHICH WEEK OF THE PAY PERIOD A LINE PAYS IN. Read off the period's own week list, never by
+// adding 7 days here (see the PERIOD_WEEKS comment) and never off paid_on: a DEFERRED line's
+// week_id deliberately differs from the date its money moved, and week_id is what pays.
+// An unrecognised week sorts last rather than throwing, a stale page mid-reload is not an error.
+const weekIndex = (l) => { const i = PERIOD_WEEKS().indexOf(l.week_id); return i < 0 ? 9 : i; };
+// Week 1's lines, then week 2's, each keeping the order the server sent. Non-mutating: `lines`
+// is the array the caller holds, and sorting it in place would reorder the shared payload.
+const byWeek = (lines) => lines.map((l, i) => [l, i])
+  .sort((a, b) => weekIndex(a[0]) - weekIndex(b[0]) || a[1] - b[1]).map(([l]) => l);
+// WEEK 2 IS TINTED, and that is the whole separator (the owner, 2026-08-05: "I do not want a line
+// item per row. Maybe color blocks?"). A divider ROW would have to carry a colspan that changes
+// with the Edit column, and would be one more thing between a person and their numbers on a list
+// that is already long. Its own function so the suite can RUN it: as an inline ternary it was
+// deleted outright by a mutation and every test still passed.
+const weekClass = (l) => (weekIndex(l) === 1 ? ' class="wk2"' : '');
+
+// A DISPUTE HAS TO SAY WHY (the owner, 2026-08-05). Ticking the box no longer raises one on its own
+//, the tick reveals this, and the button stays dead until there is a sentence in the input, the
+// same shape install-bonus.html uses for waiving a recall. No confirm()/prompt() anywhere: a
+// native modal blocks the browser automation these pages are verified with, and self-check
+// asserts their absence. Clearing needs no reason and stays a plain untick.
+// THE MONEY LINE: each week's commission and bonus, then the total. One total for the fortnight
+// could not be checked against anything, Gusto now pays these four figures into four separate
+// columns, and this is the same arithmetic read back off the same predicates the export uses
+// (server.js weekSplitSums), so the card and the file cannot disagree.
+//
+// Comfort Club is inside BONUS, not commission, in both places (the owner, 2026-07-31 and again 08-05).
+// TOTAL is SUM(payable) and is NOT these four added up: on call, reimbursement and mileage are
+// payable too, and a total that quietly dropped a fuel reimbursement would be wrong by it.
+function weekPay(p) {
+  const w = (n, label) => '<span class="pay wk"><small>' + label + '</small>'
+    + '<br>' + money(p['w' + n + '_commission'] || 0) + ' <small>comm</small>'
+    + '<br>' + money(p['w' + n + '_bonus'] || 0) + ' <small>bonus</small></span>';
+  const weeks = PERIOD_WEEKS();
+  // WRAPPED, so the whole money group pins to the right edge of every card and the TOTAL column
+  // lines up down a long list. margin-left:auto on the first block alone does NOT do this: the
+  // person's name is a <span> too, so `.pay.wk:first-of-type` matches nothing and the figures
+  // sat wherever the badge text happened to end, differently on every row.
+  return '<span class="payset">'
+    + w(1, 'Week 1' + (weeks[0] ? ' · ' + weekLabel(weeks[0]) : ''))
+    + w(2, 'Week 2' + (weeks[1] ? ' · ' + weekLabel(weeks[1]) : ''))
+    + '<span class="pay total">' + money(p.payable) + '<br><small>TOTAL</small></span></span>';
+}
+
+// THE HOURS HALF of a person's pay, under their lines. Gusto's imported hours priced per
+// WORKWEEK at the FLSA regular rate, see server.js flsaWeek, which is where the arithmetic
+// lives and the only place it lives; nothing here re-derives a figure.
+//
+// Rendered only for somebody the server sent a payroll row for, which means somebody with hours
+// imported for this period. A person paid purely on commission has no hours half at all, and a
+// row of blanks beside their money says the opposite (the owner, 2026-07-29).
+//
+// EVERYTHING IS READ-ONLY EXCEPT THE SPLIT. The rate belongs to the person, not to the pay
+// period, so it is edited on the settings card and there is one editable copy of it. The hours
+// belong to Gusto. The split is the one fact neither of them holds: Gusto's file has no dates
+// in it, so which week a fortnight's hours fell in can only be typed here, and it is ONE box,
+// because week two is the rest of the imported total and a second box could disagree with it.
+function payrollBlock(r, forPrint) {
+  if (!r) return '';
+  const hrs = (v) => Number(v || 0).toFixed(2);
+  // A missing base rate is not a rate of zero, so the cell says so rather than printing $0.00
+  // and letting somebody read it as a settled answer.
+  //
+  // "WHEN THESE WERE IMPORTED" is the exact claim, and it has to be: the rate is the one
+  // snapshotted at import, so a raise never reaches a fortnight already paid. Setting a FIRST
+  // rate does reach it, patchPerson fills the periods that were imported with none, because a
+  // gap is not a rate somebody set, so the fix named here is the one that actually works.
+  const cell = (v) => (v == null ? '<span class="muted" title="No base rate was on file for them'
+    + ' when these hours were imported. Setting one on the settings page fills in every period'
+    + ' that had none; changing an existing rate deliberately leaves past periods where they are,'
+    + ' so re-import a period to price it at a new rate.">no rate at import</span>' : money(v));
+  // The regular rate is a RATE, at four places. Rounded to cents it stops explaining the premium
+  // beside it: $19.4444 x 0.5 x 5 hrs is the $48.61 shown, $19.44 would say $48.60.
+  const rate = (v) => (v == null ? '<span class="muted">&mdash;</span>' : '$' + Number(v).toFixed(4));
+  const week = (w) => '<tr>'
+    + '<td class="num wk">' + esc(w.label) + '</td>'
+    + '<td class="num">' + hrs(w.hours) + '</td>'
+    // A week that ran no overtime says so in grey, so the eye lands on the week that did. That
+    // is the whole point of splitting the fortnight: one 89-hour line never said which week.
+    + '<td class="num' + (w.ot_hours ? '' : ' muted') + '">' + hrs(w.ot_hours) + '</td>'
+    + '<td class="num">' + money(w.earnings || 0) + '</td>'
+    + '<td class="num">' + cell(w.straight_time) + '</td>'
+    + '<td class="num">' + rate(w.rrp) + '</td>'
+    + '<td class="num">' + cell(w.premium) + '</td>'
+    + '<td class="num"><b>' + cell(w.gross) + '</b></td></tr>';
+  const weeks = r.weeks || [];
+  // One box, holding week one. Its placeholder is the assumed split, so an empty box reads as
+  // "this is what we guessed" rather than as nothing at all; clearing it goes back to the guess,
+  // which is a real answer and not the same as typing 0.
+  const split = forPrint
+    ? '<div class="wagesplit">' + hrs(weeks[0] && weeks[0].hours) + ' + ' + hrs(weeks[1] && weeks[1].hours)
+      + ' of ' + hrs(r.hours) + ' hrs' + (r.w1_hours == null ? ' (split assumed)' : '') + '</div>'
+    : '<div class="wagesplit"><label for="w1-' + r.person_id + '">Week 1 hours</label>'
+      + '<input type="number" step="0.25" min="0" max="' + hrs(r.hours) + '" id="w1-' + r.person_id + '"'
+      + ' data-hours-person="' + r.person_id + '" value="' + (r.w1_hours == null ? '' : r.w1_hours) + '"'
+      + ' placeholder="' + hrs(weeks[0] && weeks[0].hours) + '"'
+      + ' title="Which of the imported hours fell in the first week. Week 2 gets the rest."'
+      + ' aria-label="Hours in week 1 for ' + esc(r.name) + '">'
+      + '<span>of ' + hrs(r.hours) + ' imported</span></div>';
+  // WHAT THE FORTNIGHT CAME TO, readable without opening anything (the owner, 2026-08-06). Week 1's
+  // hourly pay and its overtime, the same pair for week 2, and the total the two add to.
+  //
+  // Every figure is one payrollRows already priced, straight_time, premium, and gross, which IS
+  // week 1 + week 2 across commission, bonus, hourly and overtime because that is what flsaWeek
+  // put in it. Nothing here re-derives a number; a summary that did its own arithmetic is a
+  // second answer waiting to disagree with the worksheet three lines below it.
+  //
+  // THE NO-RATE CONVENTION HOLDS HERE TOO, and this is where it matters most: with no rate
+  // snapshotted there is no straight time and no premium to total, so the line SAYS so. A row of
+  // $0.00 on the one line somebody reads without opening the card is the worst place in the page
+  // to print a zero that means "unknown", it is the figure they would take away.
+  const wsum = (w, n) => '<span class="ws"><small>Week ' + n + '</small>'
+    + '<br>' + cell(w && w.straight_time) + ' <small>hourly</small>'
+    + '<br>' + cell(w && w.premium) + ' <small>OT</small></span>';
+  const summary = r.gross == null
+    ? '<span class="wagesum"><span class="muted" title="No base rate was on file for them when'
+      + ' these hours were imported, so there is no hourly pay or overtime premium to add up.'
+      + ' Set a rate on the settings page.">no rate at import, nothing to total</span></span>'
+    : '<span class="wagesum">' + wsum(weeks[0], 1) + wsum(weeks[1], 2)
+      + '<span class="ws tot">' + money(r.gross) + '<br><small>Total</small></span></span>';
+  // OPEN WHEN PRINTING. A collapsed disclosure prints collapsed, and the printed statement is
+  // the sheet the premium actually gets checked from, the worksheet is the point of it.
+  return '<details class="wagerow" id="hours-' + r.person_id + '"' + (forPrint ? ' open' : '') + '>'
+    + '<summary><span class="wagehead">Pay for time</span>'
+    // Said only where it can change the money: an assumed split with no overtime in it pays
+    // exactly what any other split would, and flagging that every fortnight for every hourly
+    // person is how a warning stops being read.
+    + (r.split_assumed ? '<span class="flag" title="Gusto’s file carries no dates, so which'
+      + ' week the overtime fell in is assumed here. Type the real week 1 hours and the premium'
+      + ' follows.">week split assumed</span>' : '')
+    // THE DISAGREEMENT THIS WHOLE BLOCK EXISTS TO FIND. Gusto imported one overtime total for
+    // the fortnight and this split implies another, so one of the two is wrong, and which one
+    // is a question for a human, not for a writer that would have refused the split and thrown
+    // the finding away with it.
+    + (r.ot_mismatch ? '<span class="flag" title="Gusto imported '
+      + Number(r.ot_imported).toFixed(2) + ' overtime hours for this pay period; this week split'
+      + ' works out at ' + Number(r.ot_derived).toFixed(2) + '. The figures below use the split.">'
+      + 'OT ' + Number(r.ot_derived).toFixed(2) + ' vs Gusto ' + Number(r.ot_imported).toFixed(2) + '</span>' : '')
+    + summary + '</summary>'
+    + split
+    + '<div class="scroll"><table><thead><tr>'
+    + '<th class="num" style="width:104px">Week</th>'
+    + '<th class="num" style="width:70px">Hours</th>'
+    + '<th class="num" style="width:70px" title="Hours over 40 in that workweek">OT hrs</th>'
+    + '<th class="num" style="width:100px" title="Commission and bonus earned in that week.'
+    + ' Non-discretionary, so it counts toward the regular rate.">Earnings</th>'
+    + '<th class="num" style="width:110px" title="Base rate x every hour worked, overtime hours included">Straight</th>'
+    + '<th class="num" style="width:110px" title="Regular rate of pay: (straight time + earnings) / hours worked">Reg rate</th>'
+    + '<th class="num" style="width:100px" title="Half the regular rate, on the hours over 40">OT premium</th>'
+    + '<th class="num" style="width:110px">Gross</th>'
+    + '</tr></thead><tbody>'
+    + weeks.map(week).join('')
+    + '<tr class="tot"><td class="num wk">Pay period</td>'
+    + '<td class="num">' + hrs(r.hours) + '</td>'
+    + '<td class="num">' + hrs(weeks.reduce((s, w) => s + (w.ot_hours || 0), 0)) + '</td>'
+    + '<td class="num">' + money(r.earnings || 0) + '</td>'
+    + '<td class="num">' + cell(r.straight_time) + '</td>'
+    // NO fortnight regular rate, deliberately. The regular rate is a weekly average and there
+    // is no such thing as the average of two of them: printing one would invite exactly the
+    // per-period arithmetic the FLSA does not do.
+    + '<td class="num muted" title="The regular rate is a weekly figure. A pay period has two of'
+    + ' them and no single one.">&mdash;</td>'
+    + '<td class="num">' + cell(r.premium) + '</td>'
+    + '<td class="num"><b>' + cell(r.gross) + '</b></td></tr>'
+    + '</tbody></table></div></details>';
+}
+
+// A line's flag, and whether it is answerable. Its OWN function so the suite can run it rather
+// than grep for it, the first version of this lived inline in personCard and the assertion
+// guarding it was a source match that a `false &&` walked straight past.
+//
+// Clearing is offered on a CLOSED period too, because the server exempts it from the freeze for
+// a reason: 'changed_after_approval' only ever appears ON a frozen week, it means the inputs
+// moved after approval, so a dead span there left the one flag that can only appear on a closed
+// week permanently unanswerable. It moves no money; it is a human saying they have read it.
+//
+// 'deferred' IS THE EXCEPTION, and gets no × (the owner, 2026-08-05, reporting the tag coming back).
+// It says where a human sent the line, and compute re-derives it from the deferred_lines marker
+// on every run, so the button cleared the column, said Saved, and the tag returned after the
+// nightly. That reads as a sync failure and is not one. The server refuses it as well; this only
+// stops the page offering an action that cannot hold.
+function flagChip(l) {
+  if (!l.flag) return '';
+  if (l.flag === 'deferred') {
+    return '<span class="flag deferred" title="A human moved this line into this pay period.'
+      + ' It is where the line sits, not a question, use Release to undo the move.">'
+      + esc(l.flag) + '</span>';
+  }
+  return '<button class="flag ' + esc(l.flag) + '" data-line="' + l.id + '" data-act="clear_flag"'
+    + ' title="Mark as looked at. Recompute can raise this again but never clears it.">'
+    + esc(l.flag.replace(/_/g, ' ')) + ' ×</button>';
+}
+
+function disputeCell(l) {
+  if (l.disputed) {
+    return '<div class="disputed-why"><b>Disputed</b>'
+      + (l.dispute_reason ? ' · ' + esc(l.dispute_reason) : '')
+      + (l.disputed_by ? '<br><span class="muted">' + esc(l.disputed_by) + '</span>' : '') + '</div>';
+  }
+  return '<div class="notebox" data-for="' + l.id + '" hidden>'
+    + '<input type="text" maxlength="500" data-dispute-input="' + l.id + '" placeholder="why?"'
+    + ' aria-label="Reason for the dispute">'
+    + '<button class="mini warn" type="button" data-dispute="' + l.id + '" disabled>Dispute</button>'
+    + '</div>';
+}
+
+function personCard(p, lines, open, tnfrItems, people, wage) {
+  const rows = byWeek(lines).map((l) => {
+    const trClass = weekClass(l);
     const dates = lineDates(l);
     const overridden = l.override_amount != null || l.zeroed;
     const amount = l.zeroed
@@ -1357,10 +1662,14 @@ function personCard(p, lines, open, tnfrItems, people) {
       : '';
     // The note lives inline in its own column now: an input that widens on focus when
     // the week is open, and the compact saved text once it is closed.
-    const noteCell = open
-      ? '<td><input class="notein" type="text" maxlength="500" data-line="' + l.id + '" data-act="note"'
-        + ' placeholder="Note" value="' + esc(l.note || '') + '" aria-label="Note"></td>'
-      : '<td>' + (l.note ? '<span class="note">' + esc(l.note) + '</span>' : '') + '</td>';
+    const noteCell = '<td>' + (open
+      ? '<input class="notein" type="text" maxlength="500" data-line="' + l.id + '" data-act="note"'
+        + ' placeholder="Note" value="' + esc(l.note || '') + '" aria-label="Note">'
+      : (l.note ? '<span class="note">' + esc(l.note) + '</span>' : ''))
+      // The dispute and its reason share a cell, because they are one statement. Shown on a
+      // closed week too: the marks are freeze-exempt precisely because a dispute is normally
+      // raised off a printed sheet, days after payday.
+      + disputeCell(l) + '</td>';
     // Far-left sign-off ticks: the tech's (set from their portal, editable here too) and the
     // office's, then disputed. Server-persisted, shared across users, no effect on money. All
     // render on open AND closed weeks (the server exempts them from the freeze), a dispute in
@@ -1373,7 +1682,7 @@ function personCard(p, lines, open, tnfrItems, people) {
       return '<td style="text-align:center"><input type="checkbox" data-line="' + l.id
         + '" data-act="' + act + '"' + (on ? ' checked' : '') + ' aria-label="' + esc(label) + '" title="' + esc(title) + '"></td>';
     };
-    return '<tr>'
+    return '<tr' + trClass + '>'
       + markCell('tech_approved', l.tech_approved, 'Tech approved')
       + markCell('office_approved', l.office_approved, 'Office approved')
       + markCell('disputed', l.disputed, 'Disputed, this line is questioned')
@@ -1386,11 +1695,7 @@ function personCard(p, lines, open, tnfrItems, people) {
       // it means the inputs moved after approval, so a dead span there left the one flag that
       // can only appear on a closed week permanently unanswerable. It moves no money; it is a
       // human saying they have read the question.
-      + (l.flag
-        ? '<button class="flag ' + esc(l.flag) + '" data-line="' + l.id + '" data-act="clear_flag"'
-          + ' title="Mark as looked at. Recompute can raise this again but never clears it.">'
-          + esc(l.flag.replace(/_/g, ' ')) + ' \u00d7</button>'
-        : '')
+      + flagChip(l)
       + tnfrItemsBlock(l, tnfrItems)
       + (open && l.kind === 'job_type' && l.attributed_person_id != null
         ? '<div class="muted" style="font-size:11.5px;margin-top:3px">attributed by hand: '
@@ -1460,7 +1765,7 @@ function personCard(p, lines, open, tnfrItems, people) {
       + ' person; the lines below are what they earned.">commission</span>')
     + (badges.length ? '<span class="muted" style="font-size:12px">' + esc(badges.join(' · ')) + '</span>' : '')
     + (p.disputed ? '<span class="badge-disputed" style="font-size:12px">' + p.disputed + ' disputed</span>' : '')
-    + '<span class="pay">' + money(p.payable) + '<br><small>commissions</small></span>'
+    + weekPay(p)
     + '</div></summary>'
     + '<div class="scroll"><table><thead><tr>'
     + '<th style="width:24px" title="Tech approved">T</th><th style="width:24px" title="Office approved">&#10003;</th><th style="width:24px" title="Disputed">!</th>'
@@ -1477,6 +1782,10 @@ function personCard(p, lines, open, tnfrItems, people) {
     + (open ? '<th class="num" style="width:230px">Edit</th>' : '')
     + '<th style="width:130px">Note</th></tr></thead>'
     + '<tbody>' + rows + '</tbody></table></div>'
+    // The hours half, under the lines that feed its regular rate. Empty for anybody with no
+    // hours imported this period, which is most of the reason it sits here rather than in a
+    // table of its own: it is a fact about this person, not about the company.
+    + payrollBlock(wage)
     // Print lives in the BODY and not in the summary: a button inside a <summary> toggles the
     // card on the way to its own click, so the card would slam shut every time somebody
     // printed. Available on a frozen period too, deliberately, that is when a tech reads it.
@@ -1488,14 +1797,20 @@ function personCard(p, lines, open, tnfrItems, people) {
     // order, same memo shape. Offered on every card, including the ones at $0.00: "what would
     // this person's file say" is a fair question to ask before the period is approved, which is
     // exactly when it cannot be answered by exporting the lot.
-    // PER WEEK, like the period buttons, and for the same reason: a one-person file covering the
-    // whole fortnight would reintroduce the overtime error on the RECOVERY path, which is the
-    // one being used when something has already gone wrong.
+    // The whole period in one file, matching the period button: a one-person file that covered
+    // only half the fortnight would leave the other half unpaid on the RECOVERY path, which is
+    // the one being used when something has already gone wrong. The weekly pair stays alongside
+    // it for as long as the period buttons' own fallback does, and for the same reason.
+    + '<button class="btn" type="button"'
+      + ' data-export-person="' + p.person_id + '" data-week="' + PERIOD_WEEKS().join(',') + '"'
+      + ' data-person-name="' + esc(p.name) + '"'
+      + ' title="Export just this person\u2019s rows for the whole pay period as a Gusto CSV">'
+      + 'Export</button> '
     + PERIOD_WEEKS().map((w, i) => '<button class="btn" type="button"'
       + ' data-export-person="' + p.person_id + '" data-week="' + w + '"'
       + ' data-person-name="' + esc(p.name) + '"'
       + ' title="Export just this person\u2019s rows for ' + esc(weekLabel(w)) + ' as a Gusto CSV">'
-      + 'Export Wk ' + (i + 1) + '</button>').join(' ') + '</div>'
+      + 'Wk ' + (i + 1) + '</button>').join(' ') + '</div>'
     + add + '</details>';
 }
 
@@ -1532,10 +1847,25 @@ function paidAheadBreakdown(l) {
   return '<div class="stmt-line-note">' + parts.join(' &middot; ') + '</div>';
 }
 
+// Week 1 / week 2 / TOTAL, for the printed sheet. Same four figures as the card's money line,
+// off the same server-side aggregate, see weekPay.
+function stmtWeekSummary(p) {
+  if (p.w1_commission == null && p.w2_commission == null) return '';
+  const weeks = PERIOD_WEEKS();
+  const col = (n) => '<td>Week ' + n + (weeks[n - 1] ? ' &middot; ' + esc(weekLabel(weeks[n - 1])) : '') + '</td>'
+    + '<td class="num">' + money(p['w' + n + '_commission'] || 0) + '</td>'
+    + '<td class="num">' + money(p['w' + n + '_bonus'] || 0) + '</td>';
+  return '<table class="stmt-weeks"><thead><tr><th>Week</th><th class="num">Commission</th>'
+    + '<th class="num">Bonus</th></tr></thead><tbody>'
+    + '<tr>' + col(1) + '</tr><tr>' + col(2) + '</tr>'
+    + '<tr><td><b>TOTAL</b></td><td class="num" colspan="2"><b>' + money(p.payable || 0) + '</b></td></tr>'
+    + '</tbody></table>';
+}
+
 function statementHtml(person, lines) {
   const marks = (l) => [l.tech_approved ? 'tech approved' : '', l.office_approved ? 'office approved' : '',
     l.disputed ? 'DISPUTED' : '', l.earned_amount != null ? 'paid ahead' : ''].filter(Boolean).join(', ');
-  const rows = lines.map((l) => { const dates = lineDates(l); return '<tr>'
+  const rows = byWeek(lines).map((l) => { const dates = lineDates(l); return '<tr' + weekClass(l) + '>'
     + '<td class="num">' + dates[0] + '</td>'
     + '<td class="num">' + dates[1] + '</td>'
     + '<td>' + esc(l.customer_name || l.membership_customer_name || (l.source === 'manual' ? '' : 'unknown customer')) + '</td>'
@@ -1556,7 +1886,12 @@ function statementHtml(person, lines) {
     + '<td class="num">' + money(l.payable)
     + (l.zeroed || l.override_amount != null ? '<div class="stmt-line-note">computed ' + money(l.computed_amount) + '</div>' : '')
     + '</td>'
-    + '<td class="mark">' + esc(marks(l)) + '</td></tr>'; }).join('');
+    // The written reason rides with the DISPUTED mark. This sheet is where a dispute is usually
+    // raised from and where the answer gets read back; a bare "DISPUTED" here would send the
+    // reader to the dashboard for the one sentence that explains it.
+    + '<td class="mark">' + esc(marks(l))
+    + (l.disputed && l.dispute_reason ? '<div class="stmt-line-note">' + esc(l.dispute_reason) + '</div>' : '')
+    + '</td></tr>'; }).join('');
   const total = lines.reduce((s, l) => s + (l.payable || 0), 0);
   const d = DATA || {};
   return '<section class="stmt">'
@@ -1568,6 +1903,15 @@ function statementHtml(person, lines) {
     // The person's standing note from settings (agreement terms, rate context) so the
     // printed sheet carries the same ground rules the numbers were computed under.
     + (person.note ? '<div class="stmt-person-note">' + esc(person.note) + '</div>' : '')
+    // THE SAME BREAKDOWN THE CARD SHOWS, on the sheet that gets checked by hand. Gusto is paid
+    // these four figures in four columns, so a statement that printed one fortnight total could
+    // not be reconciled against the payslip it produces.
+    + stmtWeekSummary(person)
+    // And the hours those weeks' money changed the overtime rate on. THIS is the sheet the
+    // premium gets checked from, the person is holding their payslip when they read it, so
+    // printing the commission half alone would show the input and hide the answer. Same
+    // renderer as the card, in its print shape: an <input> on paper is a box nobody can fill in.
+    + payrollBlock((d.payroll || []).find((r) => r.person_id === person.person_id), true)
     + (lines.length
       ? '<table><thead><tr><th>Installed</th><th>Paid</th><th>Customer</th><th>Line</th>'
         + '<th class="num">Total</th><th class="num">Financing</th>'
@@ -1617,6 +1961,10 @@ function attributeSelect(invoiceId, current, people) {
     + '</select>';
 }
 
+// Rows about money a frozen week stopped from landing where it belongs (compute.js
+// moneyComponent). They read differently from the rest of this list, so they say so.
+const MONEY_ROW = /^(stranded|blocked):/;
+
 // The row's action control: attribute the sale (job-type rows, open period) or dismiss
 // the row as non-payable noise. A frozen period keeps Dismiss (it changes no money) but
 // drops the person options.
@@ -1626,7 +1974,12 @@ function actionSelect(u, people, open) {
     for (const pp of people) opts.push('<option value="p:' + pp.id + '"' + (pp.id === u.attributed_person_id ? ' selected' : '')
       + '>Attribute to ' + esc(pp.name) + '</option>');
   }
-  opts.push('<option value="__dismiss__">Dismiss as noise</option>');
+  // "Noise" is the wrong word for a stranded or blocked row and saying it would be a lie: that
+  // money is real, it just could not be written where it belongs. Same durable dismissal
+  // underneath, the only honest difference is what the person is answering.
+  opts.push(MONEY_ROW.test(u.component)
+    ? '<option value="__dismiss__">Mark handled</option>'
+    : '<option value="__dismiss__">Dismiss as noise</option>');
   return '<select data-attn="' + u.invoice_id + '" data-component="' + esc(u.component) + '" aria-label="Row action">'
     + opts.join('') + '</select>';
 }
@@ -1709,7 +2062,10 @@ function renderDisputed(lines, tnfrItems) {
   document.getElementById('disputed-n').textContent = all.length;
   document.getElementById('disputed-list').innerHTML = '<table><thead><tr>'
     + '<th style="width:20%">Person</th><th>Line</th><th class="num" style="width:110px">Amount</th>'
-    + '<th style="width:34%">Note</th></tr></thead><tbody>'
+    // WHY, first and widest. It is the reason the row is in this list, and the strip existed for
+    // weeks showing a Note column that had nothing to do with the dispute, the office's own
+    // annotation on the line, which is not what the person raising it wrote.
+    + '<th style="width:30%">Why</th><th style="width:22%">Note</th></tr></thead><tbody>'
     // The row jumps for the mouse; the person button does the same for the keyboard, since a
     // <tr> takes no focus and a strip nobody can tab to is a strip half the office cannot use.
     + all.map((l) => '<tr data-jump-person="' + l.person_id + '">'
@@ -1717,6 +2073,10 @@ function renderDisputed(lines, tnfrItems) {
       + ' title="Go to this person\'s card">' + esc(l.person) + '</button></td>'
       + '<td>' + lineWhat(l, tnfrItems) + '</td>'
       + '<td class="num">' + money(l.payable) + '</td>'
+      + '<td>' + (l.dispute_reason ? '<span class="disputed-why">' + esc(l.dispute_reason) + '</span>'
+        // A dispute raised before 2026-08-05 has no reason and never will; say so rather than
+        // printing an empty cell that reads as nobody having looked.
+        : '<span class="muted">(raised before reasons were recorded)</span>') + '</td>'
       + '<td>' + (l.note ? '<span class="note">' + esc(l.note) + '</span>' : '') + '</td></tr>').join('')
     + '</tbody></table>';
 }
@@ -1776,7 +2136,12 @@ function captureUiState() {
   for (const el of document.querySelectorAll(ADD_FIELDS)) {
     if (el.value !== '') addrow[el.dataset.person + ':' + el.dataset.add] = el.value;
   }
-  const expanders = [...document.querySelectorAll('#people details.tnfr[open], #disputed details[open], #attn details[open]')]
+  // details.wagerow rides here as of 2026-08-06, and it HAS to: the split box lives inside it,
+  // every save re-renders the whole list, and a worksheet that slammed shut the moment somebody
+  // typed a week-1 figure would hide the box they were using. It keys on its own id (see
+  // expanderKey), which is the person's, so a rebuild that reorders the cards still puts each
+  // one back where it came from.
+  const expanders = [...document.querySelectorAll('#people details.tnfr[open], #people details.wagerow[open], #disputed details[open], #attn details[open]')]
     .map(expanderKey).filter(Boolean);
   const a = document.activeElement;
   const focus = a && a.matches('#people input, #people select, #attn select')
@@ -1793,6 +2158,10 @@ function expanderKey(d) {
 }
 const fieldKey = (el) => (el.dataset.line ? 'line:' + el.dataset.line + ':' + (el.dataset.act || '')
   : el.dataset.add ? 'add:' + el.dataset.person + ':' + el.dataset.add
+  // The week-1 split box. It saves on change and the save re-renders, so without a key here the
+  // caret left the field on every entry, survivable while the box was always on screen, and not
+  // once the worksheet around it can be shut.
+  : el.dataset.hoursPerson ? 'hours:' + el.dataset.hoursPerson
   : el.dataset.extra ? 'extra:' + (el.closest('[data-pay-person]') || { dataset: {} }).dataset.payPerson + ':' + el.dataset.extra
   : el.dataset.attn ? 'attn:' + el.dataset.attn + ':' + (el.dataset.component || '') : null);
 function restoreUiState(state) {
@@ -1802,7 +2171,7 @@ function restoreUiState(state) {
     if (v != null) el.value = v;
   }
   const wanted = new Set(state.expanders);
-  for (const d of document.querySelectorAll('#people details.tnfr, #disputed details, #attn details')) {
+  for (const d of document.querySelectorAll('#people details.tnfr, #people details.wagerow, #disputed details, #attn details')) {
     const k = expanderKey(d);
     if (k && wanted.has(k)) d.open = true;
   }
@@ -2037,9 +2406,13 @@ async function loadPeriodInner(id, token) {
   const cardPeople = (data.bonusPeople || []).map((b) => ({
     person_id: b.id, name: b.name, payable: 0, lines: 0, ...agg.get(b.id), payroll_only: !!b.payroll_only }));
   const carded = new Set(cardPeople.map((p) => p.person_id));
-  // Everyone this period holds lines for, active or not. The wage-row arm went with the wage
-  // rows; a departed person with lines still reaches a card through data.people.
-  const alsoHolds = data.people;
+  const wageByPerson = new Map((data.payroll || []).map((r) => [r.person_id, r]));
+  // Everyone this period holds something for, active or not: an aggregate row of lines, or a
+  // payroll row. Somebody who worked the period and left before payroll was cut still has hours
+  // whose premium can be questioned, and bonusPeople (active=1) would not reach them.
+  const alsoHolds = data.people.concat([...wageByPerson.values()]
+    .map((r) => ({ person_id: r.person_id, name: r.name, payable: 0, lines: 0,
+      payroll_only: !!r.payroll_only })));
   for (const p of alsoHolds) {
     if (carded.has(p.person_id)) continue;
     carded.add(p.person_id);
@@ -2051,12 +2424,14 @@ async function loadPeriodInner(id, token) {
   document.getElementById('btn-print-all').disabled = !cardPeople.length;
   document.getElementById('people').innerHTML = (cardPeople.length
     ? cardPeople.map((p) => personCard(p, byPerson.get(p.person_id) || [], open, data.tnfrItems,
-      data.activePeople)).join('')
+      data.activePeople, wageByPerson.get(p.person_id))).join('')
     : '<div class="card"><div class="empty">Nobody is active, so there is nothing to review.'
       + ' Add people on the settings page.</div></div>')
     + (open ? '' : '<div class="frozen">This pay period is ' + esc(status) + ', so its lines are locked. Corrections go in as a manual line in the current pay period.</div>');
   // The Gross payroll stat was here: wage pay plus commission, with a count of the people
-  // whose rate was not set yet. Commission total is the only company figure this page has now.
+  // whose rate was not set yet. Commission total is the only company figure this page has now,
+  // the hours side is per person, on the cards, because the tracker pays none of it.
+  renderHours(data);
   document.getElementById('upcoming-tab').textContent = 'Not Yet Paid' + ((data.upcoming || []).length ? ' (' + data.upcoming.length + ')' : '');
   // Revealed by config, not by role. The server decides; the page only obeys, so turning the
   // feature on is one settings toggle rather than a deploy.
@@ -2114,7 +2489,7 @@ function renderGates(data) {
     // week you happen to remember pressing.
     parts.push('<div class="gate pending"><span>' + warn.join('<br><br>') + '</span>'
       + '<button class="btn go" data-export-confirm="1" type="button">Export '
-      + esc(weekLabel(PENDING_EXPORT.week)) + ' anyway</button>'
+      + esc(scopeLabel(PENDING_EXPORT.week)) + ' anyway</button>'
       + '<button class="btn" data-export-cancel="1" type="button">Cancel</button></div>');
   }
   if (data.recomputePending) {
@@ -2132,12 +2507,39 @@ function renderGates(data) {
       + ') is not ready to export to Gusto:</b><ul>'
       + reasons.map((r) => '<li>' + esc(r) + '</li>').join('') + '</ul></div>');
   });
+  // What stops the ONE-FILE export and nothing else, most importantly a week-2 column the
+  // stored template does not have, which no single week can be blocked by. Listed separately so
+  // it does not read as a reason the weekly files cannot go out; they still can.
+  {
+    const seen = new Set(PERIOD_WEEKS().flatMap((w) => weekBlockers(data, w)));
+    const only = periodBlockers(data).filter((r) => !seen.has(r));
+    if (only.length) {
+      parts.push('<div class="gate"><b>The one-file pay period export is not ready:</b><ul>'
+        + only.map((r) => '<li>' + esc(r) + '</li>').join('')
+        + '</ul>The weekly files above are unaffected.</div>');
+    }
+  }
   // The unlinked-ServiceTitan-employee gate was here: people who logged TIME but mapped to
-  // nobody. No time is ingested now, and an unknown SELLER still surfaces, in the Attention
-  // strip, which is the gate that survived because it is about money rather than hours.
+  // nobody. Its descendant is below, the same question asked of Gusto's file instead of
+  // ServiceTitan's, and still a gap a human closes rather than one anything guesses at.
   // The frozen-vs-rederiving banner was here, and existed only because wage pay re-derived
   // from today's rates until a period was approved. A commission line stores its own amount,
   // so a closed period is simply closed and the lines-are-locked notice below says so.
+  //
+  // Active people the imported timesheet had nothing for. Only ever raised once hours HAVE been
+  // imported (the server sends nothing otherwise), so this is never the standing state of a
+  // period nobody has run payroll on yet, it is a name Gusto's file missed, which is somebody
+  // whose overtime premium nobody can check. Never guessed at by matching a near name: two
+  // people can share one, and the export has stood or fallen on the exact spelling since
+  // 2026-07-31.
+  const missing = data.payrollMissing || [];
+  if (missing.length) {
+    parts.push('<div class="gate"><b>' + missing.length + ' active '
+      + (missing.length === 1 ? 'person has' : 'people have') + ' no hours in the imported'
+      + ' timesheet.</b> Check the name matches Gusto exactly, or re-import the file if the'
+      + ' roster changed, their overtime premium cannot be worked out without it.<ul>'
+      + missing.map((p) => '<li>' + esc(p.name) + '</li>').join('') + '</ul></div>');
+  }
   document.getElementById('gates').innerHTML = parts.join('');
   const rb = document.getElementById('btn-recompute');
   if (rb) {
@@ -2166,7 +2568,31 @@ function renderGates(data) {
     const b = document.getElementById('btn-export-w' + (i + 1));
     if (b) b.disabled = weekBlockers(data, w).some((r) => !waivable(r));
   });
+  // The period file covers BOTH weeks, so either week's hard blocker stops it. The missing
+  // week-2 column will be one of these until the owner can create the earning types in Gusto, and
+  // it must read as blocked rather than as a button that silently pays week 2 into week 1.
+  const bp = document.getElementById('btn-export-period');
+  if (bp) bp.disabled = periodBlockers(data).some((r) => !waivable(r));
 }
+
+// Show the reason box for one line and put the cursor in it. Called from the tick, so the
+// person who just said "this is wrong" is already typing why.
+function revealDispute(lineId) {
+  const box = document.querySelector('.notebox[data-for="' + lineId + '"]');
+  if (!box) return;
+  box.hidden = false;
+  const input = box.querySelector('input');
+  if (input) input.focus();
+}
+
+// The Dispute button is dead until the reason has real text in it. The server refuses an empty
+// one and the schema will not store it either; this is only so the refusal never has to happen.
+document.addEventListener('input', (ev) => {
+  const t = ev.target;
+  if (!t.dataset || !t.dataset.disputeInput) return;
+  const btn = document.querySelector('button[data-dispute="' + t.dataset.disputeInput + '"]');
+  if (btn) btn.disabled = !t.value.trim();
+});
 
 // One delegated listener rather than per-row handlers: the cards are re-rendered
 // after every save, and rebound handlers are how stale ids creep in.
@@ -2183,9 +2609,20 @@ document.addEventListener('change', (ev) => {
     edit(t.dataset.line, 'override_pct', t.value === '' ? null : t.value, { basis });
   } else if (t.dataset && t.dataset.line && t.dataset.act === 'note') {
     edit(t.dataset.line, 'note', t.value);
+  } else if (t.dataset && t.dataset.line && t.dataset.act === 'disputed' && t.checked) {
+    // TICKING DOES NOT RAISE IT ANY MORE, it asks for the reason. The tick goes straight back
+    // off, because the mark and its reason are written together by the server and a box that
+    // stayed checked while nothing had been saved would be lying about the state of the line.
+    // Unticking is untouched below: clearing an accusation needs no sentence.
+    t.checked = false;
+    revealDispute(t.dataset.line);
   } else if (t.dataset && t.dataset.line
     && (t.dataset.act === 'tech_approved' || t.dataset.act === 'office_approved' || t.dataset.act === 'disputed')) {
     edit(t.dataset.line, t.dataset.act, t.checked ? 1 : 0);
+  } else if (t.dataset && t.dataset.hoursPerson) {
+    // Which week the imported fortnight's hours fell in. Blank goes back to the assumed split,
+    // which the box shows as its placeholder.
+    setHoursSplit(t.dataset.hoursPerson, t.value);
   } else if (t.dataset && t.dataset.attribute) {
     attribute(t.dataset.attribute, t.value);
   } else if (t.dataset && t.dataset.attn) {
@@ -2195,6 +2632,47 @@ document.addEventListener('change', (ev) => {
     else attribute(t.dataset.attn, t.value.startsWith('p:') ? t.value.slice(2) : '');
   }
 });
+
+// What this period's imported hours currently are, on the collapsed summary, so the state is
+// readable without opening the box. Two questions, both answered: whether anything has been
+// imported at all, and whether every row's split has been confirmed. The second is what decides
+// whether the overtime figures below are checked arithmetic or an assumption.
+function renderHours(data) {
+  const rows = data.payroll || [];
+  const assumed = rows.filter((r) => r.split_assumed).length;
+  const hours = rows.reduce((s, r) => s + (r.hours || 0), 0);
+  document.getElementById('hours-state').textContent = !rows.length
+    ? 'nothing imported for this pay period yet'
+    : '' + rows.length + ' ' + (rows.length === 1 ? 'person' : 'people') + ', '
+      + hours.toFixed(2) + ' hrs'
+      + (assumed ? ', ' + assumed + ' with the week split still assumed' : '');
+}
+
+async function importHours() {
+  const box = document.getElementById('hours-text');
+  const btn = document.getElementById('hours-save');
+  btn.disabled = true;
+  try {
+    const out = await post('/api/payroll-hours', { action: 'import', period_id: CURRENT, csv: box.value });
+    box.value = '';
+    await loadPeriod(CURRENT);
+    // The counts and the misses in one sentence, and the misses are the half that matters: a
+    // name Gusto has that this tracker does not is somebody nobody will be able to check.
+    const notes = [out.people + ' ' + (out.people === 1 ? 'person' : 'people') + ', ' + out.hours + ' hrs'];
+    if (out.cleared) notes.push(out.cleared + ' confirmed week split(s) cleared because the hours moved');
+    if (out.unmatched.length) notes.push('not matched to anybody here: ' + out.unmatched.join(', '));
+    toast('Imported ' + notes.join('. '), out.unmatched.length ? 'err' : undefined);
+  } catch (e) { toast(e.message, 'err'); }
+  btn.disabled = false;
+}
+
+async function setHoursSplit(personId, value) {
+  try {
+    await post('/api/payroll-hours', { action: 'split', period_id: CURRENT, person_id: Number(personId), value });
+    await loadPeriod(CURRENT);
+    toast('Saved');
+  } catch (e) { toast(e.message, 'err'); await loadPeriod(CURRENT); }
+}
 
 async function attribute(invoiceId, personId) {
   try {
@@ -2238,6 +2716,15 @@ document.addEventListener('click', async (ev) => {
   }
   if (t.dataset.line && t.dataset.act === 'clear_flag') {
     return edit(t.dataset.line, 'clear_flag', null);
+  }
+  // The mark and the reason go in one write, so the server can refuse a reason-less dispute and
+  // there is no window where the line reads as questioned with nothing written down.
+  if (t.dataset.dispute) {
+    const input = document.querySelector('input[data-dispute-input="' + t.dataset.dispute + '"]');
+    const reason = input ? input.value.trim() : '';
+    if (!reason) return undefined;
+    t.disabled = true; // one dispute per click; the re-render replaces this button anyway
+    return edit(t.dataset.dispute, 'disputed', 1, { reason });
   }
   if (t.dataset.restore) {
     return dismiss(t.dataset.restore, t.dataset.component, false);
@@ -2322,6 +2809,16 @@ const PERIOD_WEEKS = () => {
 // place that shape is read, so a period whose payload predates the split still degrades to
 // "nothing blocking" rather than throwing inside a render.
 const weekBlockers = (data, week) => ((data && data.exportBlockers) || {})[week] || [];
+// The whole-period file's own blockers, which are NOT the two weeks' lists concatenated: see
+// the periodBlockers comment in server.js getPeriod.
+const periodBlockers = (data) => (data && data.periodBlockers) || [];
+// What an export SCOPE is called. The scope is now either one week or the comma-joined pair, and
+// a confirmation that named the raw "2026-07-20,2026-07-27" would be asking somebody to agree to
+// a string. Both weeks reads as the period; one reads as that week.
+const scopeLabel = (week) => {
+  const ws = String(week || '').split(',').filter(Boolean);
+  return ws.length > 1 ? ws.map(weekLabel).join(' + ') : weekLabel(ws[0] || week);
+};
 // "8/3 - 8/9". A week is Monday..Sunday, so the range ends 6 days on, and the buttons say which
 // one they mean rather than making anybody count fortnights.
 const weekLabel = (w) => {
@@ -2596,9 +3093,13 @@ async function boot() {
     document.getElementById('period-pick').onchange = (e) => goTo(e.target.value, e.target.value);
     document.getElementById('btn-approve').onclick = () => setPeriodStatus('approve');
     document.getElementById('btn-reopen').onclick = () => setPeriodStatus('reopen');
+    // Both weeks in one POST. weekIds() sorts them server-side, so week 1 is week 1 whatever
+    // order they arrive in, the column set a dollar lands in depends on it.
+    document.getElementById('btn-export-period').onclick = () => exportPeriod(PERIOD_WEEKS().join(','));
     document.getElementById('btn-export-w1').onclick = () => exportPeriod(PERIOD_WEEKS()[0]);
     document.getElementById('btn-export-w2').onclick = () => exportPeriod(PERIOD_WEEKS()[1]);
     document.getElementById('btn-sync').onclick = () => startSync();
+    document.getElementById('hours-save').onclick = () => importHours();
     document.getElementById('btn-print-all').onclick = async () => {
       try { await WRITES; } catch (e) { toast(e.message, 'err'); return; }
       if (!await freshForPrint()) return;
