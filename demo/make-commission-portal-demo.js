@@ -24,26 +24,11 @@ const STAMP = new Date().toISOString().slice(0, 10);
 
 let html = fs.readFileSync(SRC, 'utf8');
 
-const swap = (from, to, n = 1) => {
-  const parts = html.split(from);
-  if (parts.length - 1 !== n) throw new Error(`anchor matched ${parts.length - 1}x, expected ${n}: ${String(from).slice(0, 90)}`);
-  html = parts.join(to);
-};
-// Tolerant of an anchor upstream already removed or reworded. Same two-tier rule as
-// make-commission-demo.js: ONLY for anchors whose bad end state a guardrail at the
-// bottom independently catches, so a cosmetic drift in the donor page cannot stop the
-// nightly bake. Anchors carrying the skin, the demo engine or a chokepoint stay strict.
-const swapMaybe = (from, to) => {
-  const parts = html.split(from);
-  if (parts.length - 1 > 1)
-    throw new Error(`optional anchor matched ${parts.length - 1}x, expected 0 or 1: ${String(from).slice(0, 90)}`);
-  html = parts.join(to);
-};
-const swapRe = (re, to, n = 1) => {
-  const m = html.match(re);
-  if (!m || m.length !== n) throw new Error(`regex matched ${m ? m.length : 0}x, expected ${n}: ${re}`);
-  html = html.replace(re, to);
-};
+// Same two-tier rule as make-commission-demo.js, both tiers defined in anchors.js: a
+// strict miss is collected rather than thrown, and assertAnchors() below reports every
+// drifted anchor in one run.
+const { swap, swapMaybe, swapRe, swapAll, assertAnchors } =
+  require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
 swap('<title>NorthStar Commission — My Statement</title>',
@@ -151,10 +136,7 @@ const colors = [
   ['#123240', '#14264A'], ['#e6edf1', '#F2F5FA'], ['#a7bcc6', '#9DAAC2'],
   ['#6e8894', '#7E8BA6'], ['#5d737e', '#66738F'],
 ];
-for (const [from, to] of colors) {
-  if (!html.includes(from)) throw new Error(`palette anchor missing: ${from}`);
-  html = html.split(from).join(to);
-}
+for (const [from, to] of colors) swapAll(from, to);
 
 /* ---------- copy ---------- */
 swapMaybe('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
@@ -177,6 +159,9 @@ swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
 html = html.split(' — ').join(', ');
 html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n');
+
+/* ---------- every drifted anchor, in one report, before anything is written ---------- */
+assertAnchors();
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */
 html = scrubNames(html);
