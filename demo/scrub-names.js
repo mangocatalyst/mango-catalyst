@@ -34,6 +34,20 @@ const NAME_MAP = new Map([
   // the point of a map is that donor drift lands on a rewrite, not on a leak.
   ['Ken', 'Theo'],
   ['Travis', 'Cole'],
+  // Surnames. These used to be assert-only, which meant a donor comment that
+  // spelled a name out in full killed the bake instead of being rewritten
+  // ("credits Ken Philaja", nsdash c37d799, 2026-08-07). Each maps to the
+  // surname its first name already carries in make-demo-data.js, so a scrubbed
+  // "Ken Philaja" reads as "Theo Lindqvist" and not as two half-strangers.
+  ['Nelson', 'Vellen'],       // Russ
+  ['Mohr', 'Kirsch'],         // Ron
+  ['McColley', 'Bratsven'],   // Travis
+  ['Philaja', 'Lindqvist'],   // Ken
+  ['Wierimaa', 'Thornton'],   // Corey and Zack both; one surname, one stand-in
+  ['Furlong', 'Stavros'],     // Scott
+  ['Robinson', 'Nash'],       // Tom, helper
+  // ponytail: Matthew Driver is deliberately absent. "driver" is an ordinary
+  // word in the donor prose, so mapping or banning it would rewrite English.
 ]);
 
 // Inlined fonts are base64, which is word characters plus + / =. A word-boundary
@@ -69,12 +83,13 @@ function scrubNames(html) {
 }
 
 /**
- * Throw if any real first name survived, mapped or not. Runs after scrubNames,
- * so a hit here means either a name nobody has mapped yet or a scrub that ran in
- * the wrong order. Either way the artifact does not ship.
+ * Throw if any real name survived. Every banned name is now a mapped name, so a
+ * hit here is a hole in scrubNames (wrong order, or a boundary the regex missed),
+ * not an unmapped stranger. A name nobody has mapped yet still ships silently —
+ * the map is the only list, so add the crew here when the crew changes.
  */
 function assertNoRealNames(html, what) {
-  const banned = [...NAME_MAP.keys(), 'Philaja', 'McColley', 'Nelson', 'Mohr'];
+  const banned = [...NAME_MAP.keys()];
   const found = new Set();
   betweenPayloads(html, (segment) => {
     for (const name of banned) {
