@@ -204,12 +204,21 @@ swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap fr
   '/* booked-capacity math (service: 8h per tech-day; install: per-day cap from the pull). Charts below reuse these. */');
 
 /* ---------- rendered copy that names the real service team ----------
-   This one is not a comment: it is the note printed under the Service tab
-   heading, which a 2026-07-24 review found shipped in public/demo/dashboard.html.
-   Asserted rather than left to the name scrub below, because the sentence has to
-   read as a sentence about the fictional shop, not as two substituted words. */
-swap(`note = 'Russ and Ron run service and sell. Service revenue is invoiced work attributed to their calls; company-wide service revenue lives on the Financial tab. Sold installs count tickets of $2,500 and up (Bryan 2026-07-11); smaller service quotes show under all estimates. Tickers compare the last 30 days to the 30 before.'`,
-  `note = 'Two of the service techs sell as well as run calls. Service revenue is invoiced work attributed to their calls; company-wide service revenue lives on the Financial tab. Sold installs count tickets of $2,500 and up; smaller service quotes show under all estimates. Tickers compare the last 30 days to the 30 before.'`);
+   Not a comment: the note printed under the Service tab heading, which a
+   2026-07-24 review found shipped in public/demo/dashboard.html. Still asserted
+   rather than left to the name scrub below, because the sentence has to read as a
+   sentence about the fictional shop, not as two substituted words, and because a
+   decision stamp is internal bookkeeping that has no business on a public demo.
+
+   Anchored on the two fragments that actually need changing, NOT on the whole
+   note. It used to quote all 500 characters, so any edit anywhere in the
+   paragraph broke the bake: the 2026-08-05 warranty-callback sentence (nsdash
+   6befee5) appended one clause and killed the nightly for two nights. Everything
+   between these fragments now flows through untouched, and scrubNames plus
+   assertNoRealNames below still fail the bake on any name that appears in it. */
+swap(`Russ and Ron run service and sell.`,
+  `Two of the service techs sell as well as run calls.`);
+swap(`$2,500 and up (Bryan 2026-07-11);`, `$2,500 and up;`);
 
 /* ---------- names: the catch-all, after every anchored swap ----------
    Runs last so the swaps above still find anchors containing the real names.

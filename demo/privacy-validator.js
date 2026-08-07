@@ -95,6 +95,13 @@ const TOKEN_ALLOW = new Set([
   // an st_staff row is sometimes a vendor or a programme, not a person, and
   // its words are ordinary English ("Nelson-Free to Grow")
   'free', 'grow', 'group', 'inc', 'llc', 'the', 'and', 'for',
+  // collides with a real surname (Matthew Driver, st_staff). Allowed as a bare
+  // token only: addStaff still puts the whole "Matthew Driver" in `names`, which
+  // the live-data-string pass greps for, and "Matthew" is still a live token. The
+  // word alone is job-costing vocabulary -- the Vehicle-column note explains that
+  // the IRS mileage rate buys fuel and depreciation "but not the driver" -- and it
+  // broke the nightly bake on 2026-08-07.
+  'driver',
 ]);
 
 const addToken = (word) => {
