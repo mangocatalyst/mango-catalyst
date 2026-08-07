@@ -27,12 +27,9 @@ const SALES_JSON = fs.readFileSync(SALES_PATH, 'utf8').trim();
 
 let html = fs.readFileSync(SRC, 'utf8');
 
-// replace exactly n occurrences (default 1); throw if the count is off
-const swap = (from, to, n = 1) => {
-  const parts = html.split(from);
-  if (parts.length - 1 !== n) throw new Error(`anchor matched ${parts.length - 1}x, expected ${n}: ${String(from).slice(0, 80)}`);
-  html = parts.join(to);
-};
+// Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
+// reports every drifted anchor in one run. See anchors.js.
+const { swap, swapAll, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
 swap(`  /* Branding: northstarheatcool.com. Navy #002D3F, teal #006385, red-orange
@@ -77,10 +74,7 @@ const colors = [
   ['#123240', '#14264A'], ['#e6edf1', '#F2F5FA'], ['#a7bcc6', '#9DAAC2'],
   ['#6e8894', '#7E8BA6'], ['#5d737e', '#66738F'],
 ];
-for (const [from, to] of colors) {
-  if (!html.includes(from)) throw new Error(`palette anchor missing: ${from}`);
-  html = html.split(from).join(to);
-}
+for (const [from, to] of colors) swapAll(from, to);
 
 /* ---------- data: inline synthetic board, no server ---------- */
 // rows are built at page load with day offsets from "today", so ages, the
@@ -325,6 +319,9 @@ html = html.replace(/ *[–—] */g, ', ');
 // Anchorless on purpose: upstream adds comments like this constantly, and a comment
 // must never be the thing that stops the demo from baking.
 html = html.replace(/(\/\/[^\n]*?)\/api\/(\w+)/g, '$1the $2 endpoint');
+
+/* ---------- every drifted anchor, in one report, before anything is written ---------- */
+assertAnchors();
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */
 html = scrubNames(html);

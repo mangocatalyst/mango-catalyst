@@ -19,12 +19,9 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 
 let html = fs.readFileSync(SRC, 'utf8');
 
-// replace exactly n occurrences (default 1); throw if the count is off
-const swap = (from, to, n = 1) => {
-  const parts = html.split(from);
-  if (parts.length - 1 !== n) throw new Error(`anchor matched ${parts.length - 1}x, expected ${n}: ${String(from).slice(0, 80)}`);
-  html = parts.join(to);
-};
+// Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
+// reports every drifted anchor in one run. See anchors.js.
+const { swap, swapRe, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- fonts: 5 static faces -> 2 variable faces ---------- */
 swap(
@@ -195,8 +192,7 @@ swap('/* the north star */', '');
 swap('<button class="chip" id="w-default">Save as default for everyone</button>',
   '<button class="chip" id="w-default" style="display:none">Save as default for everyone</button>');
 // demo's own version stamp
-swap(/<span>v(\d{4}-\d{2}-\d{2}\.\d+)<\/span>/.source.length && html.match(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/)[0],
-  '<span>demo v2026-08-06.1</span>');
+swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/, '<span>demo v2026-08-06.1</span>');
 
 // a code comment names real NS installers; caught by the validator 2026-07-14
 swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap from
@@ -219,6 +215,9 @@ swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap fr
 swap(`Russ and Ron run service and sell.`,
   `Two of the service techs sell as well as run calls.`);
 swap(`$2,500 and up (Bryan 2026-07-11);`, `$2,500 and up;`);
+
+/* ---------- every drifted anchor, in one report, before anything is written ---------- */
+assertAnchors();
 
 /* ---------- names: the catch-all, after every anchored swap ----------
    Runs last so the swaps above still find anchors containing the real names.

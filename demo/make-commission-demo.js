@@ -29,33 +29,10 @@ const STAMP = new Date().toISOString().slice(0, 10);
 
 let html = fs.readFileSync(SRC, 'utf8');
 
-// replace exactly n occurrences (default 1); throw if the count is off
-const swap = (from, to, n = 1) => {
-  const parts = html.split(from);
-  if (parts.length - 1 !== n) throw new Error(`anchor matched ${parts.length - 1}x, expected ${n}: ${String(from).slice(0, 90)}`);
-  html = parts.join(to);
-};
-// the same, but tolerant of an anchor upstream has already removed or reworded.
-// ONLY for anchors whose bad end state a guardrail at the bottom catches on its own
-// (/admin.html, servicetitan.com, northstar, xyops, a real name, an em dash): if the
-// string is gone the demo is already correct, so throwing achieves nothing except
-// stopping the nightly bake. Every break since 2026-07-30 was exactly that shape --
-// loadRegistration, the ST deep-link comment, then the Settings link, which left the
-// demo artifacts frozen for four days over a link the guardrail already proves absent.
-// Anchors with no independent guardrail (the skin, the palette, the demo engine, the
-// fetch chokepoints, the version stamp) keep using swap() and still fail loudly.
-const swapMaybe = (from, to) => {
-  const parts = html.split(from);
-  if (parts.length - 1 > 1)
-    throw new Error(`optional anchor matched ${parts.length - 1}x, expected 0 or 1: ${String(from).slice(0, 90)}`);
-  html = parts.join(to);
-};
-// the same, for the one anchor that is volatile by design: the page's version stamp
-const swapRe = (re, to, n = 1) => {
-  const m = html.match(re);
-  if (!m || m.length !== n) throw new Error(`regex matched ${m ? m.length : 0}x, expected ${n}: ${re}`);
-  html = html.replace(re, to);
-};
+// Both tiers live in anchors.js, which collects a miss rather than throwing on it:
+// assertAnchors() below reports every drifted anchor in one run.
+const { swap, swapMaybe, swapRe, swapAll, assertAnchors } =
+  require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
 swap(`/* Branding lifted from northstar-owner-dashboard/index.template.html so all three
@@ -229,10 +206,7 @@ const colors = [
   ['#123240', '#14264A'], ['#e6edf1', '#F2F5FA'], ['#a7bcc6', '#9DAAC2'],
   ['#6e8894', '#7E8BA6'], ['#5d737e', '#66738F'],
 ];
-for (const [from, to] of colors) {
-  if (!html.includes(from)) throw new Error(`palette anchor missing: ${from}`);
-  html = html.split(from).join(to);
-}
+for (const [from, to] of colors) swapAll(from, to);
 
 /* ---------- copy: NorthStar identity out, Boreal in ---------- */
 swapMaybe('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
@@ -277,6 +251,9 @@ html = html.split(' &mdash; ').join(', ');
 html = html.split(' —\n').join(',\n'); // a comment clause that runs on to the next line
 html = html.replace(/(['"])— /g, '$1'); // a dash opening a quoted string, as hours-state does
 swapMaybe('<span class="muted">—</span>', '<span class="muted">not recorded</span>');
+
+/* ---------- every drifted anchor, in one report, before anything is written ---------- */
+assertAnchors();
 
 /* ---------- names: the catch-all, after every anchored swap ---------- */
 html = scrubNames(html);
