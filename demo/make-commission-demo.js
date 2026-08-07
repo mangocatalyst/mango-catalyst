@@ -31,19 +31,17 @@ let html = fs.readFileSync(SRC, 'utf8');
 
 // Both tiers live in anchors.js, which collects a miss rather than throwing on it:
 // assertAnchors() below reports every drifted anchor in one run.
-const { swap, swapMaybe, swapRe, swapAll, assertAnchors } =
+const { swap, swapMaybe, swapBetween, swapRe, swapFn, swapAll, assertAnchors } =
   require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
-swap(`/* Branding lifted from northstar-owner-dashboard/index.template.html so all three
-   dashboards read as one family. Fonts and logo are served from /assets on this
-   same origin: nothing is fetched from a CDN. */`,
+// End-anchored, both of these: they are comments, and a comment being reworded is not
+// a reason to stop the nightly.
+swapBetween(`/* Branding lifted from northstar-owner-dashboard/index.template.html`, `is fetched from a CDN. */`,
   '/* Branding: Mango Catalyst demo skin (brand-guidelines.md). */');
 swap('<title>NorthStar Commission</title>',
   '<title>Boreal Comfort Co · Commission Tracker Demo</title>');
-swap(`/* Palette: the install whiteboard's token set, verbatim — light is the default and dark is
-   the override, so all three NorthStar surfaces read as one product. The storage keys stay
-   the shared nsdash-theme / nsdash-fs from round 4; only the values moved. */`,
+swapBetween(`/* Palette: the install whiteboard's token set, verbatim`, `only the values moved. */`,
   `/* Palette: the Mango Catalyst token set, the same one the install whiteboard demo uses.
    Light is the default and dark is the override, so both demos read as one product. */`);
 
@@ -84,41 +82,27 @@ swapMaybe(`    // A hash from the address bar (or from admin.html's nav) wins ov
   `    // A hash from the address bar wins over the default landing.`);
 
 /* ---------- ServiceTitan deep links: defang all four builders to plain text ---------- */
-swapMaybe(`// Deep link straight to the job in ServiceTitan, so a questioned line is one click
-// from the evidence rather than a copied invoice number.
-const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
-// The invoice's own ST page. EditInvoice/<id> is confirmed from a local 2026-06-08
-// capture of a live ServiceTitan invoice chip (mirrors Job/Index/<id>). ponytail: if ST
-// ever moves the route this constant is the only knob; Bryan re-clicks it post-merge.
-const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';
-function customerCell(l) {
-  // The membership's own customer is the fallback, not a second-best guess: on a backlog line
-  // whose sale invoice predates the tracker there IS no invoice to name the customer, and the
-  // membership has carried the name all along. A blank cell there said "we do not know who this
-  // was", which was never true.
-  const who = l.customer_name || l.membership_customer_name;
-  const name = who ? esc(who) : (l.source === 'manual' ? '' : 'unknown customer');
-  if (!name) return '';
-  return l.job_id
-    ? '<a class="job cust" href="' + ST_JOB + encodeURIComponent(l.job_id) + '" target="_blank" rel="noopener"'
-      + ' title="Open job ' + esc(l.job_id) + ' in ServiceTitan">' + name + '</a>'
-    : '<span class="cust">' + name + '</span>';
-}`,
+// Two anchors where there used to be one 1300-character quote of the donor: the
+// comment-and-constants block by its ends, and the function by its signature. The
+// commentary in the middle is upstream's to edit; check-defanged-cells.js proves the
+// swapped customerCell renders inert text, and the servicetitan.com guardrail proves
+// the constants are gone.
+swapBetween(`// Deep link straight to the job in ServiceTitan, so a questioned line is one click`,
+  `const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';`,
   `// In the real tracker the customer and the invoice are deep links into ServiceTitan,
 // so a questioned line is one click from the evidence. There is no ServiceTitan behind
-// this demo, so the same cells render as text.
-function customerCell(l) {
+// this demo, so the same cells render as text.`, { tolerant: true });
+swapFn('customerCell', `function customerCell(l) {
   // A backlog line whose sale invoice predates the tracker has no invoice to name the
   // customer, so the membership's own customer is the fallback rather than a blank cell.
   const who = l.customer_name || l.membership_customer_name;
   const name = who ? esc(who) : (l.source === 'manual' ? '' : 'unknown customer');
   return name ? '<span class="cust">' + name + '</span>' : '';
-}`);
-swapMaybe(`// The "invoice N" text as a deep link to the invoice in ServiceTitan. Customer name
-// keeps its job link; this points at the invoice-level view instead.
-const invoiceRef = (id) => '<a class="job" href="' + ST_INVOICE + encodeURIComponent(id)
-  + '" target="_blank" rel="noopener" title="Open invoice ' + esc(id) + ' in ServiceTitan">invoice ' + esc(id) + '</a>';`,
-  `const invoiceRef = (id) => '<span class="job">invoice ' + esc(id) + '</span>';`);
+}`, { tolerant: true });
+swapBetween(`// The "invoice N" text as a deep link to the invoice in ServiceTitan.`,
+  `">invoice ' + esc(id) + '</a>';`,
+  `const invoiceRef = (id) => '<span class="job">invoice ' + esc(id) + '</span>';`,
+  { tolerant: true });
 // The starCustomerCell/starWhat swaps that used to sit here are gone with the star
 // backlog UI itself (commission-tracker f438944): StarClub is a `spiff` line in the
 // main table now, so it defangs through customerCell + invoiceRef like any other row.
@@ -144,21 +128,15 @@ ${engine}
 // esc() everything sourced`);
 
 /* ---------- the three network chokepoints and the one export navigation ---------- */
-swap(`    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const out = await res.json().catch(() => ({ error: 'server sent no answer' }));
-    if (!res.ok || out.error) {
-      throw new Error(out.reasons && out.reasons.length ? out.reasons.join(' | ') : (out.error || 'HTTP ' + res.status));
-    }
-    return out;`,
+// Anchored on the two ends, not on the middle: the error-message wording between them
+// is exactly the sort of line upstream rewords, and rewording it is not a reason to
+// stop the nightly. The guardrail below proves no fetch( survived either way.
+swapBetween(`    const res = await fetch(path, { method: 'POST',`, `    return out;`,
   `    // demo: the write lands in memory instead of on a server, and throws the same
     // way the server does so the error toasts are real rather than decorative.
     return demoWrite(path, body);`);
-swap(`  const data = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(id), { cache: 'no-store' })).json();
-  // Overtaken while in flight: the newer load owns the page. Reported rather than just
-  // returned, because the two print paths await this specifically to GET fresh data — a silent
-  // early return there reads as "refreshed" and prints whatever CARD_PEOPLE still holds.
-  if (token !== LOAD_TOKEN) return false;
-  if (data.error) throw new Error(data.error);`,
+swapBetween(`  const data = await (await fetch('/api/period?view=master&id=' + encodeURIComponent(id), { cache: 'no-store' })).json();`,
+  `  if (data.error) throw new Error(data.error);`,
   `  const data = demoPeriod(id); // demo: built in the page, no server behind it
   // No LOAD_TOKEN check: demoPeriod is synchronous, so there is no in-flight window
   // for a newer load to overtake; this always runs on to the function's return true,
@@ -209,11 +187,14 @@ const colors = [
 for (const [from, to] of colors) swapAll(from, to);
 
 /* ---------- copy: NorthStar identity out, Boreal in ---------- */
-swapMaybe('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
-swapMaybe(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The computed number is a draft; the approved number is what pays.'
-    + ' Question a line by ticking Disputed on the dashboard, or tell Bryan.</div>'`,
-  `    + '<div class="stmt-meta">Boreal Comfort Co. The computed number is a draft; the approved number is what pays.'
-    + ' Question a line by ticking Disputed on the dashboard, or tell the office.</div>'`);
+// Catch-all, not an anchor: the company name is in the masthead span and again in the
+// statement footnote, and it used to cost one anchor each, the second of which quoted a
+// whole sentence of copy just to reach the name inside it. Substituting the name covers
+// both and any future copy; the /northstar/i guardrail below proves none survived.
+html = html.split('NorthStar Heating &amp; Cooling').join('Boreal Comfort Co');
+// scrubNames alone would render this "or tell the owner", which is true but reads oddly
+// to a tech. Optional: if upstream rewords the sentence, the scrub still covers the name.
+swapMaybe('or tell Bryan.', 'or tell the office.');
 
 // The Financing column header's tooltip, added upstream after this baker was written.
 // Found by the northstar guardrail on 2026-08-03, not by an anchor: proof the two-tier
@@ -264,6 +245,11 @@ assertNoRealNames(html, 'the commission demo');
 // to be the only thing keeping the internal scheduler name out of a public artifact.
 if (/northstar|passion one|xyops/i.test(html)) throw new Error('NS identity survived the transform');
 if (/servicetitan\.com|slack\.com|\/admin\.html|ns-logo/i.test(html)) throw new Error('live endpoint or asset survived the transform');
+// The deep-link constants and their two users are swapped by separate tolerant anchors,
+// so ANY of them drifting alone leaves the page referencing a constant nobody declares.
+// That is a dead page, and no string scan above sees it: the URL is exactly what left.
+// 2026-08-07: caught here first, when invoiceRef's end anchor silently matched nothing.
+if (/\bST_JOB\b|\bST_INVOICE\b/.test(html)) throw new Error('a ServiceTitan deep-link constant survived the transform; the swapped cell builders reference it and the page will throw');
 if (/fetch\(/.test(html)) throw new Error('a network call survived the transform');
 const dashes = html.match(/[^\n]*[–—][^\n]*/g);
 if (dashes) throw new Error(`em/en dash in demo artifact (${dashes.length}):\n` +

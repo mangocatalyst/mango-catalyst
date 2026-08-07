@@ -27,7 +27,7 @@ let html = fs.readFileSync(SRC, 'utf8');
 // Same two-tier rule as make-commission-demo.js, both tiers defined in anchors.js: a
 // strict miss is collected rather than thrown, and assertAnchors() below reports every
 // drifted anchor in one run.
-const { swap, swapMaybe, swapRe, swapAll, assertAnchors } =
+const { swap, swapMaybe, swapBetween, swapRe, swapAll, assertAnchors } =
   require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
@@ -58,24 +58,19 @@ swap('  <div class="logo-chip"><img alt="NorthStar Heating and Cooling" src="/as
   `  <div class="logo-chip"><img alt="Boreal Comfort Co" src="${logoUri}"></div>`);
 
 /* ---------- ServiceTitan deep links: defang the shared builder ---------- */
-swapMaybe(`// The techs have ServiceTitan logins, so every row on this page deep-links its OWN work the
-// same way the office's copy does: the customer name opens the job, the "invoice N" chip opens
-// the invoice. Targets read off ServiceTitan's own links rather than guessed. Declared here
-// because lineWhat below is the first thing that uses them.
-const ST_JOB = 'https://go.servicetitan.com/#/Job/Index/';
-const ST_INVOICE = 'https://go.servicetitan.com/#/EditInvoice/';
-// cls defaults to the plain link. customerCell passes 'job cust' because the MASTER puts both
-// classes on the anchor itself, and the two pages had drifted into styling the same cell two
-// different ways — an anchor.job.cust here, an anchor.job wrapping a span.cust there.
-const stLink = (href, label, title, cls) => '<a class="' + (cls || 'job') + '" href="' + href + '" target="_blank" rel="noopener"'
-  + ' title="' + esc(title) + '">' + label + '</a>';`,
+// Anchored on the two ends, not on the 900 characters of donor commentary between them.
+// check-defanged-cells.js proves the swapped stLink renders inert text, and the
+// servicetitan.com guardrail proves both constants are gone.
+swapBetween(`// The techs have ServiceTitan logins, so every row on this page deep-links its OWN work the`,
+  `  + ' title="' + esc(title) + '">' + label + '</a>';`,
   `// In the real portal every row deep-links its OWN work into ServiceTitan, the same way the
 // office's copy does: the customer name opens the job, the "invoice N" chip opens the invoice.
 // There is no ServiceTitan behind this demo, so the same cells render as plain text. cls is
 // kept so the demo styles the cell exactly as the live portal does.
 const ST_JOB = '';
 const ST_INVOICE = '';
-const stLink = (href, label, title, cls) => '<span class="' + (cls || 'job') + '">' + label + '</span>';`);
+const stLink = (href, label, title, cls) => '<span class="' + (cls || 'job') + '">' + label + '</span>';`,
+  { tolerant: true });
 
 // A real customer's name that donor CODE COMMENTS use as their worked example. scrubNames
 // deliberately leaves comments alone, and the privacy validator rightly fails the bake on
@@ -97,19 +92,14 @@ ${engine}
 // esc() everything sourced`);
 
 /* ---------- the four network chokepoints ---------- */
-swap(`    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const out = await res.json().catch(() => ({ error: 'server sent no answer' }));
-    if (!res.ok || out.error) throw new Error(out.error || 'HTTP ' + res.status);
-    return out;`,
+// Both anchored end-to-end: the error wording and the in-flight commentary between them
+// are upstream's to reword, and the no-fetch guardrail proves the swap landed regardless.
+swapBetween(`    const res = await fetch(path, { method: 'POST',`, `    return out;`,
   `    // demo: the mark lands in memory instead of on a server, and throws the same way
     // the server does so the error toasts are real rather than decorative.
     return demoWrite(path, body);`);
-swap(`  const data = await (await fetch('/api/period?id=' + encodeURIComponent(id), { cache: 'no-store' })).json();
-  // Overtaken while in flight: the newer load owns the page. Reported rather than just
-  // returned, because printStatement awaits this specifically to GET fresh data — a silent
-  // early return there reads as "refreshed" and prints whatever DATA happened to hold.
-  if (token !== LOAD_TOKEN) return false;
-  if (data.error) throw new Error(data.error);`,
+swapBetween(`  const data = await (await fetch('/api/period?id=' + encodeURIComponent(id), { cache: 'no-store' })).json();`,
+  `  if (data.error) throw new Error(data.error);`,
   `  const data = demoPortalPeriod(id); // demo: built in the page, no server behind it
   // No LOAD_TOKEN check: demoPortalPeriod is synchronous, so there is no in-flight
   // window for a newer load to overtake, and printStatement still gets its true back.`);
@@ -139,11 +129,12 @@ const colors = [
 for (const [from, to] of colors) swapAll(from, to);
 
 /* ---------- copy ---------- */
-swapMaybe('  <span>NorthStar Heating &amp; Cooling</span>', '  <span>Boreal Comfort Co</span>');
-swapMaybe(`    + '<div class="stmt-meta">NorthStar Heating &amp; Cooling. The computed number is a draft; the approved number is what pays.'
-    + ' Question a line by ticking Dispute on your portal, or tell Bryan.</div>'`,
-  `    + '<div class="stmt-meta">Boreal Comfort Co. The computed number is a draft; the approved number is what pays.'
-    + ' Question a line by ticking Dispute on your portal, or tell the office.</div>'`);
+// Catch-all, not an anchor, the same one the office half uses: the company name is in
+// the masthead span and again in the statement footnote, and quoting a whole sentence of
+// copy to reach the second one is how a reworded sentence stops the bake. The
+// /northstar/i guardrail below proves none survived.
+html = html.split('NorthStar Heating &amp; Cooling').join('Boreal Comfort Co');
+swapMaybe('or tell Bryan.', 'or tell the office.');
 // The star-backlog swaps that sat here (including the one guarding a real earner's real
 // dollars in a donor comment) went with the UI itself, commission-tracker f438944. Verified
 // 2026-07-30: portal.html no longer carries that comment, so there is nothing left to guard.
