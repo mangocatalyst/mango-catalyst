@@ -21,7 +21,7 @@ let html = fs.readFileSync(SRC, 'utf8');
 
 // Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
 // reports every drifted anchor in one run. See anchors.js.
-const { swap, swapRe, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
+const { swap, swapBetween, swapRe, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- fonts: 5 static faces -> 2 variable faces ---------- */
 swap(
@@ -129,13 +129,11 @@ swap(
 );
 // Job Costing (donor 25010ea/3f0ceca, hidden beta) brought two more deep links.
 // Each collapses to the inert branch it already carries, so the cells read the same.
-swap(`    const custLink = j => j.custId
-      ? \`<a href="https://go.servicetitan.com/#/Customer/\${j.custId}" target="_blank" rel="noopener" style="color:var(--teal-bri);text-decoration:none">\${esc(j.customer || 'unknown')}</a>\`
-      : esc(j.customer || 'unknown');`,
+// End-anchored: the href line between the ends carries the styling, and Job Costing is
+// the donor page still under active change.
+swapBetween(`    const custLink = j => j.custId`, `      : esc(j.customer || 'unknown');`,
   `    const custLink = j => esc(j.customer || 'unknown'); // demo: ServiceTitan deep links disabled`);
-swap(`    const typeLink = j => j.jobIds && j.jobIds.length
-      ? \`<a href="https://go.servicetitan.com/#/Job/Index/\${j.jobIds[0]}" target="_blank" rel="noopener" class="hint" style="color:var(--teal-bri);text-decoration:none">\${esc(j.type)}</a>\`
-      : \`<span class="hint">\${esc(j.type)}</span>\`;`,
+swapBetween(`    const typeLink = j => j.jobIds && j.jobIds.length`, `      : \`<span class="hint">\${esc(j.type)}</span>\`;`,
   `    const typeLink = j => \`<span class="hint">\${esc(j.type)}</span>\`; // demo: ServiceTitan deep links disabled`);
 
 /* ---------- no server behind the demo: every call becomes a local edit ----------
@@ -144,44 +142,27 @@ swap(`    const typeLink = j => j.jobIds && j.jobIds.length
    dismissed flag springing back. Each of these keeps the local half of the work
    (localStorage, the re-render) and drops the round trip, so the control does
    what it looks like it does and the edit lasts until reload. */
-swap(`    fSync(); renderFlags();
-    try {
-      const r = await fetch('/api/flag', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, undo }) });
-      if (!r.ok) throw new Error(\`HTTP \${r.status}\`);
-    } catch (e) {
-      if (undo) fGone.add(key); else fGone.delete(key);
-      localStorage.setItem('nsFlagsDismissed', JSON.stringify([...fGone]));
-      fSync(); renderFlags();
-    }
+// End-anchored, all four: what sits between the ends is the rollback branch, the
+// error string and the commentary, which is exactly what upstream rewrites. The
+// fetch( and /api/ guardrails below are what prove each one landed.
+swapBetween(`    fSync(); renderFlags();
+    try {`, `    }
   });`,
   `    fSync(); renderFlags(); // demo: the dismissal lives in this browser, nothing to POST
   });`);
-swap(`  /* Union, not replace: this machine's just-clicked dismissals are already POSTed,
-     and what comes back adds whatever was resolved on another machine. */
-  fetch('/api/flags', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(d => {
-    if (!d || !Array.isArray(d.keys)) return;
-    const before = fGone.size;
-    d.keys.forEach(k => fGone.add(k));
-    if (fGone.size !== before) {
-      localStorage.setItem('nsFlagsDismissed', JSON.stringify([...fGone]));
-      fSync(); renderFlags();
-    }
-  }).catch(() => {});
+swapBetween(`  /* Union, not replace: this machine's just-clicked dismissals are already POSTed,`,
+  `  }).catch(() => {});
 }`,
   `  // demo: no other machine to union dismissals from
 }`);
 // The pager HEADs tomorrow's report to see whether the link should appear. The demo
 // publishes exactly one report (make-demo-data.js clears the archive first), so there
 // is never a next page, and the probe would 404 against the static host anyway.
-swap(`if (PG.next && location.protocol.startsWith('http')) {
-  fetch(PG.next, {method: 'HEAD'}).then(r => { if (r.ok) { const a = $('#pg-next'); a.href = PG.next; a.textContent = \`\${PG.nextLabel} →\`; a.style.display = 'inline-block'; } }).catch(() => {});
+swapBetween(`if (PG.next && location.protocol.startsWith('http')) {`, `.catch(() => {});
 }`,
   `// demo: one report, so there is never a next page to probe for`);
-swap(`  try {
-    const r = await fetch('/api/layout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(L) });
-    b.textContent = r.ok ? 'Saved ✓ (default for every fresh browser)' : 'Save failed';
-  } catch { b.textContent = 'Save failed'; }`,
+swapBetween(`  try {
+    const r = await fetch('/api/layout',`, `  } catch { b.textContent = 'Save failed'; }`,
   `  b.textContent = 'Saved ✓ (this browser, for the demo)'; // demo: nothing to POST to`);
 
 /* ---------- demo chrome ---------- */

@@ -29,12 +29,12 @@ let html = fs.readFileSync(SRC, 'utf8');
 
 // Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
 // reports every drifted anchor in one run. See anchors.js.
-const { swap, swapAll, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
+const { swap, swapBetween, swapFn, swapAll, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
-swap(`  /* Branding: northstarheatcool.com. Navy #002D3F, teal #006385, red-orange
-     #F0533F, cream #FFF0C3, gold #FAA54E. Typography mirrors the owner dashboard:
-     Passion One display + Inter body, served locally (no Google Fonts). */`,
+// End-anchored: this is a comment, and the hex values and font notes inside it are
+// revised whenever the donor's palette moves.
+swapBetween(`  /* Branding: northstarheatcool.com.`, `(no Google Fonts). */`,
   '  /* Branding: Mango Catalyst demo skin (brand-guidelines.md). */');
 swap('<title>Install White Board (live)</title>',
   '<title>Boreal Comfort Co · Install Whiteboard Demo</title>');
@@ -161,114 +161,38 @@ swap('<script>\n  const TYPE = {', `<script>
 
   const TYPE = {`);
 
+/* ---------- the server-backed functions, stubbed ----------
+   Anchored on the signature, not on the body: swapFn takes whatever the donor's
+   function currently contains and replaces the whole thing. Every one of these used
+   to quote its body verbatim, which is why an upstream edit INSIDE loadRegistration
+   killed the nightly for two nights on 08-05, and why equipAction carried 1537
+   characters of donor code the demo throws away anyway. The guardrails at the bottom
+   (no fetch(, no /api/, no live URL, no real name) are what prove the stubs landed. */
+
 // no server behind the static demo: edits are optimistic-only and stick in-page
-swap(`  async function flip(rowId, column, value) {
-    const r = await fetch("/api/flip", { method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rowId, column, value }) });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || \`HTTP \${r.status}\`);
-  }`,
-  '  async function flip() {} // demo: edits live in this page and reset on reload');
-swap(`  async function load() {
-    try {
-      const r = await fetch("whiteboard.json", { cache: "no-store" });
-      if (!r.ok) throw new Error(\`HTTP \${r.status}\`);
-      board = await r.json();
-      generatedAt = board.generatedAt;
-      $("error").style.display = "none";
-      render(); stamp();
-      if (regData) renderRegistration(); // reg rows join city/Slack from the board
-    } catch (e) {
-      $("error").textContent = \`Can't reach the board (\${e.message}).\`;
-      $("error").style.display = "block";
-    }
-  }`,
-  `  async function load() { board = DEMO_BOARD; render(); stamp(); }`);
-swap(`  function stamp() {
-    if (!generatedAt) return;
-    const mins = Math.round((Date.now() - new Date(generatedAt)) / 60000);
-    $("stamp").textContent = \`synced \${mins <= 0 ? "just now" : mins + "m ago"} · live edits\`;
-    $("live").classList.toggle("stale", mins > 45);
-  }`,
-  '  function stamp() { $("stamp").textContent = "demo · fictional data · edits reset on reload"; }');
+swapFn('flip', '  async function flip() {} // demo: edits live in this page and reset on reload');
+swapFn('load', '  async function load() { board = DEMO_BOARD; render(); stamp(); }');
+swapFn('stamp', '  function stamp() { $("stamp").textContent = "demo · fictional data · edits reset on reload"; }');
 /* ---------- sales + registration + history: inline synthetic feeds, no server ---------- */
-swap(`  async function loadSales() {
-    try {
-      const r = await fetch("sales-summary.json", { cache: "no-store" });
-      if (!r.ok) return; // crew instance 404s it -> Sales tab stays hidden, board unaffected
-      salesData = await r.json();
-      if (!salesReady) { salesReady = true; $("tabnav").hidden = false; $("tab-btn-sales").hidden = false; }
-      renderSales();
-    } catch (e) { /* leave tab hidden; the board does not depend on this */ }
-  }`,
-  `  async function loadSales() { // demo: inlined synthetic summary, no server
+swapFn('loadSales', `  async function loadSales() { // demo: inlined synthetic summary, no server
     salesData = DEMO_SALES;
     if (!salesReady) { salesReady = true; $("tabnav").hidden = false; $("tab-btn-sales").hidden = false; }
     renderSales();
   }`);
-swap(`  async function loadRegistration() {
-    const my = ++regSeq;
-    try {
-      const r = await fetch("/api/equipment", { cache: "no-store" });
-      if (!r.ok) return; // crew instance 404s it -> Registration tab stays hidden
-      const fresh = await r.json();
-      if (my !== regSeq) return; // a save started after this poll; its answer is newer
-      regData = fresh;
-      buildNeedsByLocation(regData.units || []); // board chips follow the same data
-      if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
-      renderRegistration();
-      if (board) render(); // chips live on board rows, so they need this data to redraw
-    } catch (e) { /* leave hidden; board unaffected */ }
-  }`,
-  `  async function loadRegistration() { // demo: inlined synthetic equipment, no server
+swapFn('loadRegistration', `  async function loadRegistration() { // demo: inlined synthetic equipment, no server
     regData = DEMO_EQUIPMENT;
     buildNeedsByLocation(regData.units || []); // same as live: board chips follow this data
     if (!regReady) { regReady = true; $("tabnav").hidden = false; $("tab-btn-registration").hidden = false; }
     renderRegistration();
     if (board) render();
   }`);
-// Deleting a row is the last call with a server behind it. Splice the local copy
-// rather than calling load(), which reassigns board = DEMO_BOARD and would put the
-// row straight back.
-swap(`  async function del(rowId) {
-    const r = await fetch("/api/delete", { method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rowId, source: "web" }) });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || \`HTTP \${r.status}\`);
-    load(); // the row is gone; re-fetch rather than patch the local copy
-  }`,
-  `  async function del(rowId) { // demo: drop the row from the copy in this page
+// Deleting a row: splice the local copy rather than calling load(), which reassigns
+// board = DEMO_BOARD and would put the row straight back.
+swapFn('del', `  async function del(rowId) { // demo: drop the row from the copy in this page
     board.rows = (board.rows || []).filter((r) => r.rowId !== rowId);
     render();
   }`);
-swap(`  async function equipAction(stEquipmentId, action, value) {
-    const my = ++regSeq;
-    const mine = (unitSeq.get(stEquipmentId) || 0) + 1; // per-unit, see below
-    unitSeq.set(stEquipmentId, mine);
-    try {
-      const r = await fetch("/api/equip", { method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stEquipmentId, action, value }) });
-      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || \`HTTP \${r.status}\`);
-      const { unit } = await r.json();
-      // A save PATCHES one unit, so it is ordered PER UNIT, not against every other
-      // request: sharing the GET's discard rule threw away a good save whenever a second,
-      // unrelated save started first. Bumping regSeq above still invalidates any poll in
-      // flight; unitSeq drops only an older response for THIS unit, which matters because
-      // the response is a whole-unit replace — tab quickly from model to serial and the
-      // slower model reply would otherwise put the old serial back on screen.
-      if (unitSeq.get(stEquipmentId) !== mine) return;
-      const i = regData.units.findIndex((u) => u.stEquipmentId === stEquipmentId);
-      if (i >= 0 && unit) regData.units[i] = unit;
-      renderRegistration();
-    } catch (e) {
-      $("reg-error").textContent = \`Registration edit didn't save: \${e.message}\`;
-      $("reg-error").style.display = "block";
-      loadRegistration();
-      setTimeout(() => { $("reg-error").style.display = "none"; }, 8000);
-    }
-  }`,
-  `  async function equipAction(stEquipmentId, action, value) { // demo: edits live in-page, reset on reload
+swapFn('equipAction', `  async function equipAction(stEquipmentId, action, value) { // demo: edits live in-page, reset on reload
     const u = regData.units.find((x) => x.stEquipmentId === stEquipmentId);
     if (u) {
       if (action === "group_tag") u.groupTag = value || "";
