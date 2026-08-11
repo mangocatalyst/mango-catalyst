@@ -106,7 +106,7 @@ function assertNoRealNames(html, what) {
   }
 }
 
-module.exports = { NAME_MAP, scrubNames, assertNoRealNames };
+module.exports = { NAME_MAP, scrubNames, assertNoRealNames, betweenPayloads };
 
 // node demo/scrub-names.js — the scrub and the assert must agree on case, or a
 // name slips the rewrite and only surfaces as a failed bake.

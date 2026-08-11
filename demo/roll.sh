@@ -2,9 +2,17 @@
 # roll.sh — the nightly. Roll today's dates into the committed skin.
 #
 # This is the half that runs at 05:45 (mc-demo-rebake.sh). It reads demo/skinned/
-# and regenerates the synthetic data; it does NOT read the donor pages, quote any
-# donor text, or run a single anchor. An edit to the live NorthStar tools cannot
-# break it. That is the whole point of the split — see demo/skin.sh.
+# and regenerates the synthetic data; it does NOT read the donor PAGES, quote any
+# donor text, or run a single anchor. An edit to the donor pages cannot break it.
+# That is the whole point of the split, see demo/skin.sh.
+#
+# Precisely, because the looser version of this claim is wrong: the validators
+# below still harvest real employee names out of live NorthStar DATA, so a new
+# hire whose first name collides with the fictional roster still fails this job
+# and still pages the 651. That happened twice in the run of failures this split
+# was built for (2026-07-28, 2026-07-29) and the split does not touch it. It is
+# job 4 in handoff-demo-anchors-2026-08-07, and the fix is renaming the fictional
+# crew off common first names, not growing TOKEN_ALLOW.
 #
 # Only the owner dashboard actually needs this: it bakes its report date in, so a
 # frozen artifact shows a visibly stale date. The whiteboard needs the sales feed
@@ -28,6 +36,13 @@ node make-demo-data.js
 cp skinned/index.template.html build/index.template.html
 NSDASH_DIR="$PWD/build" node ~/Projects/mango-automation/scripts/nsdash/ns-dash-bake.js
 node roll-inject.js
+
+# The template is frozen but ns-dash-bake.js is not, and it still runs here. This
+# is the only thing that notices when the renderer stops emitting a key the
+# frozen template reads: the result is a page of empty panels that is valid,
+# parseable, dash-free and leak-free, so every other guard passes it. See the
+# header of check-data-shape.js for what this does and does not cover.
+node check-data-shape.js ${SKIN_RECORD:+--record}
 
 # The commission pair is validated where it SHIPS, not from build/. `git reset
 # --hard` does not remove ignored files, so demo/build/commission.html survives

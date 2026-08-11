@@ -11,7 +11,7 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { scrubNames, assertNoRealNames } = require('./scrub-names.js');
+const { scrubNames, assertNoRealNames, betweenPayloads } = require('./scrub-names.js');
 
 const SRC = path.join(os.homedir(), 'Projects', 'northstar-owner-dashboard', 'index.template.html');
 const OUT_DIR = path.join(__dirname, 'build');
@@ -207,6 +207,19 @@ swap(`$2,500 and up (Bryan 2026-07-11);`, `$2,500 and up;`);
 
 /* ---------- every drifted anchor, in one report, before anything is written ---------- */
 assertAnchors();
+
+/* ---------- copy: NorthStar identity out, Boreal in ----------
+   Catch-all, not an anchor, the same shape make-commission-demo.js already uses.
+   The five anchored swaps above cover the title, the logo alt, the masthead and
+   the two decline strings, but bare "NorthStar" in ordinary prose had no handler
+   at all: one new donor sentence ("NorthStar chose to eat on a warranty swap",
+   nsdash 2026-08-11) tripped the /northstar/i guardrail below and refused the
+   whole skin. Substituting the name covers that and any future copy, and the
+   guardrail still proves none survived.
+
+   Between the base64 payloads, because unlike the commission maker's anchor this
+   string is pure letters and can occur inside an inlined font by chance. */
+html = betweenPayloads(html, s => s.split('NorthStar').join('Boreal Comfort Co'));
 
 /* ---------- names: the catch-all, after every anchored swap ----------
    Runs last so the swaps above still find anchors containing the real names.

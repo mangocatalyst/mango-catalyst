@@ -56,9 +56,19 @@ module.exports = (get, set) => {
   };
 
   // for the anchors that are volatile by design (the pages' version stamps)
+  //
+  // Count with an explicit global clone. String.match() on a NON-global regex
+  // returns [wholeMatch, ...captureGroups], so m.length was the capture count
+  // plus one and never the occurrence count: with no capture groups it was 1 no
+  // matter how many times the pattern actually appeared, the n check passed, and
+  // replace() on a non-global regex then took only the FIRST. A donor that grew a
+  // second version stamp would have shipped the second one raw, silently, with
+  // every guard green. Found by adversarial review 2026-08-11; no donor has ever
+  // had two, so this was latent rather than a live leak.
   const swapRe = (re, to, n = 1) => {
-    const m = get().match(re);
-    if (!m || m.length !== n) return miss(`regex matched ${m ? m.length : 0}x, expected ${n}: ${re}`);
+    const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+    const hits = get().match(g) || [];
+    if (hits.length !== n) return miss(`regex matched ${hits.length}x, expected ${n}: ${re}`);
     set(get().replace(re, to));
   };
 
@@ -182,6 +192,25 @@ if (require.main === module) {
   const ii = module.exports(() => i, v => { i = v; });
   ii.swapBetween('<a>', '</a>', '!');
   assert.throws(() => ii.assertAnchors(), /span matched 2x/);
+
+  // swapRe counts OCCURRENCES, not capture groups. Both of these used to pass
+  // silently and replace only the first, which is how a second donor version
+  // stamp would have shipped raw.
+  let j = '<span>v1</span> and <span>v2</span>';
+  const jj = module.exports(() => j, v => { j = v; });
+  jj.swapRe(/<span>v\d<\/span>/, 'X');
+  assert.throws(() => jj.assertAnchors(), /regex matched 2x, expected 1/);
+
+  let k = 'one <b>hit</b> only';
+  const kk = module.exports(() => k, v => { k = v; });
+  kk.swapRe(/<b>(hit)<\/b>/, 'X');   // a capture group must NOT inflate the count
+  kk.assertAnchors();
+  assert.strictEqual(k, 'one X only');
+
+  let l = 'nothing here';
+  const ll = module.exports(() => l, v => { l = v; });
+  ll.swapRe(/<span>v\d<\/span>/, 'X');
+  assert.throws(() => ll.assertAnchors(), /regex matched 0x, expected 1/);
 
   console.log('anchors.js self-check ok');
 }

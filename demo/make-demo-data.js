@@ -13,6 +13,13 @@ const DATA = path.join(OUT, 'data');
 fs.mkdirSync(DATA, { recursive: true });
 // stale archives would resurrect the pager's prev link
 for (const f of fs.readdirSync(OUT)) if (/^report-\d{4}-\d{2}-\d{2}\.html$/.test(f) || f === 'index.html') fs.unlinkSync(path.join(OUT, f));
+// ns-dash-bake.js:416 reads data/default-layout.json if it happens to exist and
+// feeds it to DATA.defaultLayout, which decides which panels are hidden and in
+// what order. Nothing here writes it, so it can only arrive by hand or by copy,
+// and `git reset --hard` does not remove it because build/ is gitignored: a
+// stale one would silently hide panels from a shipped artifact with every guard
+// still green. Delete it rather than trust that it is never there.
+fs.rmSync(path.join(DATA, 'default-layout.json'), { force: true });
 
 /* ---------- seeded PRNG (mulberry32) ---------- */
 let seed = 20260713;

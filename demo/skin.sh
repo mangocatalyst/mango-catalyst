@@ -6,7 +6,10 @@
 # daily development by people who have never heard of this one. Every edit near
 # an anchor makes it refuse, which is correct and is exactly why it must not be
 # what the 05:45 job runs: between 2026-07-28 and 2026-08-11 that arrangement
-# failed 11 nights out of 18, every one of them over a marketing page's date.
+# failed 11 of its 18 scheduled 05:45 runs, every one of them over a marketing
+# page's date. Nine of those eleven were donor drift, which this split ends. The
+# other two (07-28, 07-29) were the privacy validator's live-harvested ban list
+# colliding with the fictional roster, which it does not.
 #
 # So the split: skin.sh reads the donors and writes demo/skinned/, which is
 # COMMITTED. roll.sh reads only demo/skinned/ and rolls today's dates into it.
@@ -85,7 +88,9 @@ echo "skinned -> demo/skinned/ (donors: $(sha "$NSDASH") $(sha "$TRACKER") $(sha
 # Roll immediately. Not a convenience: ns-dash-bake.js new Function()-parses every
 # inline script, and that is the ONLY thing that catches a swap which left the
 # template syntactically broken. A skin is not proven until it has been rendered.
-./roll.sh
+# SKIN_RECORD also re-records the renderer's DATA key set here, with a human
+# watching, which is what roll.sh asserts on every other night.
+SKIN_RECORD=1 ./roll.sh
 
 cat <<EOF
 

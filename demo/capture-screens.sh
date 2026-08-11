@@ -1,7 +1,7 @@
 #!/bin/zsh
 # capture-screens.sh: the still shots under each demo on /dashboards.
 #
-# Runs headless Chrome over the artifacts bake-demo.sh already shipped into
+# Runs headless Chrome over the artifacts roll.sh and skin.sh already shipped into
 # public/demo, so a screenshot can never show anything the privacy validator
 # has not already cleared. Re-runnable: run it after every bake.
 #
@@ -36,7 +36,8 @@ HEIGHT=900
 # shot <artifact.html> <out-name> [url-fragment]
 shot() {
   local src="$SRC/$1" name=$2 frag=$3
-  [[ -f $src ]] || { echo "missing artifact: $src (run bake-demo.sh first)" >&2; exit 1; }
+  # dashboard/whiteboard come from roll.sh, the commission pair from skin.sh
+  [[ -f $src ]] || { echo "missing artifact: $src (run demo/roll.sh, or demo/skin.sh for the commission pair)" >&2; exit 1; }
   # Force the theme by appending a script the page's own bootstrap cannot win
   # against: it runs last, and all four artifacts paint off this one attribute.
   # Appended rather than injected into the head because the four artifacts do not
