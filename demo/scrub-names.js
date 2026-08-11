@@ -34,6 +34,9 @@ const NAME_MAP = new Map([
   // the point of a map is that donor drift lands on a rewrite, not on a leak.
   ['Ken', 'Theo'],
   ['Travis', 'Cole'],
+  // install crew, named in a donor comment about a ServiceTitan data quirk
+  // (nsdash 6ecfa0a, 2026-08-11). Stands in as an installer, like the real one.
+  ['Noah', 'Jack'],
   // Surnames. These used to be assert-only, which meant a donor comment that
   // spelled a name out in full killed the bake instead of being rewritten
   // ("credits Ken Philaja", nsdash c37d799, 2026-08-07). Each maps to the
@@ -46,6 +49,7 @@ const NAME_MAP = new Map([
   ['Wierimaa', 'Thornton'],   // Corey and Zack both; one surname, one stand-in
   ['Furlong', 'Stavros'],     // Scott
   ['Robinson', 'Nash'],       // Tom, helper
+  ['Hested', 'Pruitt'],       // Noah
   // ponytail: Matthew Driver is deliberately absent. "driver" is an ordinary
   // word in the donor prose, so mapping or banning it would rewrite English.
 ]);

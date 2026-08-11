@@ -18,13 +18,6 @@ const SRC = path.join(os.homedir(), 'Projects', 'northstar-owner-dashboard', 'in
 const OUT = path.join(__dirname, 'build', 'whiteboard.html');
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
-// The Sales tab feed is the real ns-dash-bake output run against synthetic Boreal data
-// (bake-demo.sh step 3, before this script) so it stays name-consistent with the board
-// and the owner dashboard. Inlined below; no server behind the static demo.
-const SALES_PATH = path.join(__dirname, 'build', 'sales-summary.json');
-if (!fs.existsSync(SALES_PATH)) throw new Error('build/sales-summary.json missing; run ns-dash-bake (bake-demo.sh step 3) before this script');
-const SALES_JSON = fs.readFileSync(SALES_PATH, 'utf8').trim();
-
 let html = fs.readFileSync(SRC, 'utf8');
 
 // Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
@@ -119,8 +112,13 @@ swap('<script>\n  const TYPE = {', `<script>
       { rebate: "na", registered: "na" }),
   ] };
 
-  // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data ----
-  const DEMO_SALES = ${SALES_JSON};
+  // ---- sales tab feed: the exact ns-dash-bake output for synthetic Boreal data.
+  // Left as a placeholder here and filled in by roll-inject.js, because this is
+  // the one part of the whiteboard that has to move every night (the feed is a
+  // dated window and the tab renders "as of <generatedAt>"). Everything else on
+  // this page is skinned once and frozen. A valid identifier on purpose, so the
+  // skinned artifact still parses as JavaScript. ----
+  const DEMO_SALES = __SALES_SUMMARY__;
 
   // ---- registration tab: synthetic equipment. installDate uses D() so warranty
   // deadlines (amber <=14d, red <=7d, overdue) stay plausible whenever this is baked.

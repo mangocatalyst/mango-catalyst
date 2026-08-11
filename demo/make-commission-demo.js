@@ -25,9 +25,17 @@ const DATA = path.join(__dirname, 'build', 'commission-data.json');
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
 if (!fs.existsSync(DATA)) throw new Error('build/commission-data.json missing; run make-commission-data.js first');
-const STAMP = new Date().toISOString().slice(0, 10);
 
 let html = fs.readFileSync(SRC, 'utf8');
+
+// The demo's version IS the donor's version: it says what this was skinned from,
+// and it moves only when somebody re-skins. It used to be the bake date, which
+// made this artifact differ every single night over a string nobody reads and
+// was the whole reason the nightly rebuilt it at all (2026-08-11).
+// Read here, off the raw donor, and with its own match: a capture group inside
+// swapRe would make anchors.js see m.length === 2 and report a phantom miss.
+const DONOR_V = (html.match(/<span>v(\d{4}-\d{2}-\d{2}\.\d+)<\/span>/) || [])[1];
+if (!DONOR_V) throw new Error(`donor version stamp not found in ${SRC}`);
 
 // Both tiers live in anchors.js, which collects a miss rather than throwing on it:
 // assertAnchors() below reports every drifted anchor in one run.
@@ -224,7 +232,7 @@ html = html.split('StarClub').join('Comfort Club');
 swapMaybe(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
 `, '');
 swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
-  `<span>demo v${STAMP} · fictional data · edits reset on reload</span>`);
+  `<span>demo v${DONOR_V} · fictional data · edits reset on reload</span>`);
 
 /* ---------- dashes: the site bans em and en dashes everywhere ---------- */
 html = html.split(' — ').join(', ');

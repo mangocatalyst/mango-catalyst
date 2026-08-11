@@ -20,9 +20,13 @@ const DATA = path.join(__dirname, 'build', 'commission-data.json');
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
 if (!fs.existsSync(DATA)) throw new Error('build/commission-data.json missing; run make-commission-data.js first');
-const STAMP = new Date().toISOString().slice(0, 10);
 
 let html = fs.readFileSync(SRC, 'utf8');
+
+// The donor's version, not the bake date. See make-commission-demo.js for why,
+// including why this needs its own match instead of a capture group in swapRe.
+const DONOR_V = (html.match(/<span>v(\d{4}-\d{2}-\d{2}\.\d+)<\/span>/) || [])[1];
+if (!DONOR_V) throw new Error(`donor version stamp not found in ${SRC}`);
 
 // Same two-tier rule as make-commission-demo.js, both tiers defined in anchors.js: a
 // strict miss is collected rather than thrown, and assertAnchors() below reports every
@@ -144,7 +148,7 @@ html = html.split('StarClub').join('Comfort Club');
 swapMaybe(`  <!-- page version, extension-style date.build: bump on every shipped template change -->
 `, '');
 swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
-  `<span>demo v${STAMP} · fictional data · edits reset on reload</span>`);
+  `<span>demo v${DONOR_V} · fictional data · edits reset on reload</span>`);
 
 /* ---------- dashes ---------- */
 html = html.split(' — ').join(', ');

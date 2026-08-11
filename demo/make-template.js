@@ -19,6 +19,14 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 
 let html = fs.readFileSync(SRC, 'utf8');
 
+// The donor's own version stamp, read off the raw donor before any swap runs.
+// This used to be hand-maintained and said v2026-08-06.1 while the donor was
+// already at v2026-08-11.2, so the number the demo showed was a stale lie about
+// nothing. Its own match, not a capture group in the swapRe below: anchors.js
+// asserts on m.length, so a group would make it report a phantom miss.
+const DONOR_V = (html.match(/<span>v(\d{4}-\d{2}-\d{2}\.\d+)<\/span>/) || [])[1];
+if (!DONOR_V) throw new Error(`donor version stamp not found in ${SRC}`);
+
 // Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
 // reports every drifted anchor in one run. See anchors.js.
 const { swap, swapBetween, swapRe, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
@@ -172,8 +180,8 @@ swap('/* the north star */', '');
 // no server behind the static demo: hide the shared-default layout save
 swap('<button class="chip" id="w-default">Save as default for everyone</button>',
   '<button class="chip" id="w-default" style="display:none">Save as default for everyone</button>');
-// demo's own version stamp
-swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/, '<span>demo v2026-08-06.1</span>');
+// demo's own version stamp: the donor's, read at the top of this file
+swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/, `<span>demo v${DONOR_V}</span>`);
 
 // a code comment names real NS installers; caught by the validator 2026-07-14
 swap(`/* booked-capacity math (service: 8h per tech-day; install: per-day cap from
