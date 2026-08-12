@@ -52,6 +52,13 @@ shot() {
     --force-device-scale-factor=2 --window-size=$WIDTH,$HEIGHT \
     --virtual-time-budget=6000 --screenshot="$OUT/$name.png" \
     "file://$tmp$frag" 2>/dev/null
+  # Chrome exits 0 having written a blank or truncated PNG when a render goes
+  # wrong, and the nightly stages whatever appeared and pushes it to the live
+  # marketing page. The real shots are 300-800KB; nothing that small is a
+  # dashboard. This is the only thing between a bad render and a blank product
+  # shot on mangocatalyst.com.
+  local bytes=$(stat -f%z "$OUT/$name.png" 2>/dev/null || echo 0)
+  (( bytes >= 50000 )) || { echo "screenshot is ${bytes}B, too small to be a render: $OUT/$name.png" >&2; exit 1; }
   echo "captured -> public/dashboards/$name.png ($(du -h "$OUT/$name.png" | cut -f1 | tr -d ' '))"
 }
 

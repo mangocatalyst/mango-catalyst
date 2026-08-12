@@ -202,8 +202,21 @@ const addText = (t) => {
 const GENERIC_MAILBOX = new Set(['admin', 'info', 'office', 'hello', 'support',
   'sales', 'billing', 'noreply', 'no-reply', 'contact', 'help', 'team',
   'finance', 'accounting', 'payroll', 'dispatch', 'service', 'careers']);
-/** Audit rows are written by tooling as well as by humans. */
-const isToolActor = (who) => /^mango\b|runbook|orchestrator|cron|bot|script/i.test(String(who));
+/**
+ * Audit rows are written by tooling as well as by humans.
+ *
+ * `agent` and `migration` are here because on 2026-08-12 they were not: a payroll
+ * agent had written rows as `who='lane3-agent'`, which no pattern here matched, so
+ * a tool actor was tokenised into the human names "lane" and "agent" and the bake
+ * failed on the demo's own copy ("Phone time by agent", the `UNA[lane]` lookup in
+ * the whiteboard script). `migration` was sitting in the same table waiting to do
+ * it again. Neither word is anyone's name, so the fix belongs here and not in
+ * TOKEN_ALLOW -- the actor was misclassified, the token was not.
+ *
+ * Forward convention: an agent writing this table stamps `who` as `mango-<lane>`,
+ * which `^mango\b` already covers. This list is the backstop for when it doesn't.
+ */
+const isToolActor = (who) => /^mango\b|runbook|orchestrator|cron|bot|script|agent|migration/i.test(String(who));
 
 /** An email is two leaks: the address, and the human-shaped local part. */
 const addEmail = (e) => {
@@ -264,6 +277,12 @@ if (!present.nsDashboardRaw) {
       addCustomer(r.name); addStaff(r.advisor);
       String(r.installers || '').split(',').forEach(n => addStaff(n));
     }
+  } else {
+    // Every other source here says so when it cannot be read. This one used to
+    // skip in silence, which is the one thing the fail-closed rule exists to
+    // prevent -- and it is the likeliest source to vanish: the donor moved the
+    // board into data/whiteboard.db and stopped writing this file on 2026-07-17.
+    console.warn('WARN: live install whiteboard not found; those checks did not run');
   }
 
   // real slack digest sentences
