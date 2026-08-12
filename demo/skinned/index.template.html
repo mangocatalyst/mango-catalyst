@@ -198,13 +198,12 @@ body.jc-wide #role-view .grid{align-items:start}
 /* two supporting tables in one full-width panel, stacked only when there is no
    room for them beside each other */
 .jc-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:8px 26px;align-items:start}
-/* The leak strip: biggest recoverable numbers, largest first, read without a click. */
-.jc-leaks{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px}
-.jc-leak{border-left:2px solid var(--line);padding:2px 0 2px 13px}
-.jc-leak:first-child{border-left-color:var(--gold-bri)}
-.jc-leak .n{font-family:var(--body);font-weight:600;font-size:31px;letter-spacing:-.5px;line-height:1.1;color:var(--num)}
-.jc-leak .l{font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px}
-.jc-leak .s{font-size:12.5px;line-height:1.5;color:var(--dimmer);margin-top:4px}
+  font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ice)}
+  background:transparent;border:1px solid transparent;border-radius:6px}
+  background:rgba(255,107,107,.14);color:#ff9d8d;border:1px solid rgba(255,107,107,.4)}
+/* The leak strip's own five-across grid went with it on 2026-08-11: those figures
+   are half-width panels now (jcLeakStrip), built out of .panel, .big and .kpi-sub
+   like every other widget on this page, so it needs no styles of its own. */
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;backdrop-filter:blur(4px);opacity:0;transform:translateY(14px);animation:rise .55s ease forwards}
 .panel.click{cursor:pointer;transition:border-color .18s ease}
 .panel.click:hover{border-color:rgba(124,187,255,.4)}
@@ -533,6 +532,9 @@ body.role-mode .wrap>h2,body.role-mode .wrap>.grid,body.role-mode #kpis,body.rol
     <div id="mem-delta"></div>
     <div id="mem-types" style="margin-top:8px"></div>
     <div class="kpi-sub" style="margin-top:8px">Active maintenance agreements: the recurring base that smooths slow seasons.</div>
+    <!-- The modal above this is a read-only roster; the club view is the workable
+         list (address, phone, contacted/booked). stopPropagation because the whole
+         panel is a [data-modal] click target and we want the view, not the modal. -->
   </div>
   <div class="panel click" data-w="ar-aging" data-role="financial" data-modal="unpaid" style="grid-column:span 6;animation-delay:.2s">
     <h3><span class="wire ok"></span>Receivables aging <span class="hint">all AR, YTD, by invoice date</span></h3>
@@ -559,7 +561,7 @@ body.role-mode .wrap>h2,body.role-mode .wrap>.grid,body.role-mode #kpis,body.rol
   <div class="panel" data-w="leaderboard" data-role="sales" style="grid-column:span 6;animation-delay:.28s">
     <h3><span class="wire ok"></span>Sales leaderboard · 30 days</h3>
     <div id="lb-advisors" style="margin-top:6px"></div>
-    <div class="kpi-sub" style="margin-top:8px">Sold estimates by seller: comfort advisors plus selling service techs (Marcus, Dana). House-account sales credit the assigned advisor.</div>
+    <div class="kpi-sub" style="margin-top:8px">Sold estimates by seller: comfort advisors plus selling service techs (Anders, Maren). House-account sales credit the assigned advisor.</div>
   </div>
   <div class="panel click" data-w="invoiced-week" data-role="financial" data-modal="revenue" style="grid-column:span 12;animation-delay:.36s">
     <h3><span class="wire ok"></span>Invoiced by week <span class="hint">Monday weeks · full data window</span></h3>
@@ -617,7 +619,7 @@ body.role-mode .wrap>h2,body.role-mode .wrap>.grid,body.role-mode #kpis,body.rol
   <span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="rng" id="theme-btn" type="button"></button><button class="rng" id="fs-btn" type="button"></button><button class="rng" id="edit-btn" type="button">Customize</button></span>
   <span>Boreal Comfort Co · a fictional demonstration company</span>
   <!-- template version, extension-style date.build: bump on every shipped template change -->
-  <span>demo v2026-08-11.2</span>
+  <span>demo v2026-08-12.2</span>
   <span style="flex-basis:100%" id="foot-note"></span>
 </footer>
 </div>
@@ -1766,6 +1768,94 @@ const jcWeekLabel = w => {
 const jcPctS = v => jcNumOK(v) ? (Math.round(v * 10) / 10) + '%' : jcNA;
 const jcNum = (v, d = 1) => jcNumOK(v) ? (+v).toFixed(d) : jcDot;
 const jcHrs = v => jcNumOK(v) ? (+v).toFixed(1) + ' h' : jcDot;
+/* Numeric, STRICTLY. jcNumOK leans on isFinite, which coerces: isFinite('') and
+   isFinite('   ') are both true and Number('') is 0, so an empty string read out
+   of a snapshot or a half-built field would sail through as a measured zero and
+   print a chip reporting a collapse. jcNumOK is shared with a dozen panels whose
+   behaviour must not move, so the stricter test is local to the chip path.
+   Numbers and non-blank numeric strings only: no '', no whitespace, no booleans,
+   no arrays, all of which isFinite happily calls finite. */
+const jcFinite = v => typeof v === 'number' ? Number.isFinite(v)
+  : typeof v === 'string' && v.trim() !== '' ? Number.isFinite(+v) : false;
+/* A rate and its denominator, never a bare percentage. Returns null when the
+   denominator is missing or zero, so nothing on this page can divide by it: a
+   "0%" invented out of no jobs reads exactly like a real collapse. */
+const jcRate = (num, den) => (jcFinite(num) && jcFinite(den) && +den !== 0) ? (+num / +den * 100) : null;
+
+/* ---------- TREND CHIPS: jcPrior + jcChip ----------
+   ONE helper for every "is this getting better or worse" mark on this page. Panel
+   code decides WHAT it is comparing; this decides how it looks, and it decides it
+   once, so two panels can never disagree about what red means.
+
+     jcPrior(hist, key, daysBack = 7)  -> {value, date, daysAgo} | null
+     jcChip(now, prior, {higherIsBetter, fmt, mini, basis}) -> HTML string | ''
+
+   THE COLOUR IS GOOD/BAD, THE ARROW IS UP/DOWN. They are different questions and
+   this page has both: warranty cost rising is an up arrow in RED, job margin
+   rising is an up arrow in GREEN. That is what higherIsBetter selects, and it has
+   NO DEFAULT -- omitting it renders nothing rather than guessing, because a chip
+   coloured by a guess is the one failure worse than no chip at all.
+
+   A missing prior renders '' everywhere. History accumulates one snapshot a night,
+   so on the day this ships every chip is empty and every panel looks exactly as it
+   does today. That is the expected state, not a fault.
+
+   The chip says a number, a direction and what it is measured against, in that
+   order, because an arrow on its own is a word puzzle. */
+const JC_CHIP_DAYS = 7;
+/* The value this metric held about `daysBack` days before its newest snapshot.
+
+   Anchored to the NEWEST SNAPSHOT rather than to today: history and the figures
+   beside it are written by the same pull, so if the pull has not run for three
+   days both sides are three days old and the comparison still lines up.
+
+   NEAREST the target date, in either direction. The obvious rule is "newest
+   snapshot at or before the target, else the oldest we hold", and it is worse:
+   with snapshots on the 28th and the 5th and a target of the 3rd it walks all
+   the way back to the 28th and compares six days too far, when the 5th sits two
+   days off. There is nothing to protect by only ever looking backwards, because
+   the chip prints the date it actually read: "vs 8/5" is honest whichever side
+   of the target it fell on. Ties go to the older snapshot, which is the longer
+   and more conservative window.
+
+   One snapshot in total is not a comparison and returns null: the same rule
+   snapAgo() applies in the bake. */
+function jcPrior(hist, key, daysBack = JC_CHIP_DAYS) {
+  const s = hist && typeof hist === 'object' ? hist[key] : null;
+  if (!s || typeof s !== 'object') return null;
+  const days = Object.keys(s).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && jcFinite(s[d])).sort();
+  if (days.length < 2) return null;
+  const end = days[days.length - 1];
+  const target = Date.parse(end + 'T12:00:00Z') - daysBack * 86400000;
+  const off = d => Math.abs(Date.parse(d + 'T12:00:00Z') - target);
+  // the newest snapshot IS today's own figure and can never be its own prior
+  const date = days.slice(0, -1).reduce((best, d) => off(d) < off(best) ? d : best);
+  return { value: s[date], date, daysAgo: Math.round((Date.parse(end) - Date.parse(date)) / 86400000) };
+}
+/* prior may be a jcPrior() snapshot (preferred: the chip then names the real
+   date it read) or a bare number, for a figure a caller derived itself. */
+function jcChip(now, prior, opts) {
+  const o = opts || {};
+  if (typeof o.higherIsBetter !== 'boolean') return '';
+  const snap = prior && typeof prior === 'object' ? prior : null;
+  const was = snap ? snap.value : prior;
+  if (!jcFinite(now) || !jcFinite(was)) return '';
+  const fmt = typeof o.fmt === 'function' ? o.fmt : v => Math.round(v).toLocaleString();
+  const when = o.basis || (snap && snap.date ? `vs ${MD(snap.date)}` : 'vs the reading before');
+  const d = +now - +was;
+  /* FLAT MEANS "the page would print the same figure", not "the floats are
+     identical". fmt$ rounds to the dollar, so a 40 cent drift between a stored
+     snapshot and a live sum would otherwise draw a red arrow next to a literal
+     "$0", which contradicts itself at a glance. Same lesson delta() learned on
+     2026-07-28, one layer up: compare what the reader sees. */
+  const dir = fmt(now) === fmt(was) ? 0 : d > 0 ? 1 : d < 0 ? -1 : 0;
+  const cls = !dir ? 'flat' : (dir > 0) === o.higherIsBetter ? 'up' : 'down';
+  const body = dir
+    ? `${dir > 0 ? '&#9650;' : '&#9660;'} ${fmt(Math.abs(d))} ${esc(when)}`
+    : `&middot; no change ${esc(when)}`;
+  const tip = `Was ${fmt(was)}${snap && snap.date ? ` on ${snap.date}` : ''}${snap && jcFinite(snap.daysAgo) ? `, ${snap.daysAgo} day${snap.daysAgo === 1 ? '' : 's'} ago` : ''}. Now ${fmt(now)}.`;
+  return `<span class="delta ${cls}${o.mini ? ' mini' : ''}" title="${esc(tip)}">${body}</span>`;
+}
 /* cutTable has five fixed columns; three more panels would need three more
    shapes out of it, so they get their own column-driven renderer instead of
    bending that one until it serves nobody. cols: {h, t?, r?, v(row)}. */
@@ -1816,7 +1906,9 @@ const jcFoot = foot => !foot ? ''
 const jcPanel = (title, hint, body, foot, span = 6, wire = 'ok', cls = '') => `<div class="panel${cls ? ' ' + cls : ''}" style="grid-column:span ${span}">
   <h3><span class="wire ${wire}"></span>${title}${hint ? `<span class="hint">${hint}</span>` : ''}</h3>
   ${body}${jcFoot(foot)}</div>`;
-const jcStat = (num, sub) => `<div style="min-width:150px"><div class="big">${num}</div><div class="kpi-sub" style="text-transform:none">${sub}</div></div>`;
+// chip: optional jcChip() output, on its own line under the caption so it never
+// wraps into the sentence explaining the number. '' renders nothing at all.
+const jcStat = (num, sub, chip) => `<div style="min-width:150px"><div class="big">${num}</div><div class="kpi-sub" style="text-transform:none">${sub}</div>${chip ? `<div>${chip}</div>` : ''}</div>`;
 const jcStats = inner => `<div style="display:flex;gap:26px;flex-wrap:wrap;margin:10px 0 12px">${inner}</div>`;
 
 /* PANEL: job margin by distance band.
@@ -1869,14 +1961,30 @@ function jcTownPanel(byTown, unknown, winLbl) {
   /* warn is load-bearing: the town at the top of this list may be there because
      of a single bad boiler and recover to a perfectly ordinary margin without
      it, while the next one moves by the same amount and is still eleven points
-     down with half its jobs under their peer median. The note carries both
-     numbers, so it is printed as TEXT on the row AND repeated as the row
-     tooltip, never left as an icon: a reader who misses it stops selling in a
-     healthy town, and that costs more than the town ever did. */
+     down with half its jobs under their peer median. A reader who misses that
+     stops selling in a healthy town, and that costs more than the town ever did.
+
+     A CHIP AND A TOOLTIP, not a sentence, from 2026-08-11. the owner ruled on this
+     one himself: the qualifier was a full sentence on its own line under the row
+     and it read as a word puzzle in a table he was scanning. NOTHING IT SAID IS
+     GONE. Both numbers in it are now chips on the row -- how many jobs are
+     actually behind, and what the town looks like without its worst one -- and
+     the sentence itself is the tooltip on the chip AND on the whole row, taken
+     verbatim from the pull, never rebuilt here. Compress, never delete.
+
+     The fallback text names what `warn` MEANS rather than re-deriving the pull's
+     sentence from its parts: two copies of one sentence in two repos is how the
+     two stop agreeing. It is only reachable on a bake older than warnNote. */
+  const warnTip = t => t.warnNote || 'Read this row with care: one job moves this town by more than 5 points.';
+  /* "1 bad job" and "7 of 14 below median" are the two cases the guard exists to
+     keep apart, said in the fewest words that still separate them. */
+  const warnChip = t => !t.warn ? ''
+    : ` <span class="age mid" title="${esc(warnTip(t))}">${!jcNumOK(t.belowPeer) ? 'moved by one job'
+      : t.belowPeer === 1 ? '1 bad job' : `${t.belowPeer} of ${t.costed} below median`}</span>`;
   const nameCell = t => (t.unknown || t.fold
     ? `<span style="color:var(--dim)" title="${esc(t.fold ? `Every town with fewer than 5 costed installs, added together${t.towns ? `: ${t.towns} of them` : ''}. At two or three jobs a town is one job and not a market.` : 'Installs ServiceTitan holds no city for. Listed so this ranking never quietly drops revenue.')}">${esc(t.name)}</span>`
     : `<b>${esc(t.name)}</b>`)
-    + (t.warn ? ` <span class="age mid">read the note</span>` : '')
+    + warnChip(t)
     + (t.warn && jcNumOK(t.exWorstPct) ? ` <span class="age new" title="The same town with its single worst margin job removed">${t.exWorstPct}% without its worst job</span>` : '')
 ;
   const cols = [
@@ -1895,7 +2003,9 @@ function jcTownPanel(byTown, unknown, winLbl) {
       v: t => `<b>${jcMoney(t.contrib)}</b><br><span class="hint" style="font-size:11px">of ${fmt$(t.rev)}</span>` },
     { h: 'Costed', r: 1, v: t => `<span style="color:var(--dimmer)">${t.costed} of ${t.jobs}</span>` },
   ];
-  const rowAttr = t => t.warn ? ` title="${esc(t.warnNote || 'Read this row with care.')}" style="background:rgba(255,184,77,.08)"` : '';
+  // the whole row carries the sentence too, so it is reachable from anywhere on
+  // the row and not only from a chip the reader has to find first
+  const rowAttr = t => t.warn ? ` title="${esc(warnTip(t))}" style="background:rgba(255,184,77,.08)"` : '';
   return jcPanel('Job margin by town',
     `${winLbl} &middot; ${costed} costed of ${jobs} installs`,
     /* Capped and scrolling (the owner 2026-08-10). This panel sits beside the distance
@@ -1909,20 +2019,23 @@ function jcTownPanel(byTown, unknown, winLbl) {
        not printed, so the neighbour can be four rows some weeks and the constant
        would be wrong. See the .jc-level rules in the stylesheet.
        Nothing is cut: the rest is a scroll away, and the header stays put. */
-    `<div class="jc-fill">${jcGrid(cols, rows, rowAttr,
-      t => t.warn && t.warnNote
-        ? `<div style="font-size:11.5px;color:var(--gold-bri);line-height:1.45">${esc(t.warnNote)}</div>`
-        : '', 'fill')}</div>`,
+    /* No subRow any more: the qualifier that used to occupy it is the chips and
+       their tooltip above. This was jcGrid's ONLY subRow caller, so that
+       parameter is now dead flexibility -- left in place deliberately while five
+       lanes are landing in this file, because dropping it moves the `maxH`
+       argument on every other caller for no reader-visible gain. Ripe for
+       deletion once the merge wave is done. */
+    `<div class="jc-fill">${jcGrid(cols, rows, rowAttr, null, 'fill')}</div>`,
     /* the amber pointer is NOT foldable. A reader who scans the bottom row and
        stops selling in a town that recovers to a perfectly ordinary margin
        without one bad boiler has been cost more than the town ever cost. */
     { cap: warned
-        ? `Worst first. ${warned} amber row${warned === 1 ? ' moves' : 's move'} more than 5 points on one job: read the note on the row before acting.`
+        ? `Worst first. ${warned} amber row${warned === 1 ? ' moves' : 's move'} more than 5 points on one job: read its chips, and hover them for the detail, before acting.`
         : 'Worst first. No row here moves by more than 5 points when its worst job is removed.',
       warn: !!warned,
       more: `<p>Worst at the top, best at the bottom, ranked on dollars behind the peer median for the same job type, so a town full of water heaters is not condemned for earning less than a town full of full systems.</p>
       <p>Towns with fewer than 5 costed installs are added together in one row near the end, because at two or three jobs a town is one job and not a market. Read Material before anything else: every town in the worse half has a material problem and none of them has a distance problem.</p>
-      <p>${warned ? `${warned} row${warned === 1 ? ' carries an amber note, and it has' : 's carry an amber note, and they have'} to be read before acting: those are the towns a single job moves by more than 5 points, and the note says what the town looks like without that job.` : 'No row here moves by more than 5 points when its worst job is removed, so none is currently flagged as one bad job in disguise.'}</p>` },
+      <p>${warned ? `${warned} row${warned === 1 ? ' carries amber chips, and it has' : 's carry amber chips, and they have'} to be read before acting: those are the towns a single job moves by more than 5 points. The chips say how many of the town's jobs are actually behind their peers, and what the town's margin looks like without its single worst job. Hovering either chip, or anywhere on the row, gives the full sentence.` : 'No row here moves by more than 5 points when its worst job is removed, so none is currently flagged as one bad job in disguise.'}</p>` },
     6, 'ok', 'jc-level');
 }
 
@@ -1930,7 +2043,7 @@ function jcTownPanel(byTown, unknown, winLbl) {
    Guarded on the object, not on zeroRate.hrs, because reading .hrs off a field
    that does not exist yet is exactly the crash this guard is here to stop. */
 /* PANEL: one service tech, and what an hour of his is worth.
-   the owner 2026-08-10, after hand analyses of Dana and Marcus: they get pulled onto
+   the owner 2026-08-10, after hand analyses of Maren and Anders: they get pulled onto
    install cleanup because "install makes the money". True at the top line, and it
    hides that a warranty hour is install work earning none of it.
 
@@ -1999,7 +2112,12 @@ function jcPersonPanel(p, winLbl, floor = 70) {
    crew, same year, paid at a premium. Classified off the greynote's code, never
    its title, the same rule the PTO block runs on. */
 const JC_GRP = { install: 'Install crew', service: 'Service', sales: 'Sales', departed: 'Former employee', unknown: 'Unclassified' };
-function jcCrewPanels(crew, winLbl) {
+// hist: the pull's nightly jobcost metric history (JC.history). Optional -- an
+// older bake carries none and the pair renders exactly as it did before chips.
+// audit: JC.callbackAudit, so the cleanup panel can caveat FORWARD at the panel
+// below it instead of leaving the reader to find the contradiction himself
+// (duo review 2026-08-11, finding 4). Optional on the same terms.
+function jcCrewPanels(crew, winLbl, hist, audit) {
   // BOTH lists, or nothing. Guarding only on nwa let a half-built crew object
   // through and then threw on crew.ot inside techRows, which blanks the whole
   // jobcosting view rather than dropping one panel. A bake older than the pull
@@ -2019,8 +2137,11 @@ function jcCrewPanels(crew, winLbl) {
   const nwa = jcPanel('Sent home &mdash; no work available',
     `${winLbl} &middot; ServiceTitan code <b>NWA</b>, unpaid`,
     jcStats(
-      jcStat(jcHrs(crew.nwaInstall), `<b>install crew</b> sent home, ${shifts(crew.nwaInstall)} of ${shift} hours`)
-      + jcStat(jcHrs(crew.nwaTotal), `everyone, ${shifts(crew.nwaTotal)}`))
+      // more hours sent home is worse: the company had no work to give.
+      jcStat(jcHrs(crew.nwaInstall), `<b>install crew</b> sent home, ${shifts(crew.nwaInstall)} of ${shift} hours`,
+        jcChip(crew.nwaInstall, jcPrior(hist, 'sentHomeInstallHrs'), { higherIsBetter: false, fmt: jcHrs }))
+      + jcStat(jcHrs(crew.nwaTotal), `everyone, ${shifts(crew.nwaTotal)}`,
+        jcChip(crew.nwaTotal, jcPrior(hist, 'sentHomeHrs'), { higherIsBetter: false, fmt: jcHrs })))
     + jcGrid([
       { h: 'Who was sent home', v: r => r.k },
       { h: 'Hours', r: 1, v: r => jcHrs(r.h) },
@@ -2041,9 +2162,12 @@ function jcCrewPanels(crew, winLbl) {
   const ot = jcPanel('Overtime paid',
     `${winLbl} &middot; the same year, the same crew`,
     jcStats(
-      jcStat(jcHrs(crew.otTotal), `overtime worked, everyone`)
-      + jcStat(jcMoney(crew.otAmtTotal), 'paid out at the premium rate')
-      + jcStat(jcHrs(crew.otInstall), `by the <b>install crew</b>, ${jcMoney(crew.otAmtInstall)}`))
+      jcStat(jcHrs(crew.otTotal), `overtime worked, everyone`,
+        jcChip(crew.otTotal, jcPrior(hist, 'otHrs'), { higherIsBetter: false, fmt: jcHrs }))
+      + jcStat(jcMoney(crew.otAmtTotal), 'paid out at the premium rate',
+        jcChip(crew.otAmtTotal, jcPrior(hist, 'otAmt'), { higherIsBetter: false, fmt: jcMoney }))
+      + jcStat(jcHrs(crew.otInstall), `by the <b>install crew</b>, ${jcMoney(crew.otAmtInstall)}`,
+        jcChip(crew.otInstall, jcPrior(hist, 'otInstallHrs'), { higherIsBetter: false, fmt: jcHrs })))
     + jcGrid([
       { h: 'Who worked it', v: r => r.k },
       { h: 'Hours', r: 1, v: r => jcHrs(r.h) },
@@ -2088,6 +2212,30 @@ function jcCrewPanels(crew, winLbl) {
      service does. The panel leads with that, because a reader who takes the
      flattering number into a room loses the argument in one question. */
   const cu = crew.cleanup;
+  /* CAVEATING FORWARD (duo review 2026-08-11, finding 4). The bold claim below is
+     true of what the office TAGGED. The audit panel directly under this one
+     reports install-fault work the tags never saw, weighted heavily onto the
+     service bench, and adding it flips the comparison. A panel whose whole stated
+     purpose is stopping a reader carrying a flattering number into a room was
+     handing him one that dies one panel further down his own page.
+
+     The two populations are DISJOINT and therefore add: a visit is in the audit
+     precisely because no recall link put it on the ledger above. That is stated
+     in the fold, because "these two numbers may be added" is the opposite of
+     what this page says about every other pair of figures on it, and a reader who
+     has learned that rule deserves to be told why this pair is different.
+
+     WHICH WAY IT LANDS IS COMPUTED, never asserted. The tagged ratio is 1.58x
+     install today and the summed one is 1.22x service; both move nightly, and a
+     sentence that hardcodes the direction is a lie waiting for the data. */
+  const ab = audit && typeof audit === 'object' && audit.byBench ? audit.byBench : null;
+  const cuFwd = (cu && ab && jcNumOK(ab.service) && jcNumOK(ab.install)
+    && jcNumOK(cu.installHrs) && jcNumOK(cu.serviceHrs)) ? (() => {
+    const inst = cu.installHrs + ab.install, svc = cu.serviceHrs + ab.service;
+    const hi = Math.max(inst, svc), lo = Math.min(inst, svc);
+    const x = lo > 0 ? Math.round(hi / lo * 100) / 100 : null;
+    return `<p style="font-size:12.5px;line-height:1.55;margin-top:8px"><b>And that is only the tagged half.</b> Counting the ${jcHrs(ab.service)} of install-caused work the audit below found on the service bench, and the ${jcHrs(ab.install)} it found on the install bench, the twelve months run <b>${jcHrs(inst)}</b> install against <b>${jcHrs(svc)}</b> service${x ? ` &mdash; ${svc > inst ? `the service bench carries <b>${x}&times;</b> more, the other way round` : `install still carries <b>${x}&times;</b> more`}` : ''}. Those visits reached no recall link, which is exactly why they are in the audit and not in the table above, so the two do add.</p>`;
+  })() : '';
   const cleanup = (cu && Array.isArray(cu.byGroup) && cu.byGroup.length)
     ? jcPanel('Who goes back when an install fails',
       `${winLbl} &middot; trips charged back to the install that caused them`,
@@ -2101,10 +2249,12 @@ function jcCrewPanels(crew, winLbl) {
         { h: 'Trips', r: 1, v: r => r.trips },
         { h: 'Who', v: r => esc((r.people || []).slice(0, 4).map(p => fname(p.name)).join(', ')) },
       ], cu.byGroup)
-      + `<p style="font-size:12.5px;line-height:1.55;color:var(--gold-bri);margin-top:10px"><b>Install already cleans up after itself more than service does.</b> The opposite claim can be produced from this same page by counting every job of a warranty type, which sweeps in <b>RECALL (SJ)</b> &mdash; a service technician going back on a <i>service</i> callback. That is service cleaning up after service, and it is the larger half. The number worth arguing about is the ${jcHrs(cu.serviceHrs)} of <b>install-caused</b> work still carried by the service bench, not a department that shirks.</p>`
+      + `<p style="font-size:12.5px;line-height:1.55;color:var(--gold-bri);margin-top:10px"><b>On what the office tagged, install already cleans up after itself more than service does.</b> The opposite claim can be produced from this same page by counting every job of a warranty type, which sweeps in <b>RECALL (SJ)</b> &mdash; a service technician going back on a <i>service</i> callback. That is service cleaning up after service, and it is the larger half. The number worth arguing about is the ${jcHrs(cu.serviceHrs)} of <b>install-caused</b> work still carried by the service bench, not a department that shirks.</p>`
+      + cuFwd
       + (cu.cause && jcNumOK(cu.cause.fault && cu.cause.fault.hrs) ? `<p style="font-size:12.5px;line-height:1.55;margin-top:8px"><b>And it is not established that it is install's fault.</b> The office has tagged ${cu.cause.fault.n + cu.cause.noFault.n} of ${cu.cause.fault.n + cu.cause.noFault.n + cu.cause.untagged.n} warranty trips, and what it tagged splits almost evenly: <b>${jcHrs(cu.cause.fault.hrs)}</b> installer fault against <b>${jcHrs(cu.cause.noFault.hrs)}</b> explicitly <i>not</i> installer fault, with ${jcHrs(cu.cause.untagged.hrs)} carrying no tag at all. Treating every warranty trip as an install error asserts something most of the record does not say. That gap closes by tagging trips in ServiceTitan, not by anything on this page.</p>` : ''),
-      { cap: 'Counted from the trip\'s link back to the install that caused it, not from the job\'s own type.',
+      { cap: 'Counted from the trip\'s link back to the install that caused it, not from the job\'s own type. These are the trips the office tagged.',
         more: `<p>A trip lands here when ServiceTitan links it to an install (<code>recallForId</code>), or when the only install on file at that address predates it. The second kind is a <b>guess</b> and the page states how many rely on it; treat a small departmental gap as inside the error bars.</p>
+        ${cuFwd ? `<p>This page tells you almost everywhere NOT to add two of its figures together. The audit hours are the exception and it is worth knowing why: a visit is in that audit precisely because no recall link ever put it on the table above, so the two sets share no job and summing them double-counts nothing. It was checked job number by job number, not assumed.</p>` : ''}
         <p>Trips whose origin is a <b>service</b> job, or an install older than this window, are counted elsewhere on this page and deliberately not here. Neither is install cleanup.</p>
         <p>People who have since left are shown separately. Their trips happened, but they are not a live routing decision.</p>` },
       6)
@@ -2136,36 +2286,262 @@ function jcCrewPanels(crew, winLbl) {
   return nwa + ot + note + cleanup + season;
 }
 
-/* PANEL: the one-time Slack audit of install callbacks.
+/* "2026-08-11" is a date a reader has to parse. "8/11" is one they read. Same
+   reason jcWeekLabel prints the Monday instead of the ISO week. */
+const jcMD = d => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''));
+  return m ? `${+m[2]}/${+m[3]}` : String(d || '');
+};
+const jcDayDiff = (a, b) => {
+  const p = s => Date.parse(`${s}T12:00:00Z`);
+  return (!a || !b || isNaN(p(a)) || isNaN(p(b))) ? null : Math.round((p(b) - p(a)) / 86400000);
+};
+/* HOW FRESH IS THIS PANEL, in one place, because the honest answer changed shape.
+   It used to be flatly "not updated nightly" and that was true. the owner 2026-08-11
+   asked for the agents to run every night, so now there are three answers and
+   only one of them is the old one:
+
+     no lastRunOn   the static 2026-08-11 audit constant. Says so, as before.
+     fresh          ran within STALE_DAYS. Prints the date it ran.
+     stale          the nightly classifier has STOPPED. This is the failure the
+                    original warning existed to prevent, so it gets LOUDER than
+                    the warning it replaces, not quieter: a figure that silently
+                    froze while everyone kept quoting it is the whole danger. */
+const JC_AUDIT_STALE_DAYS = 2;
+/* ISO-SHAPED IS NOT ISO-VALID. Date.parse('2026-02-30T12:00:00Z') does not fail,
+   it NORMALISES to March 2 -- so a store stamped with a day that does not exist
+   read as fresh two days later. Round-trip the parts instead: build the date and
+   check it still says what it was given. */
+const jcISO = d => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''));
+  if (!m) return false;
+  const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return t.getUTCFullYear() === +m[1] && t.getUTCMonth() === +m[2] - 1 && t.getUTCDate() === +m[3];
+};
+function jcAuditFresh(lastRunOn, asOf) {
+  if (!lastRunOn) return { live: false, stale: false, html: '<b>not updated nightly</b>' };
+  /* A lastRunOn that is not a date, or that is in the FUTURE, is a broken store,
+     and a broken store is not a fresh one. Both used to read as live -- "last run
+     nonsense" rendered as an ordinary date stamp, and a run dated next week
+     rendered as this morning's (finding 13). The failure mode this panel exists
+     to prevent is a figure that looks current and is not, so anything it cannot
+     verify goes to the warning, not to the claim. */
+  const age = jcISO(lastRunOn) ? jcDayDiff(lastRunOn, asOf) : null;
+  if (age === null) {
+    return { live: true, stale: true, age: null,
+      html: `<b style="color:var(--red)">LAST RUN DATE UNREADABLE (${esc(String(lastRunOn).slice(0, 24))}) &mdash; treat these figures as frozen until the nightly check is verified.</b>` };
+  }
+  if (age < 0) {
+    return { live: true, stale: true, age,
+      html: `<b style="color:var(--red)">LAST RUN IS DATED ${jcMD(lastRunOn)}, IN THE FUTURE &mdash; the clock or the store is wrong, so treat these figures as frozen.</b>` };
+  }
+  if (age <= JC_AUDIT_STALE_DAYS) {
+    return { live: true, stale: false, age, html: `<b>updated nightly</b> &middot; last run ${jcMD(lastRunOn)}` };
+  }
+  return { live: true, stale: true, age,
+    html: `<b style="color:var(--red)">NOT UPDATED SINCE ${jcMD(lastRunOn)} &mdash; ${age} days. The nightly check has stopped; these figures are frozen.</b>` };
+}
+
+/* PANEL: install callbacks the office never recorded.
 
    The cleanup panel above is limited by what the office tagged, and the audit
    found the tagging catches about one visit in eight. This panel is what the
-   record actually says once somebody read it. It carries its own date because it
-   is NOT recomputed nightly -- it rests on language judgement over Slack, no
-   query reproduces it, and a stale number pretending to be live would be worse
-   than none. */
+   record actually says once somebody read it.
+
+   It carries its date for the reason it always did: this rests on language
+   judgement over Slack, not on a query, and a stale number pretending to be live
+   would be worse than none. What changed on 2026-08-11 is WHO does the reading.
+   It was twelve agents once; it is now one agent every night
+   (ns-callback-classify.js), so the date is a last-run stamp rather than an
+   epitaph -- and a run that stops shows up as a warning instead of as silence.
+   See jcAuditFresh. */
 function jcAuditPanel(a, JC) {
   if (!a || typeof a !== 'object' || !jcNumOK(a.faultHrs)) return '';
   const b = a.byBench || {};
   const ratio = b.install > 0 ? Math.round(b.service / b.install * 100) / 100 : null;
   const tagged = JC && JC.crew && JC.crew.cleanup ? JC.crew.cleanup.serviceHrs : null;
+  /* asOf is WHEN THE PULL RAN, not the report date. JC.to is yesterday by
+     construction, so ageing the classifier's own "today" stamp against it made
+     every successful 04:45 night read one day in the future at 05:45 and paint
+     this panel red on a morning everything worked. Falls back to JC.to for a bake
+     older than the field, which is the pre-existing behaviour and no worse. */
+  const fresh = jcAuditFresh(a.lastRunOn, (a && a.asOf) || (JC && JC.to));
+  const nt = a.needsTagging && jcNumOK(a.needsTagging.n) && a.needsTagging.n > 0 ? a.needsTagging : null;
   return jcPanel('What the office never recorded',
-    `Slack audit run ${esc(a.ran)} &middot; ${esc(a.from)} to ${esc(a.to)} &middot; <b>not updated nightly</b>`,
+    `${fresh.live ? 'Classified from Slack' : `Slack audit run ${esc(a.ran)}`} &middot; ${esc(a.from)} to ${esc(a.to)} &middot; ${fresh.html}`,
     jcStats(
-      jcStat(jcHrs(a.faultHrs), `<b>install-caused rework</b> across ${a.faultVisits} visits nobody logged as a callback`)
+      /* "visits nobody logged as a callback" was 5 rows too strong -- the office
+         DID tag five of these, it just never fixed the job type, and the panel's
+         own fold says "6 of 145 carried the office callback tag" three paragraphs
+         down. Computed live from the same rows, so it cannot rot. */
+      jcStat(jcHrs(a.faultHrs), jcNumOK(a.faultUnlogged)
+        ? `<b>install-caused rework</b> across ${a.faultVisits} visits, ${a.faultUnlogged} of which nobody logged as a callback`
+        : `<b>install-caused rework</b> across ${a.faultVisits} visits nobody logged as a callback`)
       + jcStat(jcHrs(b.service), 'of it absorbed by the <b>service bench</b>')
       + (ratio ? jcStat(`${ratio}&times;`, 'what the service bench carried against the install bench') : ''))
+    /* EVERY bench the data carries, biggest first -- not a hardcoded four, and no
+       truthiness filter. The fixed list dropped any hours the pull could not
+       attribute to a department, so a technician with no payout business unit had
+       his rework vanish out of a table sitting under a total that still counted
+       it. `unknown` is a real answer and JC_GRP already names it "Unclassified".
+
+       A bench reading 0.0 h is still a ROW. The pull only creates a bench key for
+       a bench that actually worked, so a zero here means real hours that rounded
+       away -- a 0.1 h visit split between two technicians leaves one of them at
+       0.0 after the residual lands on the other. Filtering on truthiness dropped
+       that row while its work stayed in the total above it, which is the same
+       bug one decimal place down. */
     + jcGrid([
       { h: 'Bench', v: r => JC_GRP[r.k] || r.k },
       { h: 'Hours', r: 1, v: r => jcHrs(r.v) },
-    ], ['service', 'install', 'departed', 'sales'].filter(k => b[k]).map(k => ({ k, v: b[k] })))
+    ], Object.keys(b).filter(k => jcNumOK(b[k])).sort((x, y) => b[y] - b[x]).map(k => ({ k, v: b[k] })))
     + `<p style="font-size:12.5px;line-height:1.55;margin-top:10px"><b>Why nobody knew.</b> ${Array.isArray(a.bookedAs) ? a.bookedAs.map(([t, n]) => `${n} were booked <b>${esc(t)}</b>`).join(', ') : ''}. ${a.chargedToCustomer} of ${a.chargedOf} were <b>charged to the customer</b> as an ordinary service call, and only ${a.carriedOfficeTag} of ${a.callbacks} carried the office callback tag. A query on job type finds roughly one in eight.${tagged ? ` The tagged figure on this page is ${jcHrs(tagged)}; the record says it is a good deal more than that.` : ''}</p>`
-    + `<p style="font-size:12.5px;line-height:1.55;color:var(--gold-bri);margin-top:8px"><b>No cutoff survives this.</b> ${a.over180} of the ${a.faultVisits} were found more than 180 days after the install &mdash; an AC wired wrong in November is not found until June. The longest ran 613 days: <i>"No wires to C on the dragonfly&hellip; this AC was installed November of 2024 and has NEVER WORKED. It couldn't."</i></p>`,
+    + `<p style="font-size:12.5px;line-height:1.55;color:var(--gold-bri);margin-top:8px"><b>No cutoff survives this.</b> ${a.over180} of the ${a.faultVisits} were found more than 180 days after the install &mdash; an AC wired wrong in November is not found until June. The longest ran 613 days: <i>"No wires to C on the dragonfly&hellip; this AC was installed November of 2024 and has NEVER WORKED. It couldn't."</i></p>`
+    /* THE ONE THING ANYBODY CAN ACT ON. Everything above is a measurement; this
+       is a worklist. Each row is an install-caused callback whose ServiceTitan
+       job type does not admit to being one, so every query anyone runs misses it.
+       the owner: the tagging will improve now the office is staffed, so this list
+       shrinking IS the success metric. Nothing is silently cut -- the rows shown
+       are the biggest, and the remainder is counted out loud. */
+    /* THE CHIP BELONGS ON THIS NUMBER MORE THAN ON ANY OTHER ON THE PAGE. the owner
+       2026-08-11: the office is better staffed now, the tagging will improve, and
+       this list shrinking is how he wants to see that it did. Every other chip
+       here reports a cost; this one reports whether a habit is changing.
+
+       higherIsBetter: false, so a fall is green. mini, because it sits inside a
+       sentence rather than under a stat, and a chip carrying the stat's 7px top
+       margin would ride high off the text baseline. Renders '' until a second
+       night of history lands, same as every other chip on the page. */
+    + (nt ? `<p style="font-size:12.5px;line-height:1.55;margin-top:12px"><b>Needs tagging: ${nt.n}${jcNumOK(nt.of) ? ` of ${nt.of}` : ''} install-caused callbacks, ${jcHrs(nt.hrs)}.</b> ${jcChip(nt.n, jcPrior(JC && JC.history, 'cbNeedsTagging'), { higherIsBetter: false, mini: true })} ServiceTitan still calls these ordinary service &mdash; no warranty job type, no callback tag. Either one clears the row. Retag them and every warranty number on this page gets truer for free.</p>`
+      + jcGrid([
+        { h: 'Job', v: r => `#${esc(r.jobNumber)}` },
+        { h: 'Customer', v: r => `<span title="${esc(r.evidence || '')}">${esc(r.customer || '')}</span>` },
+        { h: 'Booked as', v: r => esc(r.stJobType || '') },
+        { h: 'Days after install', r: 1, v: r => jcNumOK(r.days) ? String(r.days) : jcDot },
+        { h: 'Hours', r: 1, v: r => jcHrs(r.hrs) },
+      ], nt.rows || [], null, null, 260)
+      + (nt.more > 0 ? `<p style="font-size:12px;color:var(--gold-bri);margin-top:6px">Showing the ${nt.shown} biggest of ${nt.n}. The other ${nt.more} are in the same list and are not counted anywhere else on this page.</p>` : '')
+      : ''),
     { cap: `Classified from the customer Slack channel and the installed-equipment record, one visit at a time. Confidence: ${a.confidence.high} high, ${a.confidence.medium} medium, ${a.confidence.low} low.`,
       more: `<p><b>What this deliberately does not count.</b> ${jcHrs(a.notOurs.differentEquipment)} was a genuinely <b>different appliance</b> &mdash; we sold an AC, their 2007 furnace failed. ${jcHrs(a.notOurs.unrelated)} was a real manufacturer failure, customer damage or an act of weather, most with warranty credits already applied. ${jcHrs(a.notOurs.unknown)} could not be called either way and was left out rather than guessed into the number.</p>
       <p><b>It is a floor.</b> The unknowns are mostly lookup failures, not thin evidence &mdash; the stored Slack channel was stale on several customers and the real conversation sat in another channel. And a customer with four trips for one unfinished install is counted once.</p>
-      <p><b>It is not live.</b> No query reproduces this; twelve agents read the conversations. Re-run the audit to refresh it, and treat the date above as the date it was true.</p>` },
+      ${fresh.live
+        ? `<p><b>It is judgement, not a query.</b> No ServiceTitan field answers this; an agent reads the customer's own Slack channel for every new return visit, overnight, the same way twelve agents read the first ${a.classified}. That means the figures move as it runs &mdash; and if it stops running, the line above says so instead of leaving a frozen number looking current.</p>`
+        : `<p><b>It is not live.</b> No query reproduces this; twelve agents read the conversations. Re-run the audit to refresh it, and treat the date above as the date it was true.</p>`}` },
     12);
+}
+
+/* The eight defect classes, with the reader-facing wording fixed by the
+   2026-08-11 store contract rather than invented here, so the nightly classifier,
+   the backfill and this panel cannot each word the same enum differently.
+
+   UNCLASSIFIED is NOT one of the eight. It is what callbackAudit() buckets an
+   install-fault callback the classifier could not put a class on, and it is named
+   as the gap it is instead of being folded into "Other install faults" -- that
+   would turn "we do not know yet" into a finding and send somebody chasing
+   defects nobody has identified. */
+const JC_DEFECT = {
+  COMMISSIONING: 'Never set up / commissioned',
+  CHARGE_PURGE: 'Never charged, purged or filled',
+  LEAKING_JOINT: 'A joint we made leaks',
+  LOW_VOLTAGE: 'Wiring never landed or landed wrong',
+  COMPONENT_OMITTED: 'Part left off the install',
+  VENTING: 'Venting wrong',
+  INSTALL_DAMAGE: 'Damage during install',
+  OTHER: 'Other install faults',
+  UNCLASSIFIED: 'Not classified yet',
+};
+/* PANEL: what went wrong on the install, one line per class, biggest first.
+
+   the owner 2026-08-11: "a widget that has very basic issues. IE 47 jobs not wired
+   right, 100 AC installs never commissioned. Just basic issues so we know where
+   to start fixing the issues." So the ORDER IS THE ANSWER and there is no prose
+   under it: a sentence explaining which row to start with would be the word
+   puzzle this panel exists to replace.
+
+   Counted off the nightly classifier's verdicts and off nothing else. A keyword
+   pass over the ServiceTitan summary was tried in the audit and cannot separate
+   these classes at all: it matched neither term on 78 of 222 rows and BOTH on 50.
+
+   No byDefect renders no panel. That is the no-store state -- callbackAudit()
+   falls back to the frozen 2026-08-11 constant, which carries no class split
+   because nothing was classed by class when it was written. Eight rows of zero
+   would read as "nothing is wrong here", which is the opposite of what an
+   unclassified backlog means. */
+function jcDefectPanel(a, JC) {
+  // a row needs a class to be labelled and a count to be ranked. Without either
+  // it would print as "undefined" against a number nobody can read, which is a
+  // worse answer than one row fewer.
+  const rows = a && typeof a === 'object' && Array.isArray(a.byDefect)
+    ? a.byDefect.filter(r => r && r.cls && jcNumOK(r.visits)) : [];
+  if (!rows.length) return '';
+  const H = JC && JC.history;
+  /* BIGGEST FIRST MEANS VISITS. the owner counts jobs ("47 jobs not wired right"), so
+     visits rank and hours break the ties, which is also the order the backfill
+     published its table in.
+
+     Sorted here and not in the pull because the one row that must never rank is a
+     RENDERING rule: "not classified yet" is a hole in the record, not a defect
+     anybody can go and fix, so it is pinned last however large it grows. */
+  const ranked = rows.slice().sort((x, y) =>
+    (x.cls === 'UNCLASSIFIED') - (y.cls === 'UNCLASSIFIED') || y.visits - x.visits || y.hrs - x.hrs);
+  /* Summed off the rows this table is about to print, never off a.faultVisits, so
+     the count in the heading is always the count of what is underneath it. The
+     panel lands directly below one printing its own 130, and two headings over one
+     set of jobs is the bug this project keeps re-learning. */
+  const visits = ranked.reduce((s, r) => s + r.visits, 0);
+  const hrs = Math.round(ranked.reduce((s, r) => s + (jcNumOK(r.hrs) ? r.hrs : 0), 0) * 10) / 10;
+  /* asOf is WHEN THE PULL RAN, not the report date. JC.to is yesterday by
+     construction, so ageing the classifier's own "today" stamp against it made
+     every successful 04:45 night read one day in the future at 05:45 and paint
+     this panel red on a morning everything worked. Falls back to JC.to for a bake
+     older than the field, which is the pre-existing behaviour and no worse. */
+  const fresh = jcAuditFresh(a.lastRunOn, (a && a.asOf) || (JC && JC.to));
+  /* THE OWNER COUNTS JOBS. "47 jobs not wired right" is the sentence this widget was
+     built from, and it was printing return VISITS -- honestly labelled, with the
+     difference in a tooltip, on a table the room reads off a projector where no
+     tooltip exists (duo review 2026-08-11, finding 7). 26 visits fixing 19
+     installs is a different fact from 26 visits on 26 installs, and the second is
+     what a reader assumes. Both columns now, visits still ranking.
+
+     THE COLUMN DOES NOT ADD TO THE HEADING and the heading says so. An install
+     that was wired wrong AND never purged is a row in two classes, so the
+     per-class installs overlap: 130 visits are 86 installs but the column sums to
+     99. The pull emits the distinct total separately for exactly this reason;
+     deriving it here by adding the column up would print a number nothing
+     measures. Absent field prints no headline count rather than a wrong one. */
+  const installs = jcNumOK(a.faultInstalls) ? a.faultInstalls : null;
+  const haveInst = ranked.some(r => jcNumOK(r.installs));
+  return jcPanel('What went wrong on the install',
+    `${visits} return visits${installs === null ? '' : ` on ${installs} installs`} &middot; ${jcHrs(hrs)} &middot; biggest first`,
+    jcGrid([
+      { h: 'What went wrong', v: r => esc(JC_DEFECT[r.cls] || r.cls) },
+      { h: 'Visits', r: 1, t: 'Return visits this defect caused', v: r => r.visits },
+      ...(haveInst ? [{ h: 'Installs', r: 1, t: 'Distinct installs behind those visits. Three trips back to one unfinished install are three visits and one install. These do not add across the rows: one install can be in two classes.', v: r => jcNumOK(r.installs) ? r.installs : jcDot }] : []),
+      { h: 'Hours', r: 1, t: 'Technician hours spent going back out', v: r => jcHrs(r.hrs) },
+      /* mini, because the chip sits inside a table row and the stat-sized one
+         carries a top margin that rides it off the row's baseline. higherIsBetter
+         false, so a class getting smaller is green. Empty until a second night of
+         per-class history lands, same as every other chip on this page, and a dot
+         rather than a blank cell so the column reads as "nothing yet". */
+      { h: 'Trend', r: 1, v: r => jcChip(r.visits, jcPrior(H, `defect.${r.cls}`), {
+        higherIsBetter: false, mini: true,
+        fmt: v => `${Math.round(v)} visit${Math.round(v) === 1 ? '' : 's'}`,
+      }) || jcDot },
+    ], ranked),
+    /* Provenance, and it says Slack rather than "defects": these are visits an
+       agent read a conversation and called install-caused, and a couple of them
+       are a crew coming back for materials rather than a finished install failing.
+       The freshness stamp is the audit panel's own, so a classifier that stops
+       running turns both panels loud at the same moment instead of leaving this
+       one looking current. */
+    { cap: `${a.from && a.to ? `${esc(a.from)} to ${esc(a.to)} &middot; ` : ''}classified from the customer Slack channel one visit at a time, never from the ServiceTitan summary &middot; ${fresh.html}`,
+      warn: fresh.stale,
+      more: haveInst && installs !== null
+        ? `<p><b>The Installs column does not add up to ${installs}, and it should not.</b> One install that was wired wrong and never purged is counted once in each class, so the column comes to more than the number of installs behind it. Read a row as "this defect, on this many jobs"; read ${installs} as the size of the whole problem.</p>
+        <p>A visit with no origin install on file adds to Visits and to nothing else, so the visit counts stay whole either way.</p>`
+        : '' },
+    6);
 }
 
 function jcZeroPanel(z, costedRows, instRev, winLbl) {
@@ -2206,6 +2582,117 @@ function jcZeroPanel(z, costedRows, instRev, winLbl) {
     // three stats and a short table: it rides BESIDE the warranty panel, not
     // under it, and it is a third of the row rather than half of it
     4);
+}
+
+/* PANEL: the installs whose equipment never got billed, one row each.
+   the owner 2026-08-11: "For 5964 Installed Not Billed, list the jobs that went over,
+   who sold them and how much for each."
+
+   THE TABLE IS THE EXPLANATION. A total on a tile is a number; three named jobs
+   with a seller against each is a morning's phone calls, which is the whole
+   difference this panel exists to make. So one caption line and nothing else
+   above the fold.
+
+   Rows arrive from the pull already ranked by the gap and already carrying the
+   ranked seller, so nothing here re-sorts or re-attributes: a second opinion on
+   either would be a second answer to a question the pull already settled.
+
+   ABSENT OR EMPTY renders nothing at all, the same guard every panel here uses.
+   Empty is the GOOD state -- no install is sitting unbilled -- and an empty table
+   under a heading reads as a broken panel rather than as good news. */
+function jcUnderBilledPanel(rows, winLbl) {
+  if (!Array.isArray(rows) || !rows.length) return '';
+  const n = v => (jcNumOK(v) ? v : 0);
+  const gap = rows.reduce((s, r) => s + n(r.gap), 0);
+  const billed = rows.reduce((s, r) => s + n(r.rev), 0);
+  const kit = rows.reduce((s, r) => s + n(r.matl), 0);
+  const aged = rows.filter(r => jcNumOK(r.ageDays));
+  const oldest = aged.length ? Math.max(...aged.map(r => r.ageDays)) : null;
+  /* ONE money format across all three money columns, and it prints cents whenever
+     there are cents. Two reasons, and the second is the one that matters.
+
+     fmt$ rounds, and on this panel the TOKEN INVOICE is the evidence: 50 cents
+     billed against $2,471.95 of equipment. Rounded, that reads "$1", a plausible
+     small invoice rather than the placeholder it actually is.
+
+     And the three columns are an arithmetic statement the reader is invited to
+     check: Over by IS Equipment cost less Invoiced. Rounding two of them and not
+     the third printed $2,472 - $0.50 = $2,471, which is wrong on its face and
+     costs the table the only kind of trust it has. Same formatter, every column,
+     so what is printed subtracts. */
+  // toLocaleString, not toFixed: fmt$ groups thousands and a bare toFixed does
+  // not, so "$2471.95" would sit in a column under "$2,472" and read as a typo.
+  const money = v => (jcNumOK(v) && v % 1
+    ? (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : jcMoney(v));
+  /* Same deep link the ledger uses, but pointed at installJobId rather than at
+     jobIds[0]: on a project the first invoice is usually the service sibling that
+     carried the deposit, and a reader sent to that job finds no equipment on it.
+     The customer name is the handle the office says out loud, so it carries the
+     link; the ServiceTitan job number rides in the tooltip, which is what gets
+     read down a phone. (This tenant's jobNumber IS the job id, checked against
+     the API on all three live rows, so no second field is fetched to print it.) */
+  const jobLink = r => esc(r.customer || 'unknown'); // demo: ServiceTitan deep links disabled
+  const cols = [
+    { h: 'Job', t: 'Opens the install job in ServiceTitan. Hover for the job number.', v: jobLink },
+    /* Departed sellers are NAMED and marked, never dropped: dropping them loses
+       the sale, printing them bare sends somebody to ask a man who is not there.
+       Marked ONLY on an explicit false. soldByActive is tri-state out of the pull
+       and null means ServiceTitan has no record of the id, which is a roster gap
+       -- printing "Former employee" off it would state a fact about somebody's
+       employment that nothing on this page knows. Same wording as the crew panels. */
+    { h: 'Sold by', v: r => r.soldBy
+      ? `<span class="age new" style="font-size:11px" title="${esc(r.soldBy)}">${esc(fname(r.soldBy))}</span>${r.soldByActive === false ? `<br><span class="hint" style="font-size:11px">${JC_GRP.departed}</span>` : ''}`
+      : jcDot },
+    // The invoice DATE is the provenance, and it belongs beside the figure it
+    // qualifies rather than in a sentence underneath: all three of these were
+    // billed the same day, months after the work, which is the finding.
+    { h: 'Invoiced', r: 1, t: 'What the customer was actually billed on this job, and when',
+      v: r => `${money(r.rev)}${r.invoiceDate ? `<br><span class="hint" style="font-size:11px">${esc(r.invoiceDate)}</span>` : ''}` },
+    { h: 'Equipment cost', r: 1, t: "Material on this job's purchase orders. Labor and driving are not in this column.",
+      v: r => money(r.matl) },
+    { h: 'Over by', r: 1, t: 'Equipment cost less what was invoiced', v: r => `<b>${money(r.gap)}</b>` },
+    /* A DOT, never a number, when the age is not an age. The pull measures this
+       from the job's completion date and falls back to the invoice date when a
+       job has none on file; this column claims the former, and on a panel whose
+       argument is "the bill is a year younger than the work" a billing age
+       printed here would quietly prove the opposite. The invoice date is in the
+       column to the left either way, so nothing is hidden by the dot. */
+    { h: 'Days old', r: 1, t: 'Days since the work was finished, not since it was billed',
+      v: r => jcNumOK(r.ageDays) ? Math.round(r.ageDays).toLocaleString()
+        : `<span title="No completion date on this job, so its age would be the age of the bill">${jcDot}</span>` },
+  ];
+  /* Titled off the tile it explains, word for word. A reader who saw the figure
+     at the top and scrolls down should land on the same words.
+
+     "INSTALLED, NOT BILLED" until 2026-08-11 (duo review, finding 12). That label
+     asserted one of the two causes -- the flattering one -- while the page's own
+     caption underneath said only the job record can say which it is, and at 382 to
+     518 days old the billing-catching-up reading is the less likely of the two.
+     The fact is not in dispute and is exactly what the new title says: equipment
+     cost ran past the invoice. What it MEANS stays in the caption, as both
+     options, where it already was. */
+  return jcPanel('Equipment over invoice &mdash; check these jobs',
+    `${winLbl} &middot; ${rows.length} install${rows.length === 1 ? '' : 's'} &middot; biggest first`,
+    jcGrid(cols, rows),
+    /* ONE SENTENCE, carrying three things and no fourth.
+
+       Both operands, so no figure sits without its base: $5,973.60 of equipment
+       went in, $9.50 came back. The GAP TOTAL stated outright, so nobody has to
+       subtract to learn what the panel is about -- and it is the same arithmetic
+       the Over by column adds up to, in the same format.
+
+       And THE CAVEAT, which is the reason this panel can be shown at all: the
+       vault flag of 2026-08-06 says this money could equally be equipment
+       Boreal Comfort Co chose to eat on a warranty swap, and that ServiceTitan settles it
+       in five minutes while this data never can. A table headed "not billed"
+       without that clause invites the one question that ends the conversation, so
+       it stays above the fold rather than moving into the disclosure. */
+    { cap: `${money(kit)} of equipment went in on ${rows.length === 1 ? 'this job' : `these ${rows.length} jobs`} against ${money(billed)} billed, leaving ${money(gap)} that was either never billed or eaten on a warranty swap &mdash; only the job itself says which.`,
+      more: `<p>Each row is an install where the equipment on the purchase orders came to more than half again what the customer was billed. That ratio is a rule of thumb for finding them, not a measurement, so every row here is a job to open rather than a loss to book.</p>
+      <p>Days old counts from when the work was finished, not from the bill.${oldest === null ? ' No job here has a completion date on file, so every age reads as a dot rather than as the age of its invoice.' : ` The oldest is ${Math.round(oldest).toLocaleString()} days, so this is not billing catching up: a token invoice written long after the truck left is a job somebody closed to get it off a list.${aged.length < rows.length ? ` ${rows.length - aged.length} of these ${rows.length} carry no completion date and show a dot instead of an age.` : ''}`}</p>
+      <p>These rows are held out of every margin figure on this page, deliberately. Their revenue is not real revenue and folding them in would drag the company number to a percentage that means nothing.</p>` },
+    6);
 }
 
 /* What warranty work cost, computed in ONE place. The leak strip at the top of
@@ -2256,6 +2743,35 @@ function jcWarrantyCost(JC) {
     both: marginLost !== null && direct !== null ? marginLost + direct : null };
 }
 
+/* The two money bars on the warranty panel. the owner 2026-08-11: "we don't want a
+   word puzzle, we want immediate concrete information." The paragraph these
+   replace took ninety words to say what the picture says at a glance, which is
+   that the second bar is six times the first.
+
+   NOT barChart(): that one is vertical, centres its label underneath, and has no
+   room for the line that says where the figure came from -- and every label here
+   is four words. Label, derivation, bar and figure sit in ONE viewBox so they
+   cannot drift apart at any panel width, and the whole thing scales with the
+   panel instead of needing a media query.
+
+   Rows are pre-filtered by the caller to ones carrying a real number: a figure
+   the pull has not costed yet is a missing bar, never a bar of length zero,
+   which would read as a measured nothing. */
+function jcCostBars(rows, W = 760) {
+  const RH = 44, GAP = 8, LW = 250, VW = 110;
+  const mx = Math.max(...rows.map(r => r.v), 1);
+  const bw = W - LW - VW, H = rows.length * RH + (rows.length - 1) * GAP;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;margin:2px 0 10px" role="img"
+    aria-label="${esc(rows.map(r => `${r.label}, ${jcMoney(r.v)}`).join('. '))}">${rows.map((r, i) => {
+    const y = i * (RH + GAP), w = Math.max(r.v / mx * bw, 2);
+    return `<text x="0" y="${y + 18}" font-size="15" fill="var(--cream)">${esc(r.label)}</text>`
+      + (r.note ? `<text x="0" y="${y + 36}" font-size="12" fill="var(--dim)">${esc(r.note)}</text>` : '')
+      + `<rect x="${LW}" y="${y + 9}" width="${bw}" height="${RH - 18}" rx="4" fill="var(--grid)"/>`
+      + `<rect x="${LW}" y="${y + 9}" width="${w.toFixed(1)}" height="${RH - 18}" rx="4" fill="${r.c}"/>`
+      + `<text x="${W}" y="${y + 30}" text-anchor="end" font-size="17" font-weight="600" fill="var(--num)">${jcMoney(r.v)}</text>`;
+  }).join('')}</svg>`;
+}
+
 /* PANEL: what a warranty trip costs in selling time nobody got to sell.
    Field guard is revPerTechHour: without it there is no revenue side, and half
    this panel is the half the owner asked for. */
@@ -2263,6 +2779,7 @@ function jcRecallPanel(JC, winLbl) {
   const W = jcWarrantyCost(JC);
   if (!W) return '';
   const I = JC.roll.install;
+  const H = JC.history;
   const { hrs, rph, marginLost, revLost, direct, both } = W;
   const rec = Array.isArray(JC.byRecaller) ? JC.byRecaller : [];
   /* pct is labelled from what it actually adds up to rather than from an
@@ -2277,7 +2794,9 @@ function jcRecallPanel(JC, winLbl) {
     { h: 'Who was paid for the trip', v: r => `<span title="${esc(r.name || '')}">${esc(fname(r.name))}</span>` },
     { h: 'Hours', r: 1, v: r => jcHrs(r.hrs) },
     { h: 'OT', r: 1, t: 'Of those hours, the ones paid at overtime', v: r => jcNumOK(r.ot) && r.ot ? jcHrs(r.ot) : jcDot },
-    { h: 'Paid', r: 1, t: 'Gross wages for those hours', v: r => jcMoney(r.amt) },
+    // "Paid" until 2026-08-11. It is gross wages and nothing else, and "paid"
+    // reads as what the TRIP billed, which is the one thing it is not (the owner).
+    { h: 'Wages', r: 1, t: 'Gross wages for those hours', v: r => jcMoney(r.amt) },
     { h: 'Trips', r: 1, v: r => jcNumOK(r.trips) ? r.trips : jcDot },
     { h: 'Installs', r: 1, t: 'Distinct installs those trips went back to', v: r => jcNumOK(r.installs) ? r.installs : jcDot },
     { h: pctHead, r: 1, t: pctTip, v: r => jcPctS(r.pct) },
@@ -2293,12 +2812,35 @@ function jcRecallPanel(JC, winLbl) {
     { label: 'Not tagged', ...(C.untagged || { n: 0, hrs: 0, cost: 0 }) },
   ] : [];
   const cTot = CAUSE_ROWS.reduce((s, r) => s + (jcNumOK(r.n) ? r.n : 0), 0);
+  /* THE TWO ADDENDS OF THE HEADLINE, in the order the headline adds them. A term
+     the pull could not cost is dropped rather than drawn as $0: `both` is null in
+     exactly that case, so the tile above it reads n/a at the same time and the
+     picture and the total never disagree about what is known. */
+  const BARS = [
+    { label: 'Money already spent', v: direct, c: 'var(--dim)',
+      note: 'warranty labour and parts, every trip' },
+    { label: 'Margin we never earned', v: marginLost, c: 'var(--gold-bri)',
+      note: `${jcHrs(allHrs)} at ${jcNumOK(I.perHour) ? fmt$(I.perHour) : 'n/a'} of margin an hour` },
+  ].filter(r => jcNumOK(r.v));
   return jcPanel('What warranty work costs in selling time',
     `${winLbl} &middot; ${jcHrs(allHrs)} on every warranty trip in the window`,
-    jcStats(
-      jcStat(marginLost === null ? jcNA : jcMoney(marginLost), `margin forgone: ${jcHrs(allHrs)} at ${jcNumOK(I.perHour) ? fmt$(I.perHour) : 'n/a'} of margin per technician hour`)
-      + jcStat(jcMoney(revLost), `revenue forgone: the same hours at ${fmt$(rph)} invoiced per technician hour`)
-      + jcStat(direct === null ? jcNA : jcMoney(direct), 'already spent: warranty labor and parts on every trip, whenever its install was sold'))
+    /* The total leads and the two bars UNDER it are its two addends, so the
+       addition is shown instead of argued. The paragraph that used to argue it
+       ("the two costs add rather than overlap...") is what the picture replaced:
+       nothing it said is gone, it is the sub-line and the two bars. */
+    jcStats(jcStat(both === null ? jcNA : jcMoney(both), 'money spent + margin never earned',
+      jcChip(both, jcPrior(H, 'warrantyBoth'), { higherIsBetter: false, fmt: jcMoney })))
+    + (BARS.length ? jcCostBars(BARS) : '')
+    /* Revenue forgone is a HINT, not a third bar, and that is the honest
+       arithmetic: it is the same hours priced at what we invoice, so it already
+       contains the wages in the bar above it and adding it would charge those
+       hours twice. It is on the page because the owner asked for it. */
+    + `<p style="font-size:12.5px;line-height:1.55;color:var(--ink)">At the full rate we invoice, those ${jcHrs(allHrs)} would have billed <b>${jcMoney(revLost)}</b> &mdash; ${fmt$(rph)} invoiced per technician hour. Margin, not revenue, is what is added above: a revenue dollar still has to buy its own material and pay its own commission.</p>`
+    /* the opportunity-cost caveat is NOT foldable and it sits directly under the
+       figure it qualifies, not behind a click: it is the whole difference between
+       a real number and a fantasy one. Compressed 2026-08-11 from three lines to
+       one; it may be shortened again, it may never be removed. */
+    + `<p style="font-size:12.5px;line-height:1.55;color:var(--gold-bri)">Margin never earned is only real if that hour could have been sold to somebody else. In a week when the crew had open capacity, it is closer to nothing.</p>`
     /* The split, stated on the panel rather than folded away. It is the difference
        between the figures above and the ledger below, and without it the two look
        like they disagree. */
@@ -2307,11 +2849,6 @@ function jcRecallPanel(JC, winLbl) {
       jcNumOK(JC.recallNonInstallHrs) && JC.recallNonInstallHrs ? `${jcHrs(JC.recallNonInstallHrs)} against service or cancelled jobs` : '',
       orphHrs ? `${jcHrs(orphHrs)} with no install on file at that address` : '',
     ].filter(Boolean).join(', ')}. The first kind never goes away: a system sold last year still gets a warranty call this year.</p>` : '')
-    /* the opportunity-cost caveat is NOT foldable and it sits beside the forgone
-       margin figure, not behind a click: it is the whole difference between a
-       real number and a fantasy one. */
-    + `<p style="font-size:12.5px;line-height:1.55;color:var(--gold-bri)">Forgone margin is only real if that hour could have been sold to somebody else. In a week when the crew had open capacity, the true cost of it is closer to zero.</p>`
-    + (both === null ? '' : `<p style="font-size:13px;line-height:1.6;color:var(--ink);margin-top:8px">The two costs add rather than overlap: ${jcMoney(direct)} is money already out the door and ${jcMoney(marginLost)} is money that was never earned, so warranty work cost about <b>${jcMoney(both)}</b> over this window.</p>`)
     /* Both crew tables stay on the page in full: they are content, not prose.
        They used to stack in a half width panel and cost 1,030px between the owner
        and his ledger. Side by side in a full width panel they cost 515px and the
@@ -2320,9 +2857,12 @@ function jcRecallPanel(JC, winLbl) {
        not installer fault." A compressor that failed is not a craftsmanship signal,
        and reading one warranty total as if it were makes the crew look sloppy for
        equipment nobody on the truck chose. Reported only: no margin moves on it.
-       Untagged is printed as loudly as the other two on purpose. It is 44% of the
-       trips today, and a split that hides its own unknown share reads authoritative
-       when it is half guesswork. */
+       Untagged is printed as loudly as the other two on purpose, and the sentence
+       under the table COMPUTES its share rather than asserting one -- this comment
+       used to name 44% and the live figure had drifted to 56% (185 of 329) without
+       anybody noticing, which is exactly the rot the rendered line avoids. A split
+       that hides its own unknown share reads authoritative when most of it is
+       guesswork. */
     + (C ? `<div class="kpi-sub" style="margin-top:14px;margin-bottom:2px">Whose fault it was</div>`
       + jcGrid([
         { h: 'Cause', v: r => r.label },
@@ -2340,13 +2880,13 @@ function jcRecallPanel(JC, winLbl) {
         { h: 'Who', v: o => `<span title="${esc(o.name || '')}">${esc(fname(o.name))}</span>` },
         { h: 'Hours', r: 1, v: o => jcHrs(o.hrs) },
         { h: 'OT', r: 1, t: 'Of those hours, the ones paid at overtime', v: o => jcNumOK(o.ot) && o.ot ? jcHrs(o.ot) : jcDot },
-        { h: 'Paid', r: 1, v: o => jcMoney(o.amt) },
+        { h: 'Wages', r: 1, t: 'Gross wages for those hours', v: o => jcMoney(o.amt) },
         { h: 'Trips', r: 1, v: o => jcNumOK(o.trips) ? o.trips : jcDot },
       ], orphans)
-      + `<p style="margin-top:8px;font-size:12.5px;line-height:1.55;color:var(--dim)">${jcHrs(orphHrs)} of warranty time with no install on file at that address${jcNumOK(JC.recallOrphan) ? `, worth ${jcMoney(JC.recallOrphan)}` : ''}. It is inside the three figures above and charged to no job below. This is the part tagging the callback in ServiceTitan actually fixes.</p></div>` : '')
+      + `<p style="margin-top:8px;font-size:12.5px;line-height:1.55;color:var(--dim)">${jcHrs(orphHrs)} of warranty time with no install on file at that address${jcNumOK(JC.recallOrphan) ? `, worth ${jcMoney(JC.recallOrphan)}` : ''}. It is inside the figures above and charged to no job below. This is the part tagging the callback in ServiceTitan actually fixes.</p></div>` : '')
     + `</div>`,
     { cap: 'Every warranty hour worked in this window, whether or not the install that caused it is still on the page.',
-      more: `<p>Lead with the margin figure. Revenue forgone is the bigger number because a revenue dollar still has to buy its own material and pay its own commission; margin is what an hour actually banks. Every figure on this panel is the same window as the rest of the page, not all time.</p>
+      more: `<p>The bars are margin, not revenue. Revenue forgone is the bigger number because a revenue dollar still has to buy its own material and pay its own commission; margin is what an hour actually banks, which is why it is the figure added to money already spent. Every figure on this panel is the same window as the rest of the page, not all time.</p>
       ${rec.length ? `<p>The "who goes back" table is hours WORKED, not installs CAUSED. The cost of a warranty trip stays charged to the install that went wrong, wherever it went wrong and whoever did it; all that table names is who was paid to drive back out.</p>` : ''}
       ${orphans.length ? `<p>Tagging recalls in ServiceTitan is what moves the unmatched hours onto the installs that caused them.</p>` : ''}` },
     // span 8: it carries two crew tables, and they sit side by side in here
@@ -2464,14 +3004,47 @@ function jcLeaks(JC) {
   // strip and the panel cannot print two different totals
   const W = jcWarrantyCost(JC);
   const ph = JC.roll && JC.roll.install ? JC.roll.install.perHour : null;
-  /* Renamed from "Warranty work" (the owner 2026-08-10). Same helper, same number:
-     what he is arguing about is not that warranty happens, it is what the company
-     gave up to do it, so the tile is named for the question. */
-  if (W && jcNumOK(W.both)) out.push({ k: 'warranty', amt: W.both, label: 'Opportunity cost',
-    sub: `${jcMoney(W.direct)} already spent going back out, and ${jcMoney(W.marginLost)} of margin those ${jcHrs(W.allHrs)} never earned.${jcNumOK(ph) ? ` Warranty work is install work that returns none of the ${fmt$(ph)} a field hour normally leaves behind.` : ''}` });
+  /* Trend chips, added 2026-08-11. H is the pull's nightly metric history, merged
+     into jobCost by the bake; absent on any bake older than that change, and empty
+     until a second night lands, and jcChip renders '' either way. Every metric
+     here is money or hours going OUT, so higherIsBetter is false on all of them:
+     a rise is red. */
+  const H = JC.history;
+  /* "Warranty work" (the owner 2026-08-10) -> "Opportunity cost" -> this. Same
+     helper, same number: what he is arguing about is not that warranty happens,
+     it is what the company gave up to do it. "Opportunity cost" is business-school
+     English and this page is read by people who never sat in that room, so the
+     tile now says which money and where it went.
+
+     THE LABEL AND THE FIGURE HAVE TO MATCH, and this figure is `both`, which is
+     money spent PLUS margin never earned. the owner asked for "Revenue we never
+     earned": that is W.revLost, a different and larger number, and it cannot be
+     added to money already spent because the wages are inside both -- it would
+     charge the same hour twice. If he overrules the wording, the label below is
+     one string to swap AND the amount has to move to W.revLost with it, or the
+     tile lies.
+
+     "Lost to INSTALL RECALLS" until 2026-08-11 (duo review, finding 3). It was an
+     overclaim by one word: `both` runs over allHrs, every warranty hour in the
+     window, which includes hours whose origin is a service or cancelled job and
+     hours against an address with no install on file. The warranty panel below
+     states that split honestly, so the tile was being contradicted by the page
+     itself one panel down. Including the money is the owner's 2026-08-07 ruling and
+     is not touched; only the word "install" went. "Warranty work" is exactly the
+     population allHrs counts.
+
+     "UP TO" on the margin half, three words, same review. The capacity caveat --
+     forgone margin is only real if that hour could have been sold -- lives on the
+     warranty panel, some 6,000 px below this tile, and the tile was asserting the
+     ceiling as a loss with nothing beside it. The caveat stays where it lives, in
+     full; this is the pointer to it that fits in a tile. */
+  if (W && jcNumOK(W.both)) out.push({ k: 'warranty', amt: W.both, label: 'Lost to warranty work',
+    d: jcChip(W.both, jcPrior(H, 'warrantyBoth'), { higherIsBetter: false, fmt: jcMoney }),
+    sub: `Money spent + margin never earned: ${jcMoney(W.direct)} already spent going back out, plus up to ${jcMoney(W.marginLost)} of margin those ${jcHrs(W.allHrs)} never earned &mdash; up to, because a forgone hour is only a loss if it could have been sold.${jcNumOK(ph) ? ` Warranty work is install work that returns none of the ${fmt$(ph)} a field hour normally leaves behind.` : ''}` });
   const z = JC.zeroRate;
   if (z && typeof z === 'object' && !Array.isArray(z) && jcNumOK(z.cost) && z.cost)
     out.push({ k: 'zero', amt: z.cost, label: 'Hours booked at $0',
+      d: jcChip(z.cost, jcPrior(H, 'zeroCost'), { higherIsBetter: false, fmt: jcMoney }),
       sub: `${jcHrs(z.hrs)} of technician time on ${z.rows || 0} installs carries no pay, so those jobs read better than they are. ESTIMATED, not payroll.` });
   /* The worst town used to be the third tile. the owner 2026-08-10 took it off: it is
      the only entry here that is not money leaving the building. A shortfall against
@@ -2485,8 +3058,16 @@ function jcLeaks(JC) {
   const ubAmt = ub.reduce((s, j) => s + ubGap(j), 0);
   const staleRows = ub.filter(j => j.state === 'stale');
   const staleAmt = staleRows.reduce((s, j) => s + ubGap(j), 0);
-  if (ubAmt > 0) out.push({ k: 'underbilled', amt: ubAmt, label: 'Installed, not billed',
-    sub: `${ub.length} install${ub.length === 1 ? '' : 's'} whose material runs past its revenue.${staleAmt > 0 ? ` ${jcMoney(staleAmt)} of that is past the freeze horizon, so it is not billing catching up.` : ''}` });
+  /* "Installed, not billed" until 2026-08-11 (duo review, finding 12): a label
+     that picked one of the two causes, and the flattering one. The measurement is
+     that equipment cost ran past the invoice; whether that is a bill nobody sent
+     or equipment we chose to eat is a question only the job record answers, and
+     the panel below says so in its caption. The tile now states the measurement.
+     Same string reaches the second-row widget, which builds its heading from this
+     label -- they cannot drift. */
+  if (ubAmt > 0) out.push({ k: 'underbilled', amt: ubAmt, label: 'Equipment over invoice',
+    d: jcChip(ubAmt, jcPrior(H, 'underBilled'), { higherIsBetter: false, fmt: jcMoney }),
+    sub: `${ub.length} install${ub.length === 1 ? '' : 's'} whose equipment cost runs past what was invoiced.${staleAmt > 0 ? ` ${jcMoney(staleAmt)} of that is past the freeze horizon, so it is not billing catching up.` : ''}` });
   return out.sort((a, b) => b.amt - a.amt);
 }
 
@@ -2523,29 +3104,179 @@ function jcDriving(JC) {
    given a fake dollar amount to rank on. */
 function jcContext(JC) {
   const out = [];
+  const H = JC && JC.history;
   const W = jcWarrantyCost(JC);
   if (W && W.allHrs) out.push({ k: 'warrantyhrs',
     num: `${Math.round(W.allHrs).toLocaleString()}<small> h</small>`,
     label: 'Warranty and callback hours',
+    d: jcChip(W.allHrs, jcPrior(H, 'warrantyHrs'), { higherIsBetter: false, fmt: jcHrs }),
     sub: `${jcHrs(W.hrs)} went back to an install inside this window and is charged to it below. The other ${jcHrs(W.offHrs)} belongs to older installs, to service or cancelled jobs, or to an address with no install on file.` });
   const D = jcDriving(JC);
   if (D) out.push({ k: 'driving', num: jcMoney(D.veh), label: 'Driving',
+    // Vehicle cost across every install row, NOT callback driving: the chip moves
+    // with the whole book, so it is not evidence about warranty trips.
+    d: jcChip(D.veh, jcPrior(H, 'driving'), { higherIsBetter: false, fmt: jcMoney }),
     sub: `${D.miles.toLocaleString()} miles routed from the shop across ${D.routedN} installs, at the IRS rate in force when each was billed. ${jcHrs(D.driveHrs)} of paid crew time went into it${D.drivePct === null ? '' : `, ${D.drivePct}% of every hour worked`}.${D.cappedN ? ` ${D.cappedN} rows are mileage capped, so this is a floor.` : ''}` });
   return out;
 }
 
-function jcLeakStrip(JC) {
+/* THE RECALL-RATE CARD on the top row. the owner 2026-08-11 asked for the rate beside
+   the dollars, because the dollars alone never answered "is this normal".
+
+   A DESCRIPTOR, not HTML, the same shape jcLeaks and jcContext hand back: renderRole
+   owns the layout, this owns the arithmetic and the words. It is a function and not
+   four lines inline in renderRole for one reason -- renderRole cannot be called in a
+   test, so inline the boundaries below are unreachable and only the happy path a
+   human happened to look at is ever checked (Codex review, 2026-08-11).
+
+   ONE rate, ONE base. recallRows is INSTALLS that had a warranty trip charged back,
+   not trips: ns-dash-pull.js:763, `all.filter(j => j.recallN > 0).length`, stored for
+   the chip under `recallInstalls`. The handoff said trips. The per-trip rate against
+   every warranty trip in the window is a different and equally true number, and
+   printing both here is the word puzzle this pass exists to remove; it lives on the
+   warranty panel below. The denominator is in the sub-line, never implied. */
+function jcRateCard(I, hist) {
+  const rate = I ? jcRate(I.recallRows, I.jobs) : null;
+  const haveBase = !!I && jcFinite(I.jobs) && +I.jobs !== 0;
+  /* THE PRIOR IS TWO COUNTS FROM THE SAME NIGHT OR IT IS NOTHING. Built from the
+     stored counts rather than a stored rate because the denominator moves: 119 of
+     390 and 119 of 396 are different rates off one numerator. But jcPrior picks the
+     snapshot nearest the target PER KEY, independently, so a history holding
+     recallInstalls on the 3rd and installs on the 4th would hand back the 3rd's
+     numerator over the 4th's denominator and print a rate that was true on neither
+     night, labelled with one of the two dates. The pull writes both keys in the
+     same block on the same run, so matching is the ordinary case and a mismatch
+     means the history is partial: no chip beats a fabricated one, which is the same
+     rule jcChip already applies to a missing prior. */
+  const wasN = jcPrior(hist, 'recallInstalls'), wasD = jcPrior(hist, 'installs');
+  const was = wasN && wasD && wasN.date === wasD.date
+    ? { value: jcRate(wasN.value, wasD.value), date: wasN.date, daysAgo: wasN.daysAgo } : null;
+  return {
+    label: 'Recall rate',
+    num: rate === null ? 'n/a' : `${Math.round(rate * 10) / 10}<small>%</small>`,
+    /* THREE STATES, THREE SENTENCES. A missing numerator over 396 real installs is
+       not "no installs": telling the owner his window is empty while it holds 396
+       jobs is a wrong sentence over a right number, which is the defect this page
+       keeps having to fix. Only a missing or zero DENOMINATOR is an empty window.
+
+       "AT LEAST", and it is not hedging (duo review 2026-08-11, finding 5). The
+       numerator counts installs with a warranty trip CHARGED BACK IN SERVICETITAN,
+       and the page's own callback store already knows of 20 more install-fault
+       origins among these same rows that carry no such trip. So the true rate is
+       higher than this and cannot be lower: the honest word for that is a floor.
+       The store's extra origins are deliberately NOT added in -- that would mix a
+       tagged population with a classified one and move a costed number -- so the
+       wording carries what the arithmetic cannot. "That ServiceTitan recorded"
+       names why it is a floor in the same breath, because a floor nobody can
+       explain reads as a fudge. */
+    sub: rate !== null ? `at least ${I.recallRows} of ${I.jobs} installs came back under warranty that ServiceTitan recorded`
+      : haveBase ? `${I.jobs} installs in the window; the warranty count has not landed yet`
+      : 'no installs in the window to measure against',
+    // POINTS, not percent of a percent: 30.3% to 28.1% is 2.2 points down, and
+    // "7% better" would be a third number nobody can check.
+    d: jcChip(rate, was, { higherIsBetter: false, fmt: v => (Math.round(v * 10) / 10) + ' pts' }),
+  };
+}
+
+/* THE SECOND ROW, AS WIDGETS. the owner 2026-08-11: "break the second row down into
+   widgets vs an entire row." It was five figures crammed across one span-12
+   panel; it is now half-width panels sitting side by side, which is the same
+   treatment the sent-home / overtime pair already gets further down.
+
+   NONE of the arithmetic moved. The ranking survives as READING order -- left to
+   right, then down -- so the biggest leak is still the first thing under the
+   band. The two context figures move into one panel of their own, which turns
+   "these are not in the ranking" from a sentence inside a disclosure into where
+   they physically sit.
+
+   winLbl is optional: a caller that does not pass one renders exactly as this
+   did before, minus the window in each heading. */
+function jcLeakStrip(JC, winLbl) {
   const L = jcLeaks(JC);
   const C = jcContext(JC);
   if (!L.length && !C.length) return '';
-  const tile = x => `<div class="jc-leak"><div class="n">${x.num || jcMoney(x.amt)}</div><div class="l">${x.label}</div><div class="s">${x.sub}</div></div>`;
-  return `<div class="panel" style="grid-column:span 12">
-    <div class="jc-leaks">${[...L, ...C].map(tile).join('')}</div>
-    ${jcMore(`<p>The first ${L.length} are money, largest first, re-ranked from live fields on every render: the order is not written down anywhere and neither is any of these figures. The last ${C.length} are context and are not ranked, because hours and miles do not belong in a list sorted by dollars.</p>
-      <p>These are not slices of one pot and they must not be added together. Opportunity cost is money spent plus margin never earned, the $0 hours are labor this page has not charged anybody, and the unbilled equipment is held out of every roll-up on the page. Driving is already inside every margin on this page, counted once as the IRS mileage rate and once again as the wages for the drive, which sit in labor: it is shown here because it is large and invisible, not because it is a further loss. Each one is explained in its own panel below.</p>
-      <p>The worst town used to sit in this strip and was taken out on 2026-08-10: it is a shortfall against a peer median rather than money leaving the building, and it belongs beside its own caveats on the town panel.</p>
-      <p>One further leak is NOT here and cannot be: equipment on cancelled installs that the vendor never credited back. No field in this pull carries it, so it is tracked by hand outside this dashboard rather than invented into the strip above.</p>`,
-      'What this list is and is not')}</div>`;
+  // a context figure pre-renders its own headline, because hours are not dollars;
+  // a money leak carries an amount and nothing else, which is what keeps the
+  // ranked list a list of dollars.
+  const head = x => x.num || jcMoney(x.amt);
+  /* THE RECALL RATE, on the second row (handoff E). It is the SAME function the
+     top-row card is built from, called a second time, rather than the division
+     written out again: two hand-rolled copies of one rate are two numbers to keep
+     in step, and its three honest empty states come along with it for free.
+
+     It sits INSIDE the recall panel as a supporting figure rather than as a panel
+     of its own. How often, beside how much, is the pairing the shared box could
+     never show; a second headline "30.3%" one screen under the card that already
+     says it would be a duplicate, not a finding.
+
+     BUT IT CANNOT DEPEND ON THAT PANEL EXISTING. The warranty card needs `both`,
+     which is null the moment `recallCost` has not costed or `perHour` is missing,
+     while the rate is two COUNTS and survives all of it -- so 7 of 200 installs
+     coming back was rendering nowhere on this row while 200 installs sat in the
+     window (Codex review, 2026-08-11). With no card to ride, it takes one of its
+     own below the money. `haveRate` asks the same helper jcRateCard divides with,
+     rather than sniffing its rendered 'n/a'. */
+  const I = JC && JC.roll ? JC.roll.install : null;
+  const R = jcRateCard(I, JC && JC.history);
+  const haveRate = !!I && jcRate(I.recallRows, I.jobs) !== null;
+  // sharing a panel with the money, it carries its own label; on a panel of its
+  // own the heading is the label and repeating it is just saying it twice.
+  const rateStat = jcStat(R.num, `<b>${R.label}</b> &mdash; ${R.sub}`, R.d);
+  // x.d is the trend chip and is '' until the metric has two nights of history.
+  const cards = L.map((x, i) => ({
+    title: x.label,
+    hint: winLbl || '',
+    body: jcStats(jcStat(head(x), x.sub, x.d) + (x.k === 'warranty' ? rateStat : '')),
+    /* SEPARATE BOXES INVITE ADDING THEM UP harder than one shared box ever did,
+       so the rule against it is now a visible line on the panel the reader starts
+       at, not only a paragraph behind a click. The disclosure still carries it in
+       full, with what each figure actually is. */
+    cap: i === 0 && L.length > 1
+      ? `${L.length} separate figures, biggest first. They are not slices of one pot and must not be added together.`
+      : '',
+  }));
+  /* No warranty card to ride, but a real rate: it gets its own, below the money
+     and out of the ranking, because "120 of 396 installs came back" is a fact
+     about counts and does not stop being true when the cost of those trips
+     cannot be worked out. A rate of n/a takes no card -- the top row already
+     says n/a and a second empty box says nothing twice. */
+  if (!L.some(x => x.k === 'warranty') && haveRate) cards.push({
+    title: R.label,
+    hint: winLbl || '',
+    body: jcStats(jcStat(R.num, R.sub, R.d)),
+    cap: 'How often an install came back. It is on its own here because this window has no warranty cost figure for it to sit beside.',
+  });
+  if (C.length) cards.push({
+    title: 'Big numbers, already counted',
+    hint: winLbl || '',
+    body: jcStats(C.map(x => jcStat(head(x), `<b>${x.label}</b> &mdash; ${x.sub}`, x.d)).join('')),
+    /* Both sentences were folded inside the strip's disclosure. They are visible
+       here because saying these two are not a further loss is this panel's whole
+       job, and a panel whose point is behind a click has no point. */
+    cap: 'Not ranked with the money: hours and miles do not belong in a list sorted by dollars. Driving is already inside every margin on this page, counted once as the IRS mileage rate and once again as the wages for the drive, which sit in labor: it is here because it is large and invisible, not because it is a further loss.',
+  });
+  /* Everything else the one-panel strip carried, in one disclosure riding the
+     first panel rendered. Compressed, never deleted: the ordering rule, the
+     do-not-add rule in full, why the worst town left this row on 2026-08-10, and
+     the leak that has no field behind it and so is not printed at all.
+
+     THE OPENING SENTENCE HAS TO DESCRIBE THE ROW THAT ACTUALLY RENDERED. It
+     claimed ranked money unconditionally, so a window whose warranty cannot be
+     costed -- context figures only, no money card anywhere on the row -- opened
+     this disclosure by calling those hours ranked money (Codex review,
+     2026-08-11). A ranking of one is not a ranking either, and neither is an
+     addition, so both claims are gated on there being more than one figure. The
+     paragraphs about what is NOT here are true in every state and are printed in
+     every state. */
+  const ranked = L.length > 1;
+  const money = !L.length ? '' : `<p>${ranked
+        ? 'These are money, biggest first, re-ranked from live fields on every render: the order is not written down anywhere and neither is any of these figures.'
+        : 'The money figure on this row is read off live fields on every render and is written down nowhere.'}</p>
+      <p>${ranked ? 'They are not slices of one pot and they must not be added together. ' : ''}What we lost to warranty work is money spent plus margin never earned &mdash; every warranty hour in the window, including the trips whose origin turned out to be a service job or an address with no install on file, which is why it is not headed "install recalls". The $0 hours are labor this page has not charged anybody, and the equipment over invoice is held out of every roll-up on the page. Each one is explained in its own panel below.</p>`;
+  const more = `${money}<p>The worst town used to sit in this row and was taken out on 2026-08-10: it is a shortfall against a peer median rather than money leaving the building, and it belongs beside its own caveats on the town panel.</p>
+      <p>One further leak is NOT here and cannot be: equipment on cancelled installs that the vendor never credited back. No field in this pull carries it, so it is tracked by hand outside this dashboard rather than invented into a panel above.</p>`;
+  return cards.map((c, i) => jcPanel(c.title, c.hint, c.body,
+    { cap: c.cap, more: i === 0 ? more : '', label: 'What these figures are and are not' }, 6)).join('');
 }
 
 // quiet: a header click re-renders the whole view, and replaying the KPI
@@ -2566,7 +3297,7 @@ function renderRole(v, quiet) {
   if (v === 'service') {
     title = 'Service'; note = 'Two of the service techs sell as well as run calls. Service revenue is invoiced work attributed to their calls; company-wide service revenue lives on the Financial tab. Sold installs count tickets of $2,500 and up; smaller service quotes show under all estimates. Avg revenue per service appointment counts only chargeable service work: warranty callbacks are taken out of it however the office booked them, because a callback bills nothing and dividing by it charges the tech for going back on work that was already paid for. Tickers compare the last 30 days to the 30 before.';
     team = [
-      // attributed to Marcus and Dana's calls, matching the per-person cards below;
+      // attributed to Anders and Maren's calls, matching the per-person cards below;
       // O.avgTicket.service.rev is COMPANY-wide and belongs to Financial (audit 2026-07-11)
       { label: 'Service revenue', num: fmt$(sumBy(R5.service, 'revenueSvc')), sub: `on their calls · 30 days`, d: delta(sumBy(R5.service, 'revenueSvc'), sumBy(R5.service, 'revenueSvcPrev'), P30d) },
       { label: 'Avg service ticket', num: fmtA(O.avgTicket.service.avg), sub: 'net invoiced per job, company-wide', d: delta(O.avgTicket.service.avg, AT.service?.avg, P30d) },
@@ -2593,13 +3324,13 @@ function renderRole(v, quiet) {
     // only the "Install Recall" job type, so a callback written up as RECALL (SJ)
     // or as DEMAND/SERVICE (SJ) stayed in the divisor. Those jobs almost never
     // bill, so the tech was being charged a zero-revenue appointment for going
-    // back on somebody else's install: 86 of them across Marcus and Dana in the
+    // back on somebody else's install: 86 of them across Anders and Maren in the
     // trailing year, against the 28 the old test caught.
     // `?? recallTrips` is the bake-compatibility fallback, and it has to be ??
     // rather than ||: a bake older than this change carries no warrantyTrips at
     // all, and `|| 0` there would stop subtracting recalls altogether. That is a
     // BIGGER denominator, so the card would quietly drop below the number it has
-    // shown for a month (Marcus 304 to 296) rather than hold station until the next
+    // shown for a month (Anders 304 to 296) rather than hold station until the next
     // pull. Pinned in test-jobcost.js case 40.
     const warrAppts = (s, p = '') => s[`warrantyTrips${p}`] ?? s[`recallTrips${p}`] ?? 0;
     const svcAppts = (s, p = '') => Math.max((s[`apptsDone${p}`] || 0) - (s[`installsDone${p}`] || 0) - (s[`salesRun${p}`] || 0) - (s[`salesReturn${p}`] || 0) - warrAppts(s, p), 0);
@@ -2715,7 +3446,7 @@ function renderRole(v, quiet) {
     // used to sit under the ledger, is one page-level disclosure directly below
     // it: folded, not cut, and up here where it can actually be found rather than
     // twenty thousand pixels down past the ledger.
-    const JC_NOTE = `Job margin is invoiced revenue less commission, finance fee, material from the job purchase orders, technician labor, vehicle cost and any warranty trip charged back to the install that caused it. <b>This is not gross profit.</b> "Field profit per labor hour" is those same margin dollars divided by technician hours, so it is what a paid field hour leaves behind <b>after</b> the job's purchase order material, technician labor and vehicle cost have already come off, and <b>before</b> rent, overhead, and the office and salaried hours nobody bills: a crew-efficiency number, not the company's bottom line. The equipment on the purchase orders is subtracted; the office time spent ordering it is not, because ServiceTitan payroll covers technicians only. Labor is gross wages only, with no payroll tax, workers comp or benefits, and ServiceTitan payroll covers technicians only, so office and salaried time is invisible here and every number reads optimistic. Material comes from purchase orders attached to the job, less any vendor credit for parts sent back; stock pulled off a truck is not costed to it, which pushes the other way. A return is only netted off once the credit has actually been received, and only when the purchase order it reverses is on this install: a credit we cannot match is shown on the row and left in the material rather than quietly removed. Revenue is what was invoiced, not what has been collected: billed-and-unpaid is still revenue earned, and the outstanding amount shows under it. A no-charge call keeps its hours and costs them against $0. A project whose install job was cancelled is not listed at all, however many service jobs on it billed. A row whose material runs well past its revenue is marked <b>under-billed</b> and held out of the roll-up: the equipment is real and the invoice has not been written yet, which is billing catching up rather than a loss. A row is costed only when every term resolves; anything missing drops to "still being calculated" at the bottom rather than counting as zero, because $0 material on an install would print a fake 90 percent. <b>Nothing here is frozen.</b> Every job inside the ${Math.round((Date.parse(JC.to) - Date.parse(JC.from)) / 86400000 / 30)} month window is recomputed from ServiceTitan on every run, so a corrected job type, a re-cut invoice or a late warranty trip lands on the next pull; only rows older than ${JC.freezeDays} days are archived and stop updating. ${JC.commFrom ? `Commission tracking begins ${JC.commFrom}, so installs invoiced before it read "pre-commission" and cannot be fully costed. That resolves on its own as the window rolls forward. ` : ''}Unattributed technician pay was ${fmt$(JC.laborUnattributed)} and is charged to no job, on purpose${JC.crew && Array.isArray(JC.crew.unattrib) && JC.crew.unattrib.length ? `: it is ${JC.crew.unattrib.slice(0, 4).map(u => `<b>${esc(u.activity)}</b> ${u.hrs.toFixed(0)} h`).join(', ')}${JC.crew.unattrib.length > 4 ? ' and the rest' : ''}` : ''}. Every one of those entries was checked for a job to attach it to and none has one: job, project, invoice, customer and location are all empty on every single row, so there is nothing to trace back. It is overhead, not install cost booked to the wrong place, and pushing it onto jobs would invent cost rather than find it. Vehicle cost is miles at the IRS business standard mileage rate in force on the billing date (${JC.mileRates.map(([from, r]) => `${(r * 100).toFixed(1)}&cent; from ${from}`).join(', ')}), routed from the shop and bounded by what the paid drive time allows. That rate covers fuel, depreciation, tyres, maintenance and insurance, so it is what a mile costs the company, not what goes in the tank. Recalls come from ServiceTitan's own link: any job carrying recallForId, whatever its job type, charged back to the job it points at (${JC.recallLinked} matched this way). Only ${JC.recallGuessed} fall back to the guess of "most recent install at that address", and ${JC.recallOrphanN} have no install on file at their address at all (${fmt$(JC.recallOrphan)}); tagging those in ServiceTitan is what shrinks that number. A further ${JC.recallOutOfWindowN} trips (${fmt$(JC.recallOutOfWindow)}) went back to an install <b>older than this window</b>. Their cost is counted in the warranty figures, because the trip itself happened inside the window, but they reach no install row, no cut and no peer median, because the install they belong to is not on this page. That figure is a floor: it holds the warranty labor and parts less anything the trip billed, and leaves out the drive back, which is priced off the install's own routed miles and so needs a row this money does not have. That overlap never goes away: a system sold thirteen months ago still gets a warranty call this month. Peer medians compare a job to its own install type, not to a target.`;
+    const JC_NOTE = `Job margin is invoiced revenue less commission, finance fee, material from the job purchase orders, technician labor, vehicle cost and any warranty trip charged back to the install that caused it. <b>This is not gross profit.</b> "Field profit per labor hour" is those same margin dollars divided by technician hours, so it is what a paid field hour leaves behind <b>after</b> the job's purchase order material, technician labor and vehicle cost have already come off, and <b>before</b> rent, overhead, and the office and salaried hours nobody bills: a crew-efficiency number, not the company's bottom line. The equipment on the purchase orders is subtracted; the office time spent ordering it is not, because ServiceTitan payroll covers technicians only. Labor is gross wages only, with no payroll tax, workers comp or benefits, and ServiceTitan payroll covers technicians only, so office and salaried time is invisible here and every number reads optimistic. Material comes from purchase orders attached to the job, less any vendor credit for parts sent back; stock pulled off a truck is not costed to it, which pushes the other way. A return is only netted off once the credit has actually been received, and only when the purchase order it reverses is on this install: a credit we cannot match is shown on the row and left in the material rather than quietly removed. Revenue is what was invoiced, not what has been collected: billed-and-unpaid is still revenue earned, and the outstanding amount shows under it. A no-charge call keeps its hours and costs them against $0. A project whose install job was cancelled is not listed at all, however many service jobs on it billed. A row whose material runs well past its revenue is marked <b>under-billed</b> and held out of the roll-up: the equipment is real and the invoice against it is not, which is either billing that has not caught up or equipment we chose to eat &mdash; the panel below names the jobs so it can be checked. A row is costed only when every term resolves; anything missing drops to "still being calculated" at the bottom rather than counting as zero, because $0 material on an install would print a fake 90 percent. <b>Nothing here is frozen.</b> Every job inside the ${Math.round((Date.parse(JC.to) - Date.parse(JC.from)) / 86400000 / 30)} month window is recomputed from ServiceTitan on every run, so a corrected job type, a re-cut invoice or a late warranty trip lands on the next pull; only rows older than ${JC.freezeDays} days are archived and stop updating. ${JC.commFrom ? `Commission tracking begins ${JC.commFrom}, so installs invoiced before it read "pre-commission" and cannot be fully costed. That resolves on its own as the window rolls forward. ` : ''}Unattributed technician pay was ${fmt$(JC.laborUnattributed)} and is charged to no job, on purpose${JC.crew && Array.isArray(JC.crew.unattrib) && JC.crew.unattrib.length ? `: it is ${JC.crew.unattrib.slice(0, 4).map(u => `<b>${esc(u.activity)}</b> ${u.hrs.toFixed(0)} h`).join(', ')}${JC.crew.unattrib.length > 4 ? ' and the rest' : ''}` : ''}. Every one of those entries was checked for a job to attach it to and none has one: job, project, invoice, customer and location are all empty on every single row, so there is nothing to trace back. It is overhead, not install cost booked to the wrong place, and pushing it onto jobs would invent cost rather than find it. Vehicle cost is miles at the IRS business standard mileage rate in force on the billing date (${JC.mileRates.map(([from, r]) => `${(r * 100).toFixed(1)}&cent; from ${from}`).join(', ')}), routed from the shop and bounded by what the paid drive time allows. That rate covers fuel, depreciation, tyres, maintenance and insurance, so it is what a mile costs the company, not what goes in the tank. Recalls come from ServiceTitan's own link: any job carrying recallForId, whatever its job type, charged back to the job it points at (${JC.recallLinked} matched this way). Only ${JC.recallGuessed} fall back to the guess of "most recent install at that address", and ${JC.recallOrphanN} have no install on file at their address at all (${fmt$(JC.recallOrphan)}); tagging those in ServiceTitan is what shrinks that number. A further ${JC.recallOutOfWindowN} trips (${fmt$(JC.recallOutOfWindow)}) went back to an install <b>older than this window</b>. Their cost is counted in the warranty figures, because the trip itself happened inside the window, but they reach no install row, no cut and no peer median, because the install they belong to is not on this page. That figure is a floor: it holds the warranty labor and parts less anything the trip billed, and leaves out the drive back, which is priced off the install's own routed miles and so needs a row this money does not have. That overlap never goes away: a system sold thirteen months ago still gets a warranty call this month. Peer medians compare a job to its own install type, not to a target.`;
     banner = `<div class="kpi-sub" style="margin-top:18px;margin-bottom:-6px;text-transform:none;line-height:1.5">
       Every number on this page covers <b>${LD(JC.from)} through ${LD(JC.to)}</b>: a rolling 365 days, recomputed on every pull.<br>
       <b>Job margin</b> is what is left of a customer's dollar once that job has paid for itself: commission, finance fee, material,
@@ -2727,20 +3458,47 @@ function renderRole(v, quiet) {
     // the 3,200 character footnote is now inside the banner disclosure above, so
     // the page-level note slot under the ledger is deliberately empty
     note = '';
+    /* CHIPS ON ALL FOUR, not just the rate (duo review 2026-08-11, finding 11).
+       the owner's ask was chips "on all the widgets where they make sense", and the
+       four most-read numbers on the page were the ones that could not show a
+       direction. Colour is good/bad and NOT up/down, which is the whole reason
+       jcChip takes higherIsBetter with no default: margin rising is green,
+       material rising and warranty rising are red, and the arrow still points the
+       way the number actually moved.
+
+       Rates move in POINTS and money moves in dollars, because "material is 7%
+       better" is a percent of a percent and nobody can check it.
+
+       matlPct and recallCost are new snapshot keys as of tonight's pull, so both
+       chips render '' until a second night lands. That is the designed empty
+       state, not a fault, and it is the same one every other chip here shipped in. */
+    const pts = v => (Math.round(v * 10) / 10) + ' pts';
     team = [
       // the owner 2026-08-06: the percent leads, not the dollars. He asked twice what
       // "contribution %" meant, so the card now shows the rate he is judging and
       // keeps the dollars underneath it rather than the other way round.
-      { label: 'Install job margin', num: I.pct === null ? 'n/a' : `${I.pct}<small>%</small>`, sub: I.pct === null ? 'nothing fully costed yet' : `${fmt$(I.contrib)} of ${fmt$(I.rev)} invoiced · ${I.costed} of ${I.jobs} costed` },
+      { label: 'Install job margin', num: I.pct === null ? 'n/a' : `${I.pct}<small>%</small>`, sub: I.pct === null ? 'nothing fully costed yet' : `${fmt$(I.contrib)} of ${fmt$(I.rev)} invoiced · ${I.costed} of ${I.jobs} costed`,
+        d: jcChip(I.pct, jcPrior(JC.history, 'marginPct'), { higherIsBetter: true, fmt: pts }) },
       // the owner 2026-08-10 read "before overhead, purchasing and office hours" as
       // "the purchase orders are not in this number". They are: costJobs builds
       // material off the job's own POs and nets received vendor credits, and a
       // row whose PO cannot be found leaves the roll-up entirely rather than
       // costing $0. What payroll cannot see is the OFFICE TIME spent purchasing.
       // So the sub now says what is already off before it says what is not.
-      { label: 'Field profit / labor hour', num: I.perHour === null ? 'n/a' : fmt$(I.perHour), sub: 'after PO material, labor and vehicle; before overhead and office hours' },
-      { label: 'Material', num: I.matlPct === null ? 'n/a' : `${I.matlPct}<small>%</small>`, sub: 'of install revenue' },
-      { label: 'Recalls', num: I.recallCost === null ? 'n/a' : fmt$(I.recallCost), sub: I.recallRows ? `${I.recallHrs} h back out on ${I.recallRows} installs` : 'no warranty trips charged back' },
+      { label: 'Field profit / labor hour', num: I.perHour === null ? 'n/a' : fmt$(I.perHour), sub: 'after PO material, labor and vehicle; before overhead and office hours',
+        d: jcChip(I.perHour, jcPrior(JC.history, 'marginPerHour'), { higherIsBetter: true, fmt: jcMoney }) },
+      // material rising is money leaving: higherIsBetter false, so up is red
+      { label: 'Material', num: I.matlPct === null ? 'n/a' : `${I.matlPct}<small>%</small>`, sub: 'of install revenue',
+        d: jcChip(I.matlPct, jcPrior(JC.history, 'matlPct'), { higherIsBetter: false, fmt: pts }) },
+      // the PLACED warranty figure, chipped against the key that stores the same
+      // population -- recallCost, never warrantyDirect, which adds the trips whose
+      // install is not a row here and would report a jump this card never made
+      { label: 'Recalls', num: I.recallCost === null ? 'n/a' : fmt$(I.recallCost), sub: I.recallRows ? `${I.recallHrs} h back out on ${I.recallRows} installs` : 'no warranty trips charged back',
+        d: jcChip(I.recallCost, jcPrior(JC.history, 'recallCost'), { higherIsBetter: false, fmt: jcMoney }) },
+      // HOW OFTEN, beside HOW MUCH. The whole card -- rate, denominator sentence
+      // and trend chip -- is jcRateCard, so the boundaries it has to get right are
+      // reachable from a test. renderRole is not.
+      jcRateCard(I, JC.history),
       // "Still calculating" used to sit here as a fifth card. It is a work queue,
       // not a health check, and it was taking a slot in the row the owner reads
       // first. The same count now heads the panel that lists those rows.
@@ -2880,7 +3638,7 @@ function renderRole(v, quiet) {
        be installed is a follow-up. 'Is it getting better' is retired as a band,
        its trend having moved up into the lead row. */
     cards = band('Where the money is going', 'biggest recoverable numbers first, re-ranked from live fields on every render')
-      + jcLeakStrip(JC)
+      + jcLeakStrip(JC, winLbl)
       + jcDiversionPanel(JC, winLbl)
       + trendPanel
       + band('What we sold, and who sold it', winLbl)
@@ -2940,16 +3698,27 @@ function renderRole(v, quiet) {
          diverted hours, this pair asks whether the crew had work at all. */
       + ((JC.crew && Array.isArray(JC.crew.nwa) && JC.crew.nwa.length)
         ? band('Sent home, and paid overtime', 'the same twelve months, side by side')
-          + jcCrewPanels(JC.crew, winLbl)
+          + jcCrewPanels(JC.crew, winLbl, JC.history, JC.callbackAudit)
           + jcAuditPanel(JC.callbackAudit, JC)
         : '')
+      /* The same store, ranked by what actually broke. Mounted OUTSIDE the block
+         above on purpose: that band is gated on the sent-home data, and a widget
+         about install defects has no business disappearing because payroll did
+         not ship a crew array. */
+      + jcDefectPanel(JC.callbackAudit, JC)
       + ((Array.isArray(JC.people) && JC.people.length)
         ? band('What an hour of theirs is worth', `${JC.people.length} service ${JC.people.length === 1 ? 'tech' : 'techs'} &middot; ceilings, not losses`)
           + JC.people.map(p => jcPersonPanel(p, winLbl, JC.clubFloor)).join('')
         : '')
-      + band('The two biggest leaks in detail', 'the tables behind the first two figures above')
+      /* Was "the two biggest leaks": the strip carries three figures and now all
+         three have their working papers here, so the heading counts what is
+         under it rather than what used to be. */
+      + band('The biggest leaks in detail', 'the tables behind the figures at the top')
       + jcRecallPanel(JC, winLbl)
       + jcZeroPanel(JC.zeroRate, I.costed, I.rev, winLbl)
+      // The third strip figure, named job by job. Absent field, or a window with
+      // nothing under-billed, renders nothing at all.
+      + jcUnderBilledPanel(JC.underBilled, winLbl)
       + band('Every install', `${JC.jobs.length} rows in the window`)
       + `<div class="panel" style="grid-column:span 12"><h3><span class="wire ok"></span>Install ledger
       <span class="hint">${done.length} fully costed &middot; by ${esc(sortLabel)}, ${JC_SORT.d < 0 ? 'high to low' : 'low to high'} &middot; click any heading to sort</span></h3>
@@ -2996,7 +3765,12 @@ function renderRole(v, quiet) {
   if (!quiet && !matchMedia('(prefers-reduced-motion: reduce)').matches)
     $('#role-view').querySelectorAll('.kpi-num, .big').forEach(el => countUp(el, 600));
 }
-const VTITLE = { primary: 'Operations', service: 'Service', sales: 'Sales', install: 'Install', office: 'Office', financial: 'Financial', jobcosting: 'Install Job Costing' };
+/* demo: the club maintenance list is excluded here, not defanged. It renders only
+   from a live fetch, so there is nothing for a static artifact to show. The live feed
+   filename is deliberately not named here: this file ships, and the validator bans
+   the whiteboard's feed name for the same reason. */
+
+const VTITLE = { primary: 'Operations', service: 'Service', sales: 'Sales', install: 'Install', office: 'Office', financial: 'Financial', jobcosting: 'Install Job Costing', club: 'Club Maintenance List' };
 function setView(v) {
   // jobcosting is in the whitelist but has NO vbtn in #views: hidden beta,
   // reachable only at #view=jobcosting until the numbers are hand-checked.
@@ -3011,11 +3785,13 @@ function setView(v) {
   // it is never called for Operations (`if (role) renderRole(v)` below). So
   // leaving job costing for Operations stranded the whole page full-bleed until
   // a reload. setView is the one path every view goes through.
-  document.body.classList.toggle('jc-wide', v === 'jobcosting');
+  // The club list is 11 columns, same problem job costing has, so it reuses that
+  // view's full-bleed body class rather than adding a second one that does the same.
+  document.body.classList.toggle('jc-wide', v === 'jobcosting' || v === 'club');
   document.querySelectorAll('#views .vbtn').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   $('#role-view').style.display = role ? '' : 'none';
   $('#edit-btn').textContent = 'Customize';
-  if (role) renderRole(v);
+  if (role) renderRole(v); // demo: the club view is excluded, see make-template.js
   history.replaceState(null, '', v === 'primary' ? location.pathname : '#view=' + v);
 }
 document.querySelectorAll('#views .vbtn').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));

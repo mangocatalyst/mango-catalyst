@@ -34,16 +34,32 @@ const dow = d => new Date(`${d}T12:00:00Z`).getUTCDay();
 const R = addDays(today, -1);            // report day = yesterday, like the live pull
 const windowStart = addDays(R, -89);
 
-/* ---------- the fictional crew ---------- */
+/* ---------- the fictional crew ----------
+   THESE NAMES ARE LOAD-BEARING. privacy-validator.js harvests real employee names
+   out of live NorthStar data every run, so a fictional person who shares a first
+   name with a real one stops the nightly bake. It has: 2026-07-28 died on Marcus,
+   Sam, Aaron, Ryan, Nathan and Doyle at once, every one a fictional crew member
+   colliding with a different real ServiceTitan employee.
+
+   On 2026-08-12 all seven remaining collisions were renamed off the real directory
+   rather than allowlisted -- Marcus->Anders, Sam->Chidi, Dana->Maren, Aaron->Alden,
+   Ryan->Lowell, Chris Doyle->Bram Tollefson, Priya Nathan->Priya Halstad. The last
+   two needed the SURNAME changed, not the first name: Nathan Beal and Parker Doyle
+   are the real people, so the collision was on the back half.
+
+   Before adding or changing a name here, check it against every pool the validator
+   reads -- st_staff, people, invoices, memberships, the install board, raw.json --
+   not just the ones it tokenises today. A customer-list name is one hire away from
+   being a staff name. TOKEN_ALLOW is not the fix; it only ever grows. */
 const ROSTER = {
-  service: ['Marcus Vellen', 'Dana Kirsch', 'Priya Nathan', 'Cole Bratsven', 'Theo Lindqvist'],
-  sales: ['Sam Okafor', 'Jenna Marsh', 'Victor Reyes'],
+  service: ['Anders Vellen', 'Maren Kirsch', 'Priya Halstad', 'Cole Bratsven', 'Theo Lindqvist'],
+  sales: ['Chidi Okafor', 'Jenna Marsh', 'Victor Reyes'],
   installers: ['Eli Thornton', 'Owen Stavros', 'Miguel Ferrer', 'Jack Pruitt', 'Andre Wilkes', 'Toby Nash'],
-  helpers: ['Ryan Pelto', 'Chris Doyle', 'Lena Voss'],
+  helpers: ['Lowell Pelto', 'Bram Tollefson', 'Lena Voss'],
 };
-const CSRS = ['Holly Brandt', 'Aaron Sietsema', 'Maya Quist', 'Derek Fontaine'];
+const CSRS = ['Holly Brandt', 'Alden Sietsema', 'Maya Quist', 'Derek Fontaine'];
 // sellers: comfort advisors plus the two selling service techs the template names
-const SELLERS = ['Sam Okafor', 'Jenna Marsh', 'Victor Reyes', 'Marcus Vellen', 'Dana Kirsch'];
+const SELLERS = ['Chidi Okafor', 'Jenna Marsh', 'Victor Reyes', 'Anders Vellen', 'Maren Kirsch'];
 const SELLER_W = [.30, .25, .18, .15, .12];
 const pickSeller = () => { let r = rnd(), i = 0; while (i < SELLER_W.length - 1 && (r -= SELLER_W[i]) > 0) i++; return SELLERS[i]; };
 
@@ -187,9 +203,9 @@ for (const name of SELLERS) {
 }
 // Demo coverage: a selling service tech who closes jobs on service calls but has no
 // sales-appt cohort. ns-dash-bake emits cohort:null for them and the Sales card renders
-// the "n/a close rate" variant. Marcus is our selling tech (reliably sold>0 at .15 weight),
+// the "n/a close rate" variant. Anders is our selling tech (reliably sold>0 at .15 weight),
 // so this deterministically exercises both the tech-card and cohort-null variants.
-if (stats['Marcus Vellen']) stats['Marcus Vellen'].cohort = null;
+if (stats['Anders Vellen']) stats['Anders Vellen'].cohort = null;
 // service techs: run volume + service revenue
 for (const name of ROSTER.service) {
   const s = stats[name];
@@ -256,16 +272,16 @@ const owner = {
 
 /* ---------- team out + on call ---------- */
 const nonJob = [];
-for (let i = 0; i < 7; i++) nonJob.push({ day: addDays(today, i), tech: i % 2 ? 'Cole Bratsven' : 'Marcus Vellen', name: 'On Call', allDay: true });
+for (let i = 0; i < 7; i++) nonJob.push({ day: addDays(today, i), tech: i % 2 ? 'Cole Bratsven' : 'Anders Vellen', name: 'On Call', allDay: true });
 for (let i = 2; i <= 6; i++) nonJob.push({ day: addDays(today, i), tech: 'Owen Stavros', name: 'Vacation', allDay: true });
-nonJob.push({ day: addDays(today, 1), tech: 'Priya Nathan', name: 'PTO', allDay: true });
+nonJob.push({ day: addDays(today, 1), tech: 'Priya Halstad', name: 'PTO', allDay: true });
 nonJob.push({ day: today, tech: 'Toby Nash', name: 'Called out', allDay: true });
 for (const who of ROSTER.sales) nonJob.push({ day: addDays(today, 1), tech: who, name: 'Sales Meeting', allDay: false });
 
 /* ---------- payroll items: 30 days, drives the hours panel ---------- */
-const LATE_TECHS = new Set(['Eli Thornton', 'Dana Kirsch']);
+const LATE_TECHS = new Set(['Eli Thornton', 'Maren Kirsch']);
 const payItems = [];
-const staff = [...ROSTER.service, ...ROSTER.installers, ...ROSTER.helpers, 'Holly Brandt', 'Aaron Sietsema'];
+const staff = [...ROSTER.service, ...ROSTER.installers, ...ROSTER.helpers, 'Holly Brandt', 'Alden Sietsema'];
 for (const who of staff) {
   let lateLeft = LATE_TECHS.has(who) ? 3 : 0;
   for (let i = 29; i >= 0; i--) {
@@ -285,7 +301,7 @@ for (const who of staff) {
 // looks at the report day and the two before it (Fri when R is a Sunday)
 const anomalyDay = [0, 6].includes(dow(R)) ? addDays(R, -(dow(R) === 0 ? 2 : 1)) : R;
 payItems.push({ who: 'Eli Thornton', date: anomalyDay, hours: 3.4, ot: true, endedOn: `${addDays(anomalyDay, 1)}T01:40:00Z` });
-payItems.push({ who: 'Dana Kirsch', date: anomalyDay, hours: 1.2, ot: true, endedOn: `${addDays(anomalyDay, 1)}T02:05:00Z` });
+payItems.push({ who: 'Maren Kirsch', date: anomalyDay, hours: 1.2, ot: true, endedOn: `${addDays(anomalyDay, 1)}T02:05:00Z` });
 
 /* ---------- phones ---------- */
 const callAgents = {};

@@ -107,13 +107,73 @@ module.exports = (get, set) => {
     set(parts.join(to));
   };
 
+  // Take a feature's CSS out along with its markup and its JS.
+  //
+  // The 2026-08-12 exclusions (the club view, cross-period search) removed the markup
+  // and the script and left the styling: 24 `.club-*` rules and the `#q` / `.search-*`
+  // set shipped as rules for elements that no longer exist. That is drift bait -- the
+  // next donor edit to a dead rule reads exactly like an edit to a live one. So the
+  // CSS leaves as part of the mechanism rather than as a step somebody remembers.
+  //
+  // Scoped to the page's <style> blocks, and applied a line at a time. Both of those
+  // are load-bearing: the owner dashboard names the club list in a Garbage-metric
+  // PARAGRAPH, so a document-wide regex eats live copy, and the style blocks carry
+  // @media rules whose nested braces defeat any rule-matching regex. These donors
+  // write one rule per line, which is what makes the line-wise pass honest.
+  //
+  // A comment block leaves with the rules it introduces. That is how these files are
+  // written, and matching the comment TEXT would not work: "A hit is a button that
+  // happens to be a table row" is the comment for `.search-hit` and never says search.
+  //
+  // Two guardrails, because a tolerant rule is only safe when its bad end state is
+  // covered. A selector that mixes matched and unmatched parts (`.jc,.club-x{...}`)
+  // is refused rather than guessed at, since dropping it would take styling off a
+  // live element. And the token must be GONE from the style blocks afterwards, which
+  // is what catches a rule hiding inside an @media the line pass walked straight past.
+  const dropCssFor = (token) => {
+    const re = new RegExp(token.source || String(token), 'i');
+    const STYLE = /<style\b[^>]*>[\s\S]*?<\/style>/g;
+    let dropped = 0, mixed = null, left = null;
+    const out = get().replace(STYLE, (block) => {
+      const kept = [];
+      let pending = [], inComment = false;
+      for (const line of block.split('\n')) {
+        if (inComment) {
+          pending.push(line);
+          if (line.includes('*/')) inComment = false;
+          continue;
+        }
+        const t = line.trim();
+        if (t.startsWith('/*') && !t.includes('*/')) { pending.push(line); inComment = true; continue; }
+        if (t.startsWith('/*') && t.endsWith('*/')) { pending.push(line); continue; }
+        const brace = line.indexOf('{');
+        const selector = brace < 0 ? '' : line.slice(0, brace);
+        if (brace >= 0 && re.test(selector)) {
+          const parts = selector.split(',').map(s => s.trim()).filter(Boolean);
+          if (parts.some(p => !re.test(p))) { mixed = mixed || selector.trim(); kept.push(...pending, line); pending = []; continue; }
+          dropped++; pending = [];                       // the rule and its comment both go
+          continue;
+        }
+        kept.push(...pending, line); pending = [];
+      }
+      kept.push(...pending);
+      const rebuilt = kept.join('\n');
+      if (re.test(rebuilt)) left = left || brief((rebuilt.match(new RegExp('[^\\n]*' + re.source + '[^\\n]*', 'i')) || [''])[0]);
+      return rebuilt;
+    });
+    if (mixed) return miss(`css selector mixes ${re} with a live selector, refusing to drop it: ${brief(mixed)}`);
+    if (!dropped) return miss(`no css rule matched ${re}; the feature's styling is already gone or renamed`);
+    if (left) return miss(`css matching ${re} survived the drop (inside an @media?): ${left}`);
+    set(out);
+  };
+
   const assertAnchors = () => {
     if (!misses.length) return;
     throw new Error(`${misses.length} anchor(s) no longer match the donor:\n` +
       misses.map(m => '  - ' + m).join('\n'));
   };
 
-  return { swap, swapMaybe, swapBetween, swapRe, swapFn, swapAll, assertAnchors };
+  return { swap, swapMaybe, swapBetween, swapRe, swapFn, swapAll, dropCssFor, assertAnchors };
 };
 
 // ponytail: self-check, run with `node anchors.js`
@@ -211,6 +271,47 @@ if (require.main === module) {
   const ll = module.exports(() => l, v => { l = v; });
   ll.swapRe(/<span>v\d<\/span>/, 'X');
   assert.throws(() => ll.assertAnchors(), /regex matched 0x, expected 1/);
+
+  // dropCssFor takes the rules AND the comment that introduces them, leaves the rest
+  // of the sheet alone, and never touches prose outside <style>.
+  const page = (extra = '') => `<style>
+.card{padding:8px}
+/* A hit is a button that happens to be a table row: the pointer says so. */
+.search-hit{cursor:pointer}
+.search-hit:hover td{background:#eee}
+#q{width:184px}
+.ov{width:96px}${extra}
+</style>
+<p>Garbage counts club maintenance visits and search misses.</p>`;
+  let m = page();
+  const mm = module.exports(() => m, v => { m = v; });
+  mm.dropCssFor(/#q\b|\.search-/);
+  mm.assertAnchors();
+  assert.strictEqual(m, `<style>
+.card{padding:8px}
+.ov{width:96px}
+</style>
+<p>Garbage counts club maintenance visits and search misses.</p>`);
+
+  // 0 matches is a miss, not a silent no-op
+  let n = page();
+  const nn = module.exports(() => n, v => { n = v; });
+  nn.dropCssFor(/\.club-/);
+  assert.throws(() => nn.assertAnchors(), /no css rule matched/);
+  assert.strictEqual(n, page());
+
+  // a selector mixing a dead part with a live one is refused, not guessed at
+  let o = page('\n.jc,.search-x{color:red}');
+  const oo = module.exports(() => o, v => { o = v; });
+  oo.dropCssFor(/\.search-/);
+  assert.throws(() => oo.assertAnchors(), /mixes .* with a live selector/);
+
+  // and a rule hiding inside an @media the line pass walks past is caught by the
+  // end-state check rather than left in the artifact
+  let p = page('\n@media (max-width:720px){.search-hit{display:none}}');
+  const pp = module.exports(() => p, v => { p = v; });
+  pp.dropCssFor(/\.search-/);
+  assert.throws(() => pp.assertAnchors(), /survived the drop/);
 
   console.log('anchors.js self-check ok');
 }

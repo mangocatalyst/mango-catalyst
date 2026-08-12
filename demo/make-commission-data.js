@@ -31,11 +31,11 @@ const money2 = (n) => Math.round(n * 100) / 100;
 
 /* ---------- the earners: the Boreal sellers make-demo-data.js already invented ---------- */
 const PEOPLE = [
-  { id: 1, name: 'Sam Okafor', note: 'Comfort advisor. 8% on installs, 3% turnover share, tier gate applies to the premium line.' },
+  { id: 1, name: 'Chidi Okafor', note: 'Comfort advisor. 8% on installs, 3% turnover share, tier gate applies to the premium line.' },
   { id: 2, name: 'Jenna Marsh', note: null },
   { id: 3, name: 'Victor Reyes', note: 'Comfort advisor. Draw against commission settles at period close.' },
-  { id: 4, name: 'Marcus Vellen', note: null },
-  { id: 5, name: 'Dana Kirsch', note: null },
+  { id: 4, name: 'Anders Vellen', note: null },
+  { id: 5, name: 'Maren Kirsch', note: null },
 ];
 const NAME = Object.fromEntries(PEOPLE.map((p) => [p.id, p.name]));
 
@@ -169,21 +169,21 @@ const CURRENT = [];
   }));
 }
 
-// 2 + 3. the turnover pair: Marcus generated the lead, Sam closed it. Each row names
+// 2 + 3. the turnover pair: Anders generated the lead, Chidi closed it. Each row names
 //        the other, which is the whole point of the counterpart field.
 {
   const inv = invId();
   const basis = priceInvoice(inv, 'equipment', 11250);
   CURRENT.push(line({
     person_id: 1, kind: 'job_type', rule_kind: 'job_type', rule_job_type: 'Install Residential',
-    basis, pct: 5, computed_amount: basis * 0.05, counterpart: 'Marcus Vellen',
+    basis, pct: 5, computed_amount: basis * 0.05, counterpart: 'Anders Vellen',
     customer_name: 'Havermark, Petra', job_id: jobId(), invoice_id: inv,
     job_type: 'Install Residential', done_day: -2, paid_day: 4, week_slot: 0,
     tech_approved: 1,
   }));
   CURRENT.push(line({
     person_id: 4, kind: 'lead_gen', rule_kind: 'lead_gen', share: 0.5,
-    basis, pct: 3, computed_amount: basis * 0.03 * 0.5, counterpart: 'Sam Okafor',
+    basis, pct: 3, computed_amount: basis * 0.03 * 0.5, counterpart: 'Chidi Okafor',
     customer_name: 'Havermark, Petra', job_id: jobId(), invoice_id: inv,
     job_type: 'Install Residential', done_day: -2, paid_day: 4, week_slot: 0,
     flag: 'even_split', note: 'Two techs on site, split even.',

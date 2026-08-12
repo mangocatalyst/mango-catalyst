@@ -24,8 +24,8 @@ const NAME_MAP = new Map([
   ['Bryan', 'the owner'],
   // the two selling service techs (make-demo-data.js ROSTER.service, and the
   // same two people the commission demo bills as selling techs)
-  ['Russ', 'Marcus'],
-  ['Ron', 'Dana'],
+  ['Russ', 'Anders'],
+  ['Ron', 'Maren'],
   // the install leads (already the whiteboard bake's LEADS replacements)
   ['Corey', 'Eli'],
   ['Scott', 'Owen'],

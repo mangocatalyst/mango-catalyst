@@ -1,9 +1,9 @@
 {
-  "skinnedAt": "2026-08-11 08:56:09 CDT",
+  "skinnedAt": "2026-08-12 10:29:12 CDT",
   "donors": {
-    "northstar-owner-dashboard": "577881d",
-    "commission-tracker": "f6ce68e",
-    "mango-automation": "534de05"
+    "northstar-owner-dashboard": "60ce63b",
+    "commission-tracker": "f156a20",
+    "mango-automation": "9359787"
   },
   "note": "roll.sh compares these to the donors' current HEADs and logs when they move. Advisory only, it never fails the nightly. Re-skin when you want the demo to show newer product."
 }

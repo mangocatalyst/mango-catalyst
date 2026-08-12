@@ -35,8 +35,9 @@ const { swap, swapMaybe, swapBetween, swapRe, swapAll, assertAnchors } =
   require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
-swap('<title>NorthStar Commission — My Statement</title>',
-  '<title>Boreal Comfort Co · Tech Commission Portal Demo</title>');
+// Derived, not quoted, for the reason its sibling maker gives: the donor's own name
+// for itself moved (tracker 4439049) and took the re-skin down with it.
+swapRe(/<title>NorthStar[^<]*<\/title>/, '<title>Boreal Comfort Co · Tech Commission Portal Demo</title>');
 swap(`/* The commission dashboard's chrome, verbatim where it applies: same fonts, same palette,
    same nsdash-* storage keys, so the portal reads as the same product the office uses.`,
   `/* The commission dashboard's chrome, verbatim where it applies: same fonts, same palette,

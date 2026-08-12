@@ -29,7 +29,7 @@ if (!DONOR_V) throw new Error(`donor version stamp not found in ${SRC}`);
 
 // Anchors are asserted but a miss is collected, not thrown: assertAnchors() below
 // reports every drifted anchor in one run. See anchors.js.
-const { swap, swapBetween, swapRe, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
+const { swap, swapBetween, swapRe, dropCssFor, assertAnchors } = require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- fonts: 5 static faces -> 2 variable faces ---------- */
 swap(
@@ -120,7 +120,7 @@ swap('document.title = `NorthStar Operations · ${DATA.meta.reportDateHuman}`;',
   'document.title = `Boreal Comfort Co · ${DATA.meta.reportDateHuman} · Demo`;');
 swap('<span>NorthStar Heating &amp; Cooling</span>',
   '<span>Boreal Comfort Co · a fictional demonstration company</span>');
-swap('(Russ, Ron)', '(Marcus, Dana)');
+swap('(Russ, Ron)', '(Anders, Maren)');
 swap('Declined by NS', 'Declined by office', 4);
 swap('Request Declined by NorthStar', 'Request Declined by Office', 2);
 swap("$('#badge').textContent = M.badge;", "$('#badge').textContent = 'DEMO \\u00b7 FICTIONAL DATA';");
@@ -143,6 +143,56 @@ swapBetween(`    const custLink = j => j.custId`, `      : esc(j.customer || 'un
   `    const custLink = j => esc(j.customer || 'unknown'); // demo: ServiceTitan deep links disabled`);
 swapBetween(`    const typeLink = j => j.jobIds && j.jobIds.length`, `      : \`<span class="hint">\${esc(j.type)}</span>\`;`,
   `    const typeLink = j => \`<span class="hint">\${esc(j.type)}</span>\`; // demo: ServiceTitan deep links disabled`);
+// The fifth, and the reason the 2026-08-11 re-skin was blocked rather than a rerun:
+// the under-billed jobs table (donor 61a2eef) links the customer name at
+// installJobId instead of jobIds[0]. Same shape as the two above, same inert branch.
+swapBetween(`  const jobLink = r => r.jobId`, `    : esc(r.customer || 'unknown');`,
+  `  const jobLink = r => esc(r.customer || 'unknown'); // demo: ServiceTitan deep links disabled`);
+
+/* ---------- exclude the club view, rather than defang it (Bryan, 2026-08-12) ----------
+   Every other donor feature the demo drops loses only its network call: the panel
+   still renders from baked DATA. The club list cannot, by the donor's own design --
+   it is LIVE FETCH with zero baked DATA keys (`club.json` straight out of
+   whiteboard.db, edits through POST /api/flip), so a static artifact has nothing to
+   show. Stubbing the two fetches would ship a tab that loads and stays empty, which
+   is the state the 2026-08-11 review already refused: valid, parseable, dash-free,
+   leak-free and useless. `club.json` also carries customer PII, so the demo should
+   not gesture at it at all.
+
+   So the view comes out at SKIN time. The donor is untouched; the shipped demo goes
+   on looking exactly as it does today, because it predates this view entirely. A
+   club tab driven by synthetic data is a separate feature for Bryan to commission,
+   not something a re-skin should invent.
+
+   The CSS goes too, through dropCssFor. Leaving it was the first instinct here -- the
+   rules are inert once the markup is gone -- and it was wrong: 24 dead `.club-*` rules
+   in a shipped artifact are rules the next donor edit will touch as if they were live.
+   An exclusion that leaves its styling behind is not finished. */
+swap('  <button class="vbtn" data-view="club" type="button">Club</button>\n', '');
+swap(`    <div class="more-row" style="margin-top:8px" onclick="event.stopPropagation();setView('club')">Work the club list →</div>\n`, '');
+swap(`'jobcosting', 'club'].includes(v)`, `'jobcosting'].includes(v)`);
+swap(`  // Club is the one view that is NOT rendered from the baked DATA (see renderClub),
+  // so it takes its own path and owns its own 60s poll, which stops on the way out.
+  clubPoll(v === 'club');
+  if (role) v === 'club' ? renderClub() : renderRole(v);`,
+  `  if (role) renderRole(v); // demo: the club view is excluded, see make-template.js`);
+// The whole club implementation: 27.5KB of constants, helpers, the 11-column table
+// builder and the two fetches. End-anchored on the three-line tail of renderClub
+// rather than on `loadClub();` alone -- that shorter form appears twice (clubFail
+// calls it too), so it would have ended the span 80 lines early and left renderClub
+// and fetch('club.json') in the artifact. swapBetween asserts one match, so it would
+// have refused rather than shipped, but the right anchor beats a caught mistake.
+swapBetween(`/* ---------- club maintenance list (#view=club) ----------
+   The CSR booking board. Every past-due club maintenance visit ServiceTitan holds on`,
+`  renderClubBody();   // paint whatever already loaded, so a revisit is instant
+  loadClub();
+}`,
+  `/* demo: the club maintenance list is excluded here, not defanged. It renders only
+   from a live fetch, so there is nothing for a static artifact to show. The live feed
+   filename is deliberately not named here: this file ships, and the validator bans
+   the whiteboard's feed name for the same reason. */`,
+  { maxSpan: 30000 });
+dropCssFor(/\bclub-|#club\b|\.club\b/);
 
 /* ---------- no server behind the demo: every call becomes a local edit ----------
    The demo is one self-contained file on a static host, so anything that POSTs

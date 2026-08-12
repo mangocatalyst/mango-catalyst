@@ -39,7 +39,7 @@ if (!DONOR_V) throw new Error(`donor version stamp not found in ${SRC}`);
 
 // Both tiers live in anchors.js, which collects a miss rather than throwing on it:
 // assertAnchors() below reports every drifted anchor in one run.
-const { swap, swapMaybe, swapBetween, swapRe, swapFn, swapAll, assertAnchors } =
+const { swap, swapMaybe, swapBetween, swapRe, swapFn, swapAll, dropCssFor, assertAnchors } =
   require('./anchors.js')(() => html, v => { html = v; });
 
 /* ---------- identity ---------- */
@@ -47,8 +47,12 @@ const { swap, swapMaybe, swapBetween, swapRe, swapFn, swapAll, assertAnchors } =
 // a reason to stop the nightly.
 swapBetween(`/* Branding lifted from northstar-owner-dashboard/index.template.html`, `is fetched from a CDN. */`,
   '/* Branding: Mango Catalyst demo skin (brand-guidelines.md). */');
-swap('<title>NorthStar Commission</title>',
-  '<title>Boreal Comfort Co · Commission Tracker Demo</title>');
+// Derived, not quoted: the donor renamed itself "NorthStar Commission" ->
+// "NorthStar Payroll &amp; Commissions" (tracker 4439049) and refused the whole
+// re-skin over a page title. Nothing here cares what the donor calls itself, only
+// that the demo says something else, and the /northstar/i guard below proves the end
+// state either way. Same reasoning as the version stamp in make-template.js.
+swapRe(/<title>NorthStar[^<]*<\/title>/, '<title>Boreal Comfort Co · Commission Tracker Demo</title>');
 swapBetween(`/* Palette: the install whiteboard's token set, verbatim`, `only the values moved. */`,
   `/* Palette: the Mango Catalyst token set, the same one the install whiteboard demo uses.
    Light is the default and dark is the override, so both demos read as one product. */`);
@@ -233,6 +237,44 @@ swapMaybe(`  <!-- page version, extension-style date.build: bump on every shippe
 `, '');
 swapRe(/<span>v\d{4}-\d{2}-\d{2}\.\d+<\/span>/,
   `<span>demo v${DONOR_V} · fictional data · edits reset on reload</span>`);
+
+/* ---------- exclude cross-period search, rather than stub it ----------
+   Same call as the club view on the owner dashboard (Bryan, 2026-08-12), for the
+   same reason and by the same test: the donor grew this on 2026-08-12 (tracker
+   ff4256c) and the shipped demo predates it, so taking it out leaves the public page
+   exactly as it looks today. It is a database scan per keystroke behind
+   /api/search -- there is no server on a static host, and the demo carries five
+   periods in the page rather than an index to search. Stubbing the fetch would ship
+   a search box that answers "no results" to every query, which is worse than a page
+   that never promised to search.
+
+   Precedent in this file: the gear and both admin links come out for exactly this
+   reason, because there is no settings page behind the demo either.
+
+   The CSS leaves with them, through dropCssFor -- an exclusion that ships styling for
+   elements it just deleted is not finished, and a dead rule is indistinguishable from
+   a live one the next time the donor edits this sheet.
+
+   The two SEARCH_ globals do stay: they are two `let` declarations naming nothing, and
+   unlike a CSS rule there is no selector for a future edit to attach to. */
+swapBetween(`      <!-- ACROSS ALL PAY PERIODS (Bryan, 2026-08-12). The dropdown navigates one period at a`,
+  `including held and already-paid lines.">`, '', { maxSpan: 1200 });
+swap(`<div class="card" id="search-panel" hidden>
+  <div class="who"><b>Search</b> <span class="muted" id="search-state"></span></div>
+  <div id="search-results"></div>
+</div>
+
+`, '');
+swapBetween(`// --- search across every pay period ---`, `    renderSearch({ q, hits: [], error: e.message });
+  }
+}`, `// demo: cross-period search is excluded, not stubbed -- it is a server-side index
+// and this artifact is five periods in one file. See make-commission-demo.js.`,
+  { maxSpan: 4000 });
+swapBetween(`    const box = document.getElementById('q');`,
+  `    results.addEventListener('keydown', jump);`,
+  `    // demo: nothing to wire, the search box and its panel are excluded above`,
+  { maxSpan: 1800 });
+dropCssFor(/#q\b|\bsearch-/);
 
 /* ---------- dashes: the site bans em and en dashes everywhere ---------- */
 html = html.split(' — ').join(', ');

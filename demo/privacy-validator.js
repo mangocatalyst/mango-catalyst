@@ -141,6 +141,11 @@ const addStaff = (n) => {
  * "Return", from the directory row "Return Completions", which is not a person
  * at all. None of the 8 appeared in `people` or the NS roster.
  *
+ * Those fictional names are gone as of 2026-08-12: the roster was renamed off the
+ * real directory (see the header of make-demo-data.js), so the collisions above are
+ * history rather than live examples. The argument for whole-string matching here is
+ * unchanged, and the rename is what keeps it from being the only thing holding.
+ *
  * The people a donor page actually names — techs, advisors, the owner — come
  * from raw.json, the install board and `people`, and are all still tokenised, so
  * the 2026-07-24 first-name leak stays caught. What this gives up is a bare
