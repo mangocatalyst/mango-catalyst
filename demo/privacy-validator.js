@@ -142,7 +142,7 @@ const addStaff = (n) => {
  * at all. None of the 8 appeared in `people` or the NS roster.
  *
  * The people a donor page actually names — techs, advisors, the owner — come
- * from raw.json, whiteboard.json and `people`, and are all still tokenised, so
+ * from raw.json, the install board and `people`, and are all still tokenised, so
  * the 2026-07-24 first-name leak stays caught. What this gives up is a bare
  * first name of someone in the directory who appears nowhere else, which
  * identifies nobody. Revisit if a donor page is found rendering one.
@@ -182,6 +182,20 @@ const addCustomer = (n) => {
  * Free text: a Slack digest sentence, an audit label. Whole string only.
  * Tokenising prose would put every English word in the ban list, which does not
  * protect anyone and does stop the bake on the word "the".
+ *
+ * An `audit.who` that is neither an email nor tooling routes here too, as of
+ * 2026-08-12, for the reason addDirectory and addCustomer already give: a name
+ * only leaks the way it is stored. An audit actor is a login, a handle or a job
+ * label; no donor page refers to one by first name, so splitting it into words
+ * buys no coverage and manufactures collisions with English. Measured before the
+ * change: harvesting audit.who yielded 45 tokens and dropping it entirely also
+ * yielded 45, because every human who writes an audit row is already harvested
+ * from `people` or from their email local part. What it did produce was the
+ * 2026-08-12 bake failure -- `who='lane3-agent'` split into "lane" + "agent" --
+ * and a queue of the same waiting to happen: of 33 plausible names for the agent
+ * lanes being added this week, 19 (`payroll`, `audit`, `compute`, `gusto`,
+ * `nightly`, `api`, `load` ...) appear as words in the demo artifacts and would
+ * each have stopped the nightly.
  */
 const addText = (t) => {
   const s = String(t || '').trim();
@@ -203,18 +217,20 @@ const GENERIC_MAILBOX = new Set(['admin', 'info', 'office', 'hello', 'support',
   'sales', 'billing', 'noreply', 'no-reply', 'contact', 'help', 'team',
   'finance', 'accounting', 'payroll', 'dispatch', 'service', 'careers']);
 /**
- * Audit rows are written by tooling as well as by humans.
+ * Audit rows are written by tooling as well as by humans, and a tool label is not
+ * a name: matching here keeps one out of the ban list altogether rather than
+ * banning a string like "migration" as a substring of ordinary copy.
  *
- * `agent` and `migration` are here because on 2026-08-12 they were not: a payroll
- * agent had written rows as `who='lane3-agent'`, which no pattern here matched, so
- * a tool actor was tokenised into the human names "lane" and "agent" and the bake
- * failed on the demo's own copy ("Phone time by agent", the `UNA[lane]` lookup in
- * the whiteboard script). `migration` was sitting in the same table waiting to do
- * it again. Neither word is anyone's name, so the fix belongs here and not in
- * TOKEN_ALLOW -- the actor was misclassified, the token was not.
+ * `agent` and `migration` were added on 2026-08-12, after `who='lane3-agent'`
+ * matched nothing here and stopped the nightly. That was the third bake this list
+ * had been grown to save, so it is no longer the only guard: an unmatched actor
+ * now reaches addText and is banned as a whole string, never split into words. The
+ * hole this regex used to leave is closed structurally; what it still buys is
+ * keeping tool labels out of `names` entirely, which is worth two words of regex.
  *
- * Forward convention: an agent writing this table stamps `who` as `mango-<lane>`,
- * which `^mango\b` already covers. This list is the backstop for when it doesn't.
+ * So a miss here is now cosmetic rather than a 05:45 page, and this list should
+ * stay short. Forward convention instead: an agent writing this table stamps `who`
+ * as `mango-<lane>`, which `^mango\b` already covers.
  */
 const isToolActor = (who) => /^mango\b|runbook|orchestrator|cron|bot|script|agent|migration/i.test(String(who));
 
@@ -238,6 +254,15 @@ const MIN_SEARCHABLE_ID = 100000;
 const addEntityId = (id) => {
   const n = Number(id);
   if (Number.isFinite(n) && n >= MIN_SEARCHABLE_ID) entityIds.add(String(n));
+};
+
+/* Every live database is read the same way: read-only, out of process, through
+   the sqlite3 CLI. This validator must never be able to write to live payroll or
+   to the live install board, and a `-readonly` connection it does not own is the
+   cheapest way to be sure of that. */
+const sqlq = (db, sql) => {
+  const out = execFileSync('sqlite3', ['-readonly', '-json', db, sql], { encoding: 'utf8' }).trim();
+  return out ? JSON.parse(out) : [];
 };
 
 /* ---------- source presence, for the fail-closed rule ---------- */
@@ -270,21 +295,6 @@ if (!present.nsDashboardRaw) {
   }
   (raw.owner?.members?.list || []).forEach(m => addCustomer(m.name));
 
-  // install whiteboard: real customers, advisors, installers
-  const wbPath = path.join(NSDATA, '..', 'whiteboard.json');
-  if (fs.existsSync(wbPath)) {
-    for (const r of JSON.parse(fs.readFileSync(wbPath, 'utf8')).rows || []) {
-      addCustomer(r.name); addStaff(r.advisor);
-      String(r.installers || '').split(',').forEach(n => addStaff(n));
-    }
-  } else {
-    // Every other source here says so when it cannot be read. This one used to
-    // skip in silence, which is the one thing the fail-closed rule exists to
-    // prevent -- and it is the likeliest source to vanish: the donor moved the
-    // board into data/whiteboard.db and stopped writing this file on 2026-07-17.
-    console.warn('WARN: live install whiteboard not found; those checks did not run');
-  }
-
   // real slack digest sentences
   for (const f of fs.readdirSync(NSDATA).filter(f => /^slack-flags-.*\.json$/.test(f))) {
     try {
@@ -294,19 +304,46 @@ if (!present.nsDashboardRaw) {
   }
 }
 
-/* ---------- the commission tracker's own database ----------
-   Read-only, out of process, through the sqlite3 CLI: this validator must never
-   be able to write to the live pay database, and a `-readonly` connection it does
-   not own is the cheapest way to be sure of that. */
+/* ---------- the install whiteboard's own database ----------
+   Its real customers, comfort advisors and installers.
+
+   This used to read ../whiteboard.json, a file the donor stopped writing on
+   2026-07-17 when it moved the board into SQLite. By 2026-08-12 the validator was
+   harvesting an 18-row snapshot 26 days stale while the live board held 39 rows,
+   and it did so behind a bare existsSync with no presence key — so a source that
+   had gone silent could not fail the bake, which is the one thing the fail-closed
+   rule exists to prevent. Nothing leaked, but only because every name on the board
+   happened to be banned via raw.json or `people` anyway. That was luck.
+
+   A live source, so it fails closed like the other two rather than warning: an
+   installer who appears only here is exactly the person a bare-first-name leak
+   would name. The accepted cost is that the donor deleting this DB pages the 651,
+   and so does a WAL this connection cannot read -- caught below and reported as
+   what it is rather than as a stack trace. */
+const WBDB = path.join(NSDATA, 'whiteboard.db');
+present.nsWhiteboardDb = fs.existsSync(WBDB);
+if (!present.nsWhiteboardDb) {
+  console.warn('WARN: live install whiteboard database not found; those checks did not run');
+} else {
+  try {
+    for (const r of sqlq(WBDB, 'SELECT name, advisor, installers FROM installs')) {
+      addCustomer(r.name); addStaff(r.advisor);
+      String(r.installers || '').split(',').forEach(n => addStaff(n));
+    }
+  } catch (e) {
+    problems.push(`live install whiteboard database is present but unreadable `
+      + `(${String(e.message).split('\n')[0]}); this validator is running blind on it, `
+      + 'so it refuses to pass the artifact');
+  }
+}
+
+/* ---------- the commission tracker's own database ---------- */
 const CDB = path.join(os.homedir(), 'Projects', 'commission-tracker', 'data', 'commission.db');
 present.commissionDb = fs.existsSync(CDB);
 if (!present.commissionDb) {
   console.warn('WARN: live commission database not found; those checks did not run');
 } else {
-  const q = (sql) => {
-    const out = execFileSync('sqlite3', ['-readonly', '-json', CDB, sql], { encoding: 'utf8' }).trim();
-    return out ? JSON.parse(out) : [];
-  };
+  const q = (sql) => sqlq(CDB, sql);
   // every earner, every ServiceTitan staff name cached, every customer ever
   // billed or sold a membership
   for (const r of q('SELECT name AS v FROM people')) addStaff(r.v);
@@ -320,7 +357,7 @@ if (!present.commissionDb) {
   for (const r of q('SELECT email AS v FROM people WHERE email IS NOT NULL')) addEmail(r.v);
   for (const r of q("SELECT DISTINCT who AS v FROM audit WHERE who IS NOT NULL AND who <> ''")) {
     if (String(r.v).includes('@')) addEmail(r.v);
-    else if (!isToolActor(r.v)) addStaff(r.v);
+    else if (!isToolActor(r.v)) addText(r.v);
   }
   // the office allowlist is a config row, not a table: whole addresses and
   // '@domain' entries, both of which name the real company.

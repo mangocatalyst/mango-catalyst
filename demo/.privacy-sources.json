@@ -1,4 +1,5 @@
 {
   "nsDashboardRaw": true,
-  "commissionDb": true
+  "commissionDb": true,
+  "nsWhiteboardDb": true
 }
