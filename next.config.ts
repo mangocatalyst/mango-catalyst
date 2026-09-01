@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
          campaign, and nothing else should ever link to it. */
       {
         source: "/demo",
-        destination: "/dashboards?utm_source=directmail&utm_medium=print&utm_campaign=mc-mail-2026-07",
+        destination: "/dashboards?utm_source=directmail&utm_medium=print&utm_campaign=mc-mail-2026-09",
         permanent: false,
       },
     ];
