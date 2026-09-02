@@ -6,6 +6,7 @@ import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { BookButton } from "@/components/booking/BookButton";
 import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
+import { PRICE_LINE } from "@/lib/constants";
 
 /**
  * Shared body for every /programs page (2026-07-06 footer-programs
@@ -126,6 +127,9 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
             {
               "One 15-minute call. Bring the task that keeps stealing your hours, and I'll tell you straight whether it can run itself."
             }
+          </p>
+          <p className="mt-6 max-w-[44rem] leading-[1.65] text-muted lg:text-[1.1rem]">
+            {PRICE_LINE}
           </p>
           <div className="mt-9">
             <BookButton arrow>Book a 15-Minute Fit Call</BookButton>

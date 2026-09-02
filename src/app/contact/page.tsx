@@ -79,7 +79,7 @@ export default async function ContactPage({
         </h1>
         <p className="mt-5 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
           {calUrl
-            ? "Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing draining your hours can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day."
+            ? "Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing draining your hours can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day. For the record: the first build is $795 and the retainer is $1,000 a month. The call costs nothing, and the price doesn't change on it."
             : "Tell me what's slowing the office down in the form below. I reply within one business day and we set up a 15-minute call with a video link. No pitch either way."}
         </p>
       </Section>

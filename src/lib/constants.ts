@@ -88,6 +88,14 @@ export const INDUSTRY_LINKS = [
  * AI Consulting and the Owner Dashboard left this list 2026-07-16: both are
  * top-level nav sections now.
  */
+/**
+ * The retainer price, in one sentence, for every page a search visitor lands
+ * on (industry and program closers, /services). The Pricing card on home is
+ * the long form; change both together.
+ */
+export const PRICE_LINE =
+  "$795 to build the first one, then $1,000 a month to keep it running and add the next. Month to month after the first three.";
+
 export const PROGRAM_LINKS = [
   { href: "/programs/servicetitan", label: "ServiceTitan" },
   { href: "/programs/google-workspace", label: "Google Workspace" },

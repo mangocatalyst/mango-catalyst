@@ -52,6 +52,13 @@ type AnswerPart = string | { text: string; href: string };
 
 const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
+    question: "What does it cost?",
+    answer: [
+      "$795 one-time to build the first automation, then $1,000 a month to keep it running and add the next one. The first three months are a commitment; after that it's month to month. No per-seat fees, no long contract.",
+      "Two things stand on their own. The Owner Dashboard is $795 to wire to your ServiceTitan and $125 a month to keep it synced, with no retainer required. AI consulting is two one-hour sessions for $500 flat, and the $500 comes off the setup fee if you start a build within 60 days.",
+    ],
+  },
+  {
     question: "Is this going to replace my people?",
     answer: [
       "No. This replaces the busywork your people hate, the typing, the copy-paste, the chasing. It frees them up to do the work you actually hired them for, and it lets you grow without adding office staff just to keep up with paperwork. The goal is more done with the team you have, not fewer people.",
@@ -117,7 +124,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "Do I have to sign a long contract?",
     answer: [
-      "No. The first three months are a commitment; after that it's month to month and you cancel anytime. The honest reason for the three months: the build work is front-loaded, so most of my hours land before your second invoice. The alternative would be charging the true build cost up front, roughly triple the setup fee, and I'd rather keep the front door cheap. After month three, if it's not earning its keep, you cancel. I'd rather keep you because it's working than trap you because you signed something.",
+      "No. The first three months are a commitment; after that it's month to month and you cancel anytime. The honest reason for the three months: the build work is front-loaded, so most of my hours land before your second invoice. The alternative would be charging the true build cost up front, roughly triple the $795 setup fee, and I'd rather keep the front door cheap. After month three, if it's not earning its keep, you cancel. I'd rather keep you because it's working than trap you because you signed something.",
     ],
   },
 ];

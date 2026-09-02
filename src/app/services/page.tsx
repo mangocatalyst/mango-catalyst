@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode, SVGProps } from "react";
-import { SITE } from "@/lib/constants";
+import { PRICE_LINE, SITE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph, serviceLd } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
@@ -186,6 +186,9 @@ export default function ServicesPage() {
             {
               "Fifteen minutes, no pitch. We look at one task and I tell you straight whether it can run itself."
             }
+          </p>
+          <p className="mt-6 max-w-[44rem] leading-[1.65] text-navy-2 lg:text-[1.1rem]">
+            {PRICE_LINE}
           </p>
           <div className="mt-8">
             <Button href="/contact" arrow>

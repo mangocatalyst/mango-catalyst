@@ -7,6 +7,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { BookButton } from "@/components/booking/BookButton";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
+import { PRICE_LINE } from "@/lib/constants";
 
 /**
  * Shared body for every /industries page (structure identical to the
@@ -124,6 +125,9 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
             {
               "One 15-minute call. Bring the task that's eating your week, and I'll tell you straight whether it can run itself."
             }
+          </p>
+          <p className="mt-6 max-w-[44rem] leading-[1.65] text-muted lg:text-[1.1rem]">
+            {PRICE_LINE}
           </p>
           <div className="mt-9">
             <BookButton arrow>Book a 15-Minute Fit Call</BookButton>
