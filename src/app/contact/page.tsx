@@ -7,6 +7,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
 import { CalInline } from "@/components/booking/CalInline";
 import { ContactForm } from "@/components/forms/ContactForm";
+import { ContactNotices } from "@/components/forms/ContactNotices";
 
 /**
  * Contact: booking-first (seo-spec 2.6), copy verbatim from
@@ -16,10 +17,10 @@ import { ContactForm } from "@/components/forms/ContactForm";
  * exists; until then the honest fallback state points at the message form.
  * The form is the shared ContactForm, which posts natively to /api/contact
  * with no client JS; the route answers a native post with a 303 back to
- * ?sent=1|0#note, and this page renders those notices. ?booked=1 (the Cal.com
- * post-booking redirect) renders the confirmation state. Reading searchParams
- * keeps this page dynamic; the formLoadedAt stamp now comes from the form's
- * own mount effect, so nothing here depends on that.
+ * ?sent=1|0#note; ContactNotices (client, useSearchParams) renders those and
+ * the ?booked=1 state, so this page stays static and edge-cached (it was the
+ * only uncached route, audit item 8). ?booked=1 needs Cal.com's paid
+ * redirect-on-booking, so it is unreachable today.
  */
 
 const TITLE = "Book a 15-Minute Fit Call";
@@ -48,14 +49,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ContactPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
-  const sent = typeof params.sent === "string" ? params.sent : undefined;
-  const booked = params.booked === "1";
+export default function ContactPage() {
   const calUrl = process.env.NEXT_PUBLIC_CAL_URL;
   // Widened so the empty-until-decided constant does not dead-code the branch.
   const email: string = SITE.email;
@@ -72,38 +66,27 @@ export default async function ContactPage({
       />
 
       {/* Header band: H1 + answer-first intro. */}
-      <Section tone="base">
+      <Section tone="base" containerClassName="py-[clamp(2.5rem,5vw,4.5rem)]">
         <div aria-hidden className="h-[3px] w-10 bg-amber" />
         <h1 className="mt-6 max-w-[24ch] font-display text-[clamp(2.4rem,1.6rem+3vw,4rem)] font-bold uppercase leading-[1.02] tracking-[0.015em] text-ink">
           Book a 15-minute fit call
         </h1>
         <p className="mt-5 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
           {calUrl
-            ? "Pick a real time slot below. The call is 15 minutes, there's no pitch, and you leave knowing whether the thing draining your hours can run itself, and roughly what that would look like. Every booking comes with a video link in the calendar invite, so there's nothing to figure out on the day. For the record: the first build is $795 and the retainer is $1,000 a month. The call costs nothing, and the price doesn't change on it."
+            ? "Pick a real slot below. Fifteen minutes, no pitch, and you leave knowing whether the thing draining your hours can run itself. The invite carries a video link. For the record: the first build is $795 and the retainer is $1,000 a month; the call costs nothing, and the price doesn't change on it."
             : "Tell me what's slowing the office down in the form below. I reply within one business day and we set up a 15-minute call with a video link. No pitch either way."}
         </p>
       </Section>
 
       {/* Light conversion band (palette B): booking first, form second. */}
-      <Section tone="light">
+      <Section tone="light" containerClassName="pt-[clamp(2.5rem,5vw,4.5rem)]">
         <div id="book">
-          <SectionHeading tone="light" title="Grab a slot" />
-          {booked ? (
-            <Card
-              tone="light"
-              className="mt-10 max-w-[44rem] border-l-4 border-l-success p-6 sm:p-8 lg:max-w-[52rem]"
-            >
-              <p className="leading-[1.65] text-navy" role="status">
-                You&apos;re booked. A calendar invite with a video link is on
-                its way to your inbox, along with a confirmation email. No prep
-                needed: just show up knowing which task drives you nuts. If the
-                time stops working, reply to the confirmation email and
-                we&apos;ll find another slot.
-              </p>
-            </Card>
-          ) : calUrl ? (
-            <div className="mt-10 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
-              <CalInline className="min-h-[36rem] w-full" />
+          {/* No sub-heading: the H1 one band up says it, and on a phone the
+              heading pushed the booker below the fold (audit item 8). */}
+          <ContactNotices which="booked" email={email} />
+          {calUrl ? (
+            <div className="mt-8 overflow-hidden rounded-xl border border-border-lt bg-surface-lt shadow-[0_8px_24px_rgba(10,17,32,0.08)]">
+              <CalInline eager className="min-h-[36rem] w-full" />
             </div>
           ) : (
             <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8 lg:max-w-[52rem]">
@@ -123,26 +106,7 @@ export default async function ContactPage({
             lead="Not ready to book? Tell me what's eating your time and I'll reply within one business day."
           />
 
-          {sent === "1" ? (
-            <p
-              role="status"
-              className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-success bg-surface-lt p-4 font-medium text-navy lg:max-w-[52rem] lg:text-[1.2rem]"
-            >
-              Got it. I&apos;ll get back to you within one business day.
-            </p>
-          ) : null}
-          {sent === "0" ? (
-            <p
-              role="alert"
-              className="mt-8 max-w-[44rem] rounded-lg border-l-4 border-l-error bg-surface-lt p-4 font-medium text-navy lg:max-w-[52rem] lg:text-[1.2rem]"
-            >
-              {"Something went wrong on our end. Try again, or email me directly at "}
-              <a href={`mailto:${email}`} className="inline-link-light">
-                {email}
-              </a>
-              .
-            </p>
-          ) : null}
+          <ContactNotices which="sent" email={email} />
 
           <Card tone="light" className="mt-10 max-w-[44rem] p-6 sm:p-8 lg:max-w-[52rem]">
             <ContactForm idPrefix="contact" />

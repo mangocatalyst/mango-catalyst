@@ -41,9 +41,29 @@ export function CalLoader() {
       listen(c);
       c.Cal("preload", { calLink: c.link });
     }
-    const idleId = w.requestIdleCallback
-      ? w.requestIdleCallback(warm)
-      : window.setTimeout(warm, 2000);
+    // Warm at idle only where the booker is on the page (/contact, home's
+    // pricing band); everywhere else the ~370 KB embed waits for the first
+    // hover/touch/focus of a booking link (audit item 8: it was on every
+    // page's wire, and the click path inits on demand anyway).
+    const onPage = location.pathname === "/contact" || location.pathname === "/";
+    const idleId = onPage
+      ? w.requestIdleCallback
+        ? w.requestIdleCallback(warm)
+        : window.setTimeout(warm, 2000)
+      : 0;
+    function onIntent(event: Event) {
+      const el = (event.target as Element | null)?.closest("[data-cal-link]");
+      if (!el) return;
+      warm();
+      document.removeEventListener("pointerover", onIntent);
+      document.removeEventListener("focusin", onIntent);
+      document.removeEventListener("touchstart", onIntent);
+    }
+    if (!onPage) {
+      document.addEventListener("pointerover", onIntent, { passive: true });
+      document.addEventListener("focusin", onIntent);
+      document.addEventListener("touchstart", onIntent, { passive: true });
+    }
 
     function onClick(event: MouseEvent) {
       // Leave modified clicks (open-in-new-tab, etc.) to the browser.
@@ -78,6 +98,10 @@ export function CalLoader() {
     document.addEventListener("click", onClick);
     return () => {
       document.removeEventListener("click", onClick);
+      document.removeEventListener("pointerover", onIntent);
+      document.removeEventListener("focusin", onIntent);
+      document.removeEventListener("touchstart", onIntent);
+      if (!idleId) return;
       if (w.cancelIdleCallback) w.cancelIdleCallback(idleId);
       else window.clearTimeout(idleId);
     };

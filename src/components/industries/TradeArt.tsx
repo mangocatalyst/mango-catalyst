@@ -48,8 +48,7 @@ function Sheet({
           width={w}
           height={h}
           decoding="async"
-          loading="lazy"
-          fetchPriority="low"
+          loading="eager"
           className="block h-auto w-full"
         />
         <svg

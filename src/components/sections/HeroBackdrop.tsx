@@ -88,6 +88,7 @@ export function HeroBackdrop() {
                 <div className="hb-f2">
                   <img
                     {...img}
+                    fetchPriority="high"
                     src="/hero/hero-monitor.webp"
                     width={300}
                     height={258}
