@@ -6,6 +6,7 @@ import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { BookButton } from "@/components/booking/BookButton";
 import { IndustryHero } from "@/components/industries/IndustryHero";
+import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
 
 /**
  * Shared body for every /industries page (structure identical to the
@@ -29,6 +30,8 @@ export interface IndustryPageData {
   outcomes: string[];
   /** Paragraph after the outcomes list. */
   outro: string;
+  /** Optional product stills under the outcomes (ServiceTitan trades only). */
+  shots?: Screenshot[];
   /** Light-band routing copy (JSX so pages can weave links in). */
   whereToStart: ReactNode;
   art: ReactNode;
@@ -91,6 +94,11 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
           <p className="mt-10 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
             {data.outro}
           </p>
+          {data.shots ? (
+            <div className="mt-12">
+              <ScreenshotRow shots={data.shots} tone="dark" />
+            </div>
+          ) : null}
         </Section>
 
         {/* Capability line: platforms I work in, never systems I built (00 rule). */}

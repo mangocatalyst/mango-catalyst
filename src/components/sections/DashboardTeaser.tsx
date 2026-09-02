@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ScreenshotRow } from "@/components/ui/Lightbox";
+import { OWNER_SHOTS } from "@/lib/product-shots";
 
 /**
- * Home teaser for /dashboards: text only, matching the AiTeaser shape
- * (heading, one paragraph, one link). The screenshots and live demos moved
- * out of the homepage entirely (2026-07-16, "the dashboards feel out of
- * place"); /dashboards is where the visitor opts into all of that. The
- * dashboard is now sold standalone (setup + minimal monthly); numbers live
- * on /dashboards, not here.
+ * Home teaser for /dashboards: heading, one paragraph, one link, and one
+ * still of the Operations tab. The live demos stay on /dashboards (2026-07-16,
+ * "the dashboards feel out of place"), but the 2026-09-02 audit found the
+ * product visible on 2 of 29 pages, so the strongest asset gets one frame here.
+ * The dashboard is sold standalone (setup + minimal monthly); numbers live on
+ * /dashboards, not here.
  */
 export function DashboardTeaser() {
   return (
@@ -27,6 +29,9 @@ export function DashboardTeaser() {
         </Link>
         .
       </p>
+      <div className="mt-10">
+        <ScreenshotRow shots={[OWNER_SHOTS[0]]} />
+      </div>
     </Section>
   );
 }

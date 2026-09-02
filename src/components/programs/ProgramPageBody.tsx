@@ -5,6 +5,7 @@ import { breadcrumbLd, graph, serviceLd } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { BookButton } from "@/components/booking/BookButton";
+import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
 
 /**
  * Shared body for every /programs page (2026-07-06 footer-programs
@@ -31,6 +32,8 @@ export interface ProgramPageData {
   examples: string[];
   /** Paragraph after the examples list. */
   outro: string;
+  /** Optional product stills under the outro (see src/lib/product-shots.ts). */
+  shots?: Screenshot[];
   /** Optional extra band, e.g. Zapier's differentiator Q&A. */
   differentiator?: { title: string; paragraphs: string[] };
   /** Light-band routing copy (JSX so pages can weave links in). */
@@ -87,6 +90,11 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
           <p className="mt-10 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
             {data.outro}
           </p>
+          {data.shots ? (
+            <div className="mt-12">
+              <ScreenshotRow shots={data.shots} tone="dark" />
+            </div>
+          ) : null}
         </Section>
 
         {data.differentiator ? (

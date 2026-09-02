@@ -2,6 +2,7 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { DispatchArt } from "@/components/industries/TradeArt";
+import { WHITEBOARD_SHOTS } from "@/lib/product-shots";
 
 /**
  * Industries / HVAC: the original Phase 1 vertical wedge page, copy verbatim
@@ -66,6 +67,7 @@ export default function HvacIndustryPage() {
           "Every unit you install gets logged with model and serial, and registered for its manufacturer warranty the same week, automatically.",
           "The morning numbers show up built: what got done yesterday, what got sold, what got missed.",
         ],
+        shots: WHITEBOARD_SHOTS,
         outro:
           "The office crew you have stops re-typing and starts handling the judgment calls, which is what you actually hired them for.",
         whereToStart: (

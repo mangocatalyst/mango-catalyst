@@ -2,6 +2,7 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/metadata";
 import { IndustryPageBody } from "@/components/industries/IndustryPageBody";
 import { PipeRunArt } from "@/components/industries/TradeArt";
+import { WHITEBOARD_SHOTS } from "@/lib/product-shots";
 
 const PATH = "/industries/plumbing-automation";
 const DESCRIPTION =
@@ -58,6 +59,7 @@ export default function PlumbingIndustryPage() {
           "Appointment confirmations and reminders fire on their own, and schedule changes notify the customer without anyone picking up a phone.",
           "The morning numbers show up built: what got done yesterday, what got sold, what got missed.",
         ],
+        shots: WHITEBOARD_SHOTS,
         outro:
           "The office crew you have stops re-typing and starts handling the judgment calls, which is what you actually hired them for.",
         whereToStart: (

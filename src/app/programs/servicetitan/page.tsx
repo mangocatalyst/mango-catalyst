@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { pageMetadata } from "@/lib/metadata";
 import { ProgramPageBody } from "@/components/programs/ProgramPageBody";
+import { OWNER_SHOTS, WHITEBOARD_SHOTS } from "@/lib/product-shots";
 
 /**
  * Programs / ServiceTitan (2026-07-06 footer-programs expansion). Experience
@@ -39,6 +40,7 @@ export default function ServiceTitanProgramPage() {
           "ServiceTitan talks to the rest of your stack: job updates into Slack or email, customer data into your accounting tools, form leads booked straight in.",
           "Recurring busywork inside the platform, the membership checks, the unsold-estimate chase, the recall tracking, runs on a schedule instead of on memory.",
         ],
+        shots: [OWNER_SHOTS[0], WHITEBOARD_SHOTS[0]],
         outro:
           "If a workflow exists in ServiceTitan's screens or its API, it can usually be automated. The trick is knowing which ones are worth it, and that's what the fit call is for.",
         whereToStart: (

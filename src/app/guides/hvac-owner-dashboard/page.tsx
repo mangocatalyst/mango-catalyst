@@ -5,6 +5,8 @@ import { SITE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { articleLd, breadcrumbLd, graph } from "@/lib/jsonld";
 import { Card } from "@/components/ui/Card";
+import { ScreenshotRow } from "@/components/ui/Lightbox";
+import { OWNER_SHOTS } from "@/lib/product-shots";
 
 /**
  * Evergreen guide: what a heating and cooling owner dashboard should show
@@ -170,6 +172,11 @@ export default function HvacOwnerDashboardGuidePage() {
                 <p className="mt-4 leading-[1.7] text-body">{section.body}</p>
               </section>
             ))}
+          </div>
+
+          {/* The page is about a dashboard; show one before asking for the click. */}
+          <div className="mt-14 max-w-[44rem] lg:max-w-[52rem]">
+            <ScreenshotRow shots={[OWNER_SHOTS[0]]} tone="dark" />
           </div>
 
           {/* One soft closing CTA (single paragraph, inline links). */}
