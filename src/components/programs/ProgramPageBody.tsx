@@ -68,6 +68,7 @@ export function ProgramPageBody({ data }: { data: ProgramPageData }) {
           <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
             {data.intro}
           </p>
+          <BookButton className="mt-8">Book a 15-Minute Fit Call</BookButton>
         </Section>
 
         <Section id="examples" tone="deep">

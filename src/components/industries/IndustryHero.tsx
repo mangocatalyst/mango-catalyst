@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Section } from "@/components/layout/Section";
 import { TradeArtTilt } from "@/components/industries/TradeArtTilt";
+import { BookButton } from "@/components/booking/BookButton";
 
 /**
  * Shared opener for /industries pages: answer-first H1 + intro on the left,
@@ -40,6 +41,7 @@ export function IndustryHero({
         <p className="mt-6 max-w-[44rem] text-[1.05rem] leading-[1.65] text-body sm:text-[1.125rem] lg:max-w-[52rem] lg:text-[1.2rem]">
           {intro}
         </p>
+        <BookButton className="mt-8">Book a 15-Minute Fit Call</BookButton>
       </div>
     </Section>
   );

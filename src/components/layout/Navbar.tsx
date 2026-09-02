@@ -62,6 +62,14 @@ export function Navbar() {
           </BookButton>
         </div>
 
+        {/* Below lg the full nav collapses into the hamburger; keep one compact
+            booking button in the bar so a phone never scrolls without a CTA. */}
+        <div className="ml-auto mr-3 lg:hidden">
+          <BookButton href={CTA.href} size="sm">
+            Book a call
+          </BookButton>
+        </div>
+
         <MobileNav
           links={NAV_LINKS}
           cta={CTA}
