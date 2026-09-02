@@ -17,6 +17,7 @@ const PAGE_LINKS = [
   { href: "/services", label: "Services" },
   { href: "/dashboards", label: "Dashboards" },
   { href: "/ai-consultant", label: "AI Consulting" },
+  { href: "/mn-its", label: "MN-ITS Helper" },
   { href: "/guides", label: "Guides" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },

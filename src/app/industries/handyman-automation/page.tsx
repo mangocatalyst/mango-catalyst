@@ -58,6 +58,7 @@ export default function HandymanIndustryPage() {
           "A review request follows every paid job on its own, which is how the next customer finds you.",
           "A season-change note goes to past customers automatically, so the fall list fills itself.",
         ],
+        stack: "general",
         outro:
           "You get the evenings back, and the business stops leaking the jobs that called while you were working.",
         whereToStart: (

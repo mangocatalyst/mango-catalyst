@@ -26,7 +26,7 @@ import {
  * H1 (that is Home's keyword).
  */
 
-const PAGE_TITLE = "Automation Services for Small Businesses";
+const PAGE_TITLE = "Automation Services for Home Service Shops";
 const PAGE_DESCRIPTION =
   "Invoicing, lead follow-up, scheduling, reporting, and data entry that run on their own. I connect the tools you already pay for. Book a 15-minute fit call.";
 

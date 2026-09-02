@@ -34,6 +34,13 @@ export interface IndustryPageData {
   outro: string;
   /** Optional product stills under the outcomes (ServiceTitan trades only). */
   shots?: Screenshot[];
+  /**
+   * Which tools band the page gets. ServiceTitan is the primary target, not
+   * the only one: handyman, snow, landscaping and septic shops mostly run on
+   * Jobber, Housecall Pro or a spreadsheet, and telling them "I work in
+   * ServiceTitan every day" reads as a page written for someone else.
+   */
+  stack?: "servicetitan" | "general";
   /** Light-band routing copy (JSX so pages can weave links in). */
   whereToStart: ReactNode;
   art: ReactNode;
@@ -107,13 +114,19 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
         <Section id="tools" tone="deep">
           <SectionHeading title="Built in the tools your shop already runs" />
           <p className="mt-8 max-w-[44rem] leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
-            {"I work in "}
-            <Link href="/programs/servicetitan" className="inline-link">
-              ServiceTitan
-            </Link>
-            {
-              ", Google Workspace, and Slack every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
-            }
+            {data.stack === "general" ? (
+              "Most shops in this trade run on Jobber, Housecall Pro, or Google Workspace and a spreadsheet, and that's fine: if the tool has an API, and almost everything does now, it can be wired into the rest of your setup. We figure out what connects to what on the fit call, before you spend a dollar."
+            ) : (
+              <>
+                {"I work in "}
+                <Link href="/programs/servicetitan" className="inline-link">
+                  ServiceTitan
+                </Link>
+                {
+                  ", Google Workspace, and Slack every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
+                }
+              </>
+            )}
           </p>
         </Section>
 

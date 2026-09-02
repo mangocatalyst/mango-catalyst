@@ -19,9 +19,9 @@ import { SubscribeForm } from "@/components/forms/SubscribeForm";
  * it is a form rather than prose, so it competes with nothing for a keyword.
  */
 
-const PAGE_TITLE = "Automation Guides for Small Business Owners";
+const PAGE_TITLE = "Automation Guides for Home Service Shop Owners";
 const PAGE_DESCRIPTION =
-  "Plain-English guides on automating small business office work: what to automate first, what the busywork really costs, and who to hire to fix it.";
+  "Plain-English guides on automating the office side of a home-service shop: what to automate first, what the busywork really costs, and who to hire to fix it.";
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,

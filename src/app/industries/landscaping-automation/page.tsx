@@ -58,6 +58,7 @@ export default function LandscapingIndustryPage() {
           "Recurring maintenance invoices go out on schedule, every time, for every contract shape.",
           "Photos from the crews file themselves to the right property record, and the fall renewal letters send themselves.",
         ],
+        stack: "general",
         outro:
           "The short season stops being shorter because of paperwork, and the office keeps up with the crews instead of chasing them.",
         whereToStart: (

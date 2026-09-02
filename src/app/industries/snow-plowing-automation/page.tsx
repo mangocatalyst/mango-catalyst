@@ -58,6 +58,7 @@ export default function SnowPlowingIndustryPage() {
           "The storm-day route sheet builds itself from active contracts, trigger depths, and priority order.",
           "Renewal letters go out in September on their own, and the signed contracts land back in one place.",
         ],
+        stack: "general",
         outro:
           "You run the storm. The paperwork trails the trucks on its own, and the office isn't buried until noon the next day.",
         whereToStart: (

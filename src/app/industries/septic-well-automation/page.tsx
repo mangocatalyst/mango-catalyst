@@ -58,6 +58,7 @@ export default function SepticWellIndustryPage() {
           "Every open bid gets a scheduled follow-up until it gets an answer.",
           "Invoices go out when the job closes, and the morning numbers show up built: what got done, what got sold, what's due for pumping this month.",
         ],
+        stack: "general",
         outro:
           "The office crew you have stops re-typing and starts handling the judgment calls, which is what you actually hired them for.",
         whereToStart: (
