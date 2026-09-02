@@ -10,7 +10,6 @@ import { AiTeaser } from "@/components/sections/AiTeaser";
 import { CredibilityBar } from "@/components/sections/CredibilityBar";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Pricing } from "@/components/sections/Pricing";
-import { FaqTeaser } from "@/components/sections/FaqTeaser";
 import { CTABlock } from "@/components/sections/CTABlock";
 import { ContactBand } from "@/components/sections/ContactBand";
 
@@ -59,14 +58,11 @@ export default function Home() {
         <Problem />
         <ServiceGrid />
         <DashboardTeaser />
-        <AiTeaser />
-        <CredibilityBar />
         <HowItWorks />
         <Pricing />
-        <FaqTeaser />
-        {/* pt-0: the FAQ band above is light too, so the two read as one zone
-            rather than two stacked panels of the same colour. */}
-        <ContactBand idPrefix="home" containerClassName="pt-0" />
+        <CredibilityBar />
+        <AiTeaser />
+        <ContactBand idPrefix="home" />
         <CTABlock />
       </main>
     </>

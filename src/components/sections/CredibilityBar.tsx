@@ -15,21 +15,16 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const PRACTICE: { lead: string; body: ReactNode }[] = [
   {
-    lead: "A real build I shipped:",
-    body: "I built a browser extension that automates medical claim data entry into Minnesota's provider billing portal. It's privacy-first by design: everything runs on the user's own machine, so sensitive data never leaves the building. Different industry, same problem: repeated portal work, sensitive data, and staff losing hours to typing. The same pattern fits dispatch boards, supply-house receipts, warranty registration, and job closeout.",
-  },
-  {
-    lead: "A method, not a pitch.",
-    body: "Discovery, plan, build. I find the one task that keeps stealing hours, I write down exactly what will change, and I build the smallest version that proves it.",
-  },
-  {
-    lead: "Platforms I work in every day:",
+    lead: "Real builds, running in real shops:",
     body: (
       <>
-        <Link href="/programs/servicetitan" className="inline-link">
-          ServiceTitan
+        {"An "}
+        <Link href="/dashboards" className="inline-link">
+          owner dashboard and a commission tracker
         </Link>
-        {", Google Workspace, Slack. If your tool has an API, I can probably connect it."}
+        {
+          " built inside a working heating and cooling shop, fed by its ServiceTitan, in daily use. Before that, a browser extension that automates medical claim entry into Minnesota's provider billing portal: different industry, same problem of repeated portal work and staff losing hours to typing."
+        }
       </>
     ),
   },
@@ -55,7 +50,9 @@ export function CredibilityBar() {
         />
         <p className="max-w-[44rem] leading-relaxed text-body">
           <strong className="font-semibold text-ink">{"I'm Bryan."}</strong>{" "}
-          {"Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself."}
+          {
+            "Mango Catalyst is one person, and that person is me. You talk to me, you work with me, and I build and watch everything myself."
+          }
         </p>
       </div>
 
@@ -63,7 +60,7 @@ export function CredibilityBar() {
         What that looks like in practice:
       </p>
 
-      <ul className="mt-5 grid gap-5 md:grid-cols-3">
+      <ul className="mt-5 grid gap-5">
         {PRACTICE.map((item) => (
           <li key={item.lead} className="flex">
             <Card className="p-6">

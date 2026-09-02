@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode, SVGProps } from "react";
 import { PRICE_LINE, SITE } from "@/lib/constants";
+import { SERVICE_EXAMPLES } from "@/lib/service-examples";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbLd, graph, serviceLd } from "@/lib/jsonld";
 import { Section } from "@/components/layout/Section";
@@ -10,9 +11,11 @@ import { Card } from "@/components/ui/Card";
 import {
   CalendarIcon,
   ChartIcon,
+  ClipboardIcon,
   CopyIcon,
   FunnelIcon,
   InvoiceIcon,
+  TagIcon,
 } from "@/components/ui/icons";
 
 /**
@@ -76,48 +79,55 @@ function LinkIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 /** Card copy verbatim from build/out/copy/services.md (bodies as ReactNode: the data-entry card carries an inline guide link). */
-const CARDS: { icon: ReactNode; title: string; body: ReactNode }[] = [
-  {
-    icon: <InvoiceIcon className="size-5" />,
-    title: "Invoicing and billing, mostly off your desk",
-    body: "Yes, the repeatable part of invoicing can run itself: jobs close, invoices go out, payments get tracked. The weekly catch-up on billing mostly disappears. The weird edge cases, change orders, partial jobs, still get a human; that's the point of a real person building it.",
-  },
-  {
-    icon: <FunnelIcon className="size-5" />,
-    title: "Lead capture and follow-up",
-    body: "Every lead can land in one place automatically, whether it came from the trade show, the website, or the phone. It gets routed to the right person and followed up on without anyone remembering to chase it. Nothing sits in a notebook.",
-  },
-  {
-    icon: <CalendarIcon className="size-5" />,
-    title: "Scheduling and dispatch",
-    body: "Booking can run against real availability instead of a guess. The right tech, the right job, the right route, and whoever answers the phone sees what's actually open.",
-  },
-  {
-    icon: <ChartIcon className="size-5" />,
-    title: "Reporting you don't have to build",
-    body: "The daily numbers can put themselves together. What got done, what got sold, what got missed, delivered to you instead of you stitching it from five screens.",
-  },
-  {
-    icon: <LinkIcon className="size-5" />,
-    title: "Connecting the tools you already use",
-    body: "If your tools have APIs, they can talk to each other. Your CRM, your email, your forms, your spreadsheets, wired together so information flows once instead of getting re-typed everywhere. Day to day I work in ServiceTitan, Google Workspace, and Slack; if your tool has an API, I can probably wire it in.",
-  },
-  {
-    icon: <CopyIcon className="size-5" />,
-    title: "Data entry and cleanup",
-    body: (
-      <>
-        {
-          "The mind-numbing typing and copy-paste work can be handed off to a system that doesn't get tired or make typos at 4:45 on a Friday. If you want to see what that work is really costing you, read "
-        }
-        <Link href="/guides/manual-data-entry-cost" className="inline-link">
-          what manual data entry costs
-        </Link>
-        {"."}
-      </>
-    ),
-  },
-];
+const CARDS: { id: string; icon: ReactNode; title: string; body: ReactNode }[] =
+  [
+    {
+      icon: <InvoiceIcon className="size-5" />,
+      id: "invoicing",
+      title: "Invoicing and billing, mostly off your desk",
+      body: "Yes, the repeatable part of invoicing can run itself: jobs close, invoices go out, payments get tracked. The weekly catch-up on billing mostly disappears. The weird edge cases, change orders, partial jobs, still get a human; that's the point of a real person building it.",
+    },
+    {
+      icon: <FunnelIcon className="size-5" />,
+      id: "leads",
+      title: "Lead capture and follow-up",
+      body: "Every lead can land in one place automatically, whether it came from the trade show, the website, or the phone. It gets routed to the right person and followed up on without anyone remembering to chase it. Nothing sits in a notebook.",
+    },
+    {
+      icon: <CalendarIcon className="size-5" />,
+      id: "scheduling",
+      title: "Scheduling and dispatch",
+      body: "Booking can run against real availability instead of a guess. The right tech, the right job, the right route, and whoever answers the phone sees what's actually open.",
+    },
+    {
+      icon: <ChartIcon className="size-5" />,
+      id: "reporting",
+      title: "Reporting you don't have to build",
+      body: "The daily numbers can put themselves together. What got done, what got sold, what got missed, delivered to you instead of you stitching it from five screens.",
+    },
+    {
+      icon: <LinkIcon className="size-5" />,
+      id: "connecting",
+      title: "Connecting the tools you already use",
+      body: "If your tools have APIs, they can talk to each other. Your CRM, your email, your forms, your spreadsheets, wired together so information flows once instead of getting re-typed everywhere. Day to day I work in ServiceTitan, Google Workspace, and Slack; if your tool has an API, I can probably wire it in.",
+    },
+    {
+      icon: <CopyIcon className="size-5" />,
+      id: "data-entry",
+      title: "Data entry and cleanup",
+      body: (
+        <>
+          {
+            "The mind-numbing typing and copy-paste work can be handed off to a system that doesn't get tired or make typos at 4:45 on a Friday. If you want to see what that work is really costing you, read "
+          }
+          <Link href="/guides/manual-data-entry-cost" className="inline-link">
+            what manual data entry costs
+          </Link>
+          {"."}
+        </>
+      ),
+    },
+  ];
 
 export default function ServicesPage() {
   return (
@@ -152,19 +162,38 @@ export default function ServicesPage() {
 
           <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {CARDS.map((card) => (
-              <Card key={card.title} className="p-7">
-                <span className="flex size-10 items-center justify-center rounded-lg border border-hairline bg-surface-hi text-muted">
-                  {card.icon}
-                </span>
-                {/* h2, not h3: the page has no other h2, so h3 here would
+              <div key={card.id} id={card.id} className="scroll-mt-24">
+                <Card className="h-full p-7">
+                  <span className="flex size-10 items-center justify-center rounded-lg border border-hairline bg-surface-hi text-muted">
+                    {card.icon}
+                  </span>
+                  {/* h2, not h3: the page has no other h2, so h3 here would
                     skip a heading level after the H1 (seo-spec 9.5, axe
                     heading-order). The card-scale visual style lives in the
                     classes, not the tag. */}
-                <h2 className="mt-5 text-[1.15rem] font-semibold text-ink">
-                  {card.title}
-                </h2>
-                <p className="mt-3 leading-relaxed text-body">{card.body}</p>
-              </Card>
+                  <h2 className="mt-5 text-[1.15rem] font-semibold text-ink">
+                    {card.title}
+                  </h2>
+                  <p className="mt-3 leading-relaxed text-body">{card.body}</p>
+                  {SERVICE_EXAMPLES[card.id] ? (
+                    <div className="mt-6 border-l-2 border-amber pl-4">
+                      <p className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-faint">
+                        For example
+                      </p>
+                      <ul className="mt-2 grid gap-2">
+                        {SERVICE_EXAMPLES[card.id].map((example) => (
+                          <li
+                            key={example.slice(0, 24)}
+                            className="text-card text-muted"
+                          >
+                            {example}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </Card>
+              </div>
             ))}
           </div>
 

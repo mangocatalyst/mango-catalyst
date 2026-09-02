@@ -70,11 +70,11 @@ const STEPS: { title: string; body: string }[] = [
   },
   {
     title: "I build it and set it up.",
-    body: "Setup is a one-time $795. I build your first automation, wired into the tools you already use, and get it running. You don't manage anything.",
+    body: "Setup is a one-time fee, no hourly meter. I build your first automation, wired into the tools you already use, and get it running. You don't manage anything.",
   },
   {
     title: "It runs, and keeping it running is my job.",
-    body: "$1,000 a month; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, fixing it is my job.",
+    body: "A flat monthly retainer; the first 3 months are a commitment, month to month after that. Small tweaks come out of a monthly queue, bigger builds get scoped first, and when a tool you use changes and something breaks, fixing it is my job.",
   },
 ];
 

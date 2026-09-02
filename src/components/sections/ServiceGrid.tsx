@@ -12,72 +12,54 @@ import {
 } from "@/components/ui/icons";
 
 /**
- * Home section 3. Reworked 2026-07-06 (Bryan): each card keeps its generic
- * anchor and adds concrete, real examples under a FOR EXAMPLE rail, so a
- * visitor starts imagining their own version. Examples come from
- * build/out/use-case-candidates.md and are phrased as things we build,
- * never as client case studies (00-canonical-brief honesty gate).
+ * Home section 3. Reworked 2026-07-06 (Bryan) with a FOR EXAMPLE rail per
+ * card; 2026-09-02 (audit item 7) the rails moved to /services
+ * (src/lib/service-examples.ts) so home summarises and links instead of
+ * out-writing the page built to rank for this. Six cards, one line each.
  */
 
 const CARDS: {
   icon: ReactNode;
   title: string;
   body: string;
-  examples: string[];
+  /** Anchor of the matching card on /services. */
+  href: string;
 }[] = [
   {
     icon: <InvoiceIcon className="size-5" />,
     title: "Invoicing, Billing, and the Paper Trail",
+    href: "/services#invoicing",
     body: "Jobs close, invoices go out, payments get tracked. The repeatable part runs on its own, so the weekly catch-up on billing mostly disappears.",
-    examples: [
-      "Supply-house receipt emails matched line by line to the right purchase order in your CRM, for every vendor you buy from.",
-      "Yesterday's financials pulled into one morning summary instead of five screens.",
-    ],
   },
   {
     icon: <FunnelIcon className="size-5" />,
     title: "Lead Capture and Follow-Up",
+    href: "/services#leads",
     body: "Every lead, from the trade show, the website, the phone, lands in one place, gets routed to the right person, and gets followed up on automatically. Nothing sits in a notebook.",
-    examples: [
-      "Hang-ups and abandoned calls classified automatically in your phone system, so your booking rate reflects what actually happened.",
-      "Open estimates that follow themselves up until they get an answer.",
-    ],
   },
   {
     icon: <CalendarIcon className="size-5" />,
     title: "Scheduling, Dispatch, and Job Chatter",
+    href: "/services#scheduling",
     body: "The coordination around a job, not just the calendar entry, kept together instead of scattered across texts, sticky notes, and inboxes.",
-    examples: [
-      "A dedicated channel per job in your team chat, the right people added automatically, and the photos and messages in it archived back onto the job record when it closes.",
-      "Digital install and truck load sheets the crew fills from a phone, saving field time and still printing clean for the shop.",
-    ],
   },
   {
     icon: <ChartIcon className="size-5" />,
     title: "Reporting You Don't Have to Build",
+    href: "/services#reporting",
     body: "Daily numbers on what got done, what got sold, and what got missed, put together for you instead of you stitching it from five screens.",
-    examples: [
-      "Install-quality scorecards per technician: recalls, go-backs, and the hours spent fixing them, built from your CRM and payroll.",
-      "A dispatch-board dashboard on the office TV that refreshes itself.",
-    ],
   },
   {
     icon: <TagIcon className="size-5" />,
     title: "Warranty and Equipment Records",
+    href: "/services#equipment",
     body: "The equipment paper trail keeps itself, so nobody finds out at the service call that the unit was never registered.",
-    examples: [
-      "Every unit you install logged with model and serial, and registered with the manufacturer automatically, portal or not.",
-      "A master equipment sheet that fills itself in as the trucks roll.",
-    ],
   },
   {
     icon: <ClipboardIcon className="size-5" />,
     title: "Forms, Portals, and the Clicks Between",
+    href: "/services#portals",
     body: "The fifty-times-a-week stuff that lives outside your main system: web portals, agency forms, the same six clicks to do one small thing.",
-    examples: [
-      "Portal forms pre-filled from saved presets, with your staff reviewing and clicking submit.",
-      "One-keystroke shortcuts for the actions your office repeats all day inside the tools you already use.",
-    ],
   },
 ];
 
@@ -119,21 +101,12 @@ export function ServiceGrid() {
               </h3>
             </div>
             <p className="mt-4 text-card text-body">{card.body}</p>
-            <div className="mt-6 border-l-2 border-amber pl-4">
-              <p className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-faint">
-                For example
-              </p>
-              <ul className="mt-2 grid gap-2">
-                {card.examples.map((example) => (
-                  <li
-                    key={example.slice(0, 24)}
-                    className="text-card text-muted"
-                  >
-                    {example}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Link
+              href={card.href}
+              className="inline-link mt-4 inline-block text-[0.95rem]"
+            >
+              See examples
+            </Link>
           </div>
         ))}
       </div>

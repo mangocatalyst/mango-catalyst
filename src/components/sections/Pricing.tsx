@@ -1,5 +1,4 @@
 import { Section } from "@/components/layout/Section";
-import { BookButton } from "@/components/booking/BookButton";
 import { CalInline } from "@/components/booking/CalInline";
 import { Card } from "@/components/ui/Card";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -87,10 +86,6 @@ export function Pricing() {
               </li>
             ))}
           </ul>
-
-          <BookButton href="/contact#book" className="mt-8 w-full" arrow>
-            Book a 15-Minute Fit Call
-          </BookButton>
 
           <hr className="my-7 border-border-lt" />
 
