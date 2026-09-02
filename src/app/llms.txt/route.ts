@@ -34,9 +34,9 @@ const BODY = `# ${SITE.name}
 
 ## Platforms
 - [ServiceTitan](${u("/programs/servicetitan")})
-- [Zapier](${u("/programs/zapier")})
-- [Slack](${u("/programs/slack")})
 - [Google Workspace](${u("/programs/google-workspace")})
+- [Slack](${u("/programs/slack")})
+- [Zapier](${u("/programs/zapier")})
 - [Everything else](${u("/programs/everything-else")})
 - [MN-ITS](${u("/mn-its")}): a local-only Chrome extension that fills MN-ITS Professional Claim forms from saved per-client presets and stops at the review screen. Priced by clients billed per month: $65 for up to 4, $120 for 8, $220 for 16, $300 for 24, custom above that. 30-day free trial, no card.
 - [Dashboards](${u("/dashboards")}): two ServiceTitan-fed products, each with a clickable fake-data demo. The owner dashboard puts the whole shop on one page, refreshed hourly; standalone at $795 setup, $125 a month, no retainer required. The commission tracker computes every tech's pay line from ServiceTitan, gives each tech a portal, and exports approved periods to payroll; standalone at $795 setup, $125 a month, no retainer required.

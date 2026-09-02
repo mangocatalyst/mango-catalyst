@@ -100,7 +100,7 @@ const CARDS: { icon: ReactNode; title: string; body: ReactNode }[] = [
   {
     icon: <LinkIcon className="size-5" />,
     title: "Connecting the tools you already use",
-    body: "If your tools have APIs, they can talk to each other. Your CRM, your email, your forms, your spreadsheets, wired together so information flows once instead of getting re-typed everywhere. Day to day I work in ServiceTitan, Zapier, and Google Workspace; if your tool has an API, I can probably wire it in.",
+    body: "If your tools have APIs, they can talk to each other. Your CRM, your email, your forms, your spreadsheets, wired together so information flows once instead of getting re-typed everywhere. Day to day I work in ServiceTitan, Google Workspace, and Slack; if your tool has an API, I can probably wire it in.",
   },
   {
     icon: <CopyIcon className="size-5" />,

@@ -59,7 +59,7 @@ const HIRING_QUESTIONS: { question: string; detail: string }[] = [
   {
     question: "Who owns the accounts and where does my data live?",
     detail:
-      "The automations should live in accounts you own wherever possible, and the answer should be specific to your setup.",
+      "Anything built inside an account you already own, your Zapier, your Google Workspace, stays yours. Custom builds usually run on the consultant's side and stop when the retainer does. Either answer is fine; what you want is a specific one, given up front.",
   },
   {
     question: "Walk me through something you built.",

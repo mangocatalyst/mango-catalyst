@@ -90,9 +90,9 @@ export const INDUSTRY_LINKS = [
  */
 export const PROGRAM_LINKS = [
   { href: "/programs/servicetitan", label: "ServiceTitan" },
-  { href: "/programs/zapier", label: "Zapier" },
-  { href: "/programs/slack", label: "Slack" },
   { href: "/programs/google-workspace", label: "Google Workspace" },
+  { href: "/programs/slack", label: "Slack" },
+  { href: "/programs/zapier", label: "Zapier" },
   { href: "/mn-its", label: "MN-ITS Helper" },
   { href: "/programs/everything-else", label: "Everything Else" },
 ] as const;

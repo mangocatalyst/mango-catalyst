@@ -22,7 +22,7 @@ const PRACTICE: { lead: string; body: string }[] = [
   },
   {
     lead: "Platforms I work in every day:",
-    body: "ServiceTitan, Zapier, Google Workspace. If your tool has an API, I can probably connect it.",
+    body: "ServiceTitan, Google Workspace, Slack. If your tool has an API, I can probably connect it.",
   },
 ];
 

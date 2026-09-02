@@ -30,7 +30,7 @@ export default function EverythingElseProgramPage() {
         path: PATH,
         description: DESCRIPTION,
         intro:
-          "ServiceTitan, Zapier, Slack, and Google Workspace get their own pages because I'm in them every day. But they're not the menu; they're examples. The real rule is simpler: if the tool your business runs on has an API, and almost everything does now, it can be wired into the rest of your setup. And for the stubborn stuff that doesn't have one, there are still ways in. The one product I've shipped on my own is a Chrome extension that automates data entry into a state portal that offers no API at all.",
+          "ServiceTitan, Google Workspace, and Slack get their own pages because I'm in them every day, and Zapier gets one because plenty of shops already run on it. But they're not the menu; they're examples. The real rule is simpler: if the tool your business runs on has an API, and almost everything does now, it can be wired into the rest of your setup. And for the stubborn stuff that doesn't have one, there are still ways in. The one product I've shipped on my own is a Chrome extension that automates data entry into a state portal that offers no API at all.",
         examplesTitle: "The kind of thing that comes up",
         examplesLead:
           "A sample of the long tail, not a limit. If your tool isn't here, that means nothing:",

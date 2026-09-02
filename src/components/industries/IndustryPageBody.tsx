@@ -98,7 +98,7 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
           <SectionHeading title="Built in the tools your shop already runs" />
           <p className="mt-8 max-w-[44rem] leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
             {
-              "I work in ServiceTitan, Zapier, and Google Workspace every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
+              "I work in ServiceTitan, Google Workspace, and Slack every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
             }
           </p>
         </Section>
