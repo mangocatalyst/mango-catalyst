@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { Section } from "@/components/layout/Section";
 import { ArrowLink } from "@/components/ui/ArrowLink";
@@ -11,7 +13,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
  * names or implications, no magnitudes, no fabricated testimonials.
  */
 
-const PRACTICE: { lead: string; body: string }[] = [
+const PRACTICE: { lead: string; body: ReactNode }[] = [
   {
     lead: "A real build I shipped:",
     body: "I built a browser extension that automates medical claim data entry into Minnesota's provider billing portal. It's privacy-first by design: everything runs on the user's own machine, so sensitive data never leaves the building. Different industry, same problem: repeated portal work, sensitive data, and staff losing hours to typing. The same pattern fits dispatch boards, supply-house receipts, warranty registration, and job closeout.",
@@ -22,7 +24,14 @@ const PRACTICE: { lead: string; body: string }[] = [
   },
   {
     lead: "Platforms I work in every day:",
-    body: "ServiceTitan, Google Workspace, Slack. If your tool has an API, I can probably connect it.",
+    body: (
+      <>
+        <Link href="/programs/servicetitan" className="inline-link">
+          ServiceTitan
+        </Link>
+        {", Google Workspace, Slack. If your tool has an API, I can probably connect it."}
+      </>
+    ),
   },
 ];
 

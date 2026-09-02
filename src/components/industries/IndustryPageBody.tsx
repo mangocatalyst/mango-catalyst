@@ -8,6 +8,7 @@ import { BookButton } from "@/components/booking/BookButton";
 import { IndustryHero } from "@/components/industries/IndustryHero";
 import { ScreenshotRow, type Screenshot } from "@/components/ui/Lightbox";
 import { PRICE_LINE } from "@/lib/constants";
+import Link from "next/link";
 
 /**
  * Shared body for every /industries page (structure identical to the
@@ -106,8 +107,12 @@ export function IndustryPageBody({ data }: { data: IndustryPageData }) {
         <Section id="tools" tone="deep">
           <SectionHeading title="Built in the tools your shop already runs" />
           <p className="mt-8 max-w-[44rem] leading-[1.65] text-body lg:max-w-[52rem] lg:text-[1.2rem]">
+            {"I work in "}
+            <Link href="/programs/servicetitan" className="inline-link">
+              ServiceTitan
+            </Link>
             {
-              "I work in ServiceTitan, Google Workspace, and Slack every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
+              ", Google Workspace, and Slack every day. Those are platforms I work in, and if your stack is different, most tools with an API can be wired in. We figure out what connects to what on the fit call, before you spend a dollar."
             }
           </p>
         </Section>

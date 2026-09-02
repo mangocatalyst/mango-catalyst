@@ -41,11 +41,23 @@ export default function ServiceTitanProgramPage() {
           "Recurring busywork inside the platform, the membership checks, the unsold-estimate chase, the recall tracking, runs on a schedule instead of on memory.",
         ],
         shots: [OWNER_SHOTS[0], WHITEBOARD_SHOTS[0]],
+        differentiator: {
+          title: "How do you connect to my ServiceTitan?",
+          paragraphs: [
+            "Through the API, with an application scoped to the work we agreed on and nothing wider. You create it in your own ServiceTitan account, so you can see exactly what it can reach and switch it off yourself.",
+            "Read-only until you sign off. Dashboards, reports, and alerts never write to your system. Anything that does write, an invoice that fires or a warranty registration that files, waits for your explicit OK on that specific step.",
+            "Nothing runs against your live tenant that hasn't already run against a test job. You see it work on one job first, then it goes live, with a watchdog that pings a real phone if it ever stops.",
+          ],
+        },
         outro:
           "If a workflow exists in ServiceTitan's screens or its API, it can usually be automated. The trick is knowing which ones are worth it, and that's what the fit call is for.",
         whereToStart: (
           <>
-            {"ServiceTitan shops are usually trades shops, so start with "}
+            {"Two things are already built and running on ServiceTitan: the "}
+            <Link href="/dashboards" className="inline-link-light">
+              Owner Dashboard and the commission tracker
+            </Link>
+            {", both with demos you can click through right now. For the retainer work, start with "}
             <Link href="/industries/hvac-automation" className="inline-link-light">
               what automation looks like in an HVAC office
             </Link>

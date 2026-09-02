@@ -21,7 +21,7 @@ export function IndustryHero({
   art,
 }: {
   title: string;
-  intro: string;
+  intro: ReactNode;
   art: ReactNode;
 }) {
   return (

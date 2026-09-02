@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Section } from "@/components/layout/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import Link from "next/link";
 import {
   CalendarIcon,
   ChartIcon,
@@ -91,8 +92,12 @@ export function ServiceGrid() {
       />
 
       <p className="mt-10 max-w-[44rem] text-[0.95rem] leading-relaxed text-muted lg:max-w-[52rem] lg:text-[1.05rem]">
+        {"Day to day I work in "}
+        <Link href="/programs/servicetitan" className="inline-link">
+          ServiceTitan
+        </Link>
         {
-          "Day to day I work in ServiceTitan, Google Workspace, and Slack. If your tool has an API, I can probably wire it in. And everything I build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
+          ", Google Workspace, and Slack. If your tool has an API, I can probably wire it in. And everything I build ships with a watchdog: scheduled health checks, an alert to a real phone when something breaks, and a morning note on what ran. You never have to wonder whether the robot quietly quit."
         }
       </p>
 

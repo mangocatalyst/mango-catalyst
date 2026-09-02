@@ -169,7 +169,15 @@ export default function DashboardsPage() {
       <main>
         <IndustryHero
           title="Your whole shop on one page at 6 AM"
-          intro="Two products, both fed by the ServiceTitan you already pay for, both built and battle-tested inside a real heating and cooling shop rather than a software lab. The owner dashboard answers the question every owner starts the day with: how are we actually doing? The commission tracker answers the one every tech asks on payday: is this number right? Both are read-only, and both have a working demo further down this page."
+          intro={
+            <>
+              {"Two products, both fed by the "}
+              <Link href="/programs/servicetitan" className="inline-link">
+                ServiceTitan
+              </Link>
+              {" you already pay for, both built and battle-tested inside a real heating and cooling shop rather than a software lab. The owner dashboard answers the question every owner starts the day with: how are we actually doing? The commission tracker answers the one every tech asks on payday: is this number right? Both are read-only, and both have a working demo further down this page."}
+            </>
+          }
           art={null}
         />
 
