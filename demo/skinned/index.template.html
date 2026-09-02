@@ -924,7 +924,8 @@ if (DLBL !== 'yesterday') {
 /* front and center: the featured day's revenue as a stat panel (chart below) */
 $('#revf-v').textContent = fmt$(y.revenue);
 $('#revf-sub').textContent = `${y.invoices} invoices · ${fmtC(y.collected)} collected`;
-$('#revf-delta').innerHTML = delta(y.revenue, C.sameWeekday.revenue, `vs last ${wd3(M.sameWeekdayName)}`);
+/* ponytail: the Aug-12 skin expects comparisons.sameWeekday, which the demo data never had; the donor dropped it 2026-08-28. Guard so boot survives to the tab and chart code below. */
+$('#revf-delta').innerHTML = C.sameWeekday ? delta(y.revenue, C.sameWeekday.revenue, `vs last ${wd3(M.sameWeekdayName)}`) : '';
 $('#revf-mtd').innerHTML = `Month to date <b style="color:var(--cream)">${fmt$(C.mtd.revenue)}</b>${M.prevMonthName ? ` · ${M.prevMonthName} total ${fmt$(M.prevMonthTotal)}` : ''}`;
 /* skipped weekend days still get one honest line (on-call work is real) */
 if (DATA.weekend) $('#revf-mtd').insertAdjacentHTML('beforebegin',
