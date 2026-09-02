@@ -189,7 +189,7 @@ export default function HvacOwnerDashboardGuidePage() {
               {
                 ", a fully working dashboard for a fictional company. Or bring your own morning routine to a "
               }
-              <Link href="/contact" className="inline-link">
+              <Link data-cta="inline" href="/contact" className="inline-link">
                 15-minute fit call
               </Link>
               {" and I'll tell you straight what it would take to replace it."}

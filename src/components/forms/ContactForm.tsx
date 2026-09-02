@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/constants";
 
@@ -47,6 +48,7 @@ export function ContactForm({ idPrefix = "contact" }: { idPrefix?: string }) {
       });
       if (!res.ok) throw new Error(String(res.status));
       setState("sent");
+      track("note_sent");
       form.reset();
     } catch {
       setState("error");

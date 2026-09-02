@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { track } from "@vercel/analytics";
 import { ensureCalInit } from "@/lib/cal";
 
 /**
@@ -21,9 +22,24 @@ export function CalLoader() {
       requestIdleCallback?: (cb: () => void) => number;
       cancelIdleCallback?: (id: number) => void;
     };
+    // One listener for every booker on the site (popups, the inline calendar on
+    // /contact, the one in home Pricing): they share the embed. Registered on
+    // the first init, whichever path gets there first. Without this the site
+    // knows "clicked an amber button" and nothing after it.
+    let listening = false;
+    function listen(c: NonNullable<ReturnType<typeof ensureCalInit>>) {
+      if (listening) return;
+      listening = true;
+      c.Cal("on", {
+        action: "bookingSuccessful",
+        callback: () => track("booked", { calLink: c.link }),
+      });
+    }
     function warm() {
       const c = ensureCalInit();
-      if (c) c.Cal("preload", { calLink: c.link });
+      if (!c) return;
+      listen(c);
+      c.Cal("preload", { calLink: c.link });
     }
     const idleId = w.requestIdleCallback
       ? w.requestIdleCallback(warm)
@@ -49,6 +65,7 @@ export function CalLoader() {
       event.preventDefault();
       const c = ensureCalInit(); // inits on demand if the idle warm hasn't run
       if (!c) return;
+      listen(c);
       let config: Record<string, unknown> = {};
       try {
         config = JSON.parse(el!.dataset.calConfig || "{}");

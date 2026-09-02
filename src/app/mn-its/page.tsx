@@ -263,7 +263,7 @@ export default function MnItsPage() {
               <strong className="font-semibold text-navy">
                 Billing more than 24 clients?
               </strong>{" "}
-              <Link href="/contact" className="inline-link-light">
+              <Link data-cta="inline" href="/contact" className="inline-link-light">
                 Get in touch
               </Link>{" "}
               and we&apos;ll set up a plan that fits.

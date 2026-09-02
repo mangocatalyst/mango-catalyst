@@ -15,7 +15,7 @@ export default function NotFound() {
       </h1>
       <p className="mt-5 max-w-[40rem] text-[1.05rem] leading-[1.65] text-body lg:max-w-[48rem] lg:text-[1.2rem]">
         {"Head back home, or "}
-        <Link href="/contact#book" className="inline-link">
+        <Link data-cta="inline" href="/contact#book" className="inline-link">
           book a 15-minute fit call
         </Link>
         {" and we'll point you right."}

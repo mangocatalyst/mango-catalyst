@@ -242,7 +242,7 @@ export default function WhatIsConsultantGuidePage() {
           <Card className="mt-16 max-w-[44rem] p-8 sm:p-10 lg:max-w-[52rem]">
             <p className="text-[1.05rem] leading-[1.7] text-ink sm:text-[1.125rem]">
               {"The fastest way to find out if you need one: "}
-              <Link href="/contact" className="inline-link">
+              <Link data-cta="inline" href="/contact" className="inline-link">
                 book a 15-minute fit call
               </Link>
               {". If you don't, I'll say so on the call."}

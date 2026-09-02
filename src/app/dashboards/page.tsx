@@ -406,7 +406,7 @@ export default function DashboardsPage() {
             {
               "$795 one-time to wire it to your ServiceTitan and encode your actual pay agreements, then $125 a month to keep it running. Month to month, cancel anytime. The setup is the real work, because every shop's agreements are different; if yours turn out to be unusual enough that $795 doesn't cover it, I tell you the number before I start, not after. "
             }
-            <Link href="/contact#book" className="inline-link">
+            <Link data-cta="inline" href="/contact#book" className="inline-link">
               Book a 15-minute fit call
             </Link>
             {"."}

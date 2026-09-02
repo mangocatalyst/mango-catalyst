@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -37,6 +38,7 @@ export function SubscribeForm({
       });
       if (!res.ok) throw new Error(String(res.status));
       setState("sent");
+      track("subscribed");
       form.reset();
     } catch {
       setState("error");

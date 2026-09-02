@@ -202,7 +202,7 @@ export default function DataEntryCostGuidePage() {
               <div aria-hidden className="h-[3px] w-10 bg-amber" />
               <p className="mt-6 max-w-[42rem] text-[1.1rem] leading-[1.7] text-body sm:text-[1.2rem] lg:max-w-[50rem] lg:text-[1.25rem]">
                 {"Not sure what your number is? "}
-                <Link href="/contact" className="inline-link">
+                <Link data-cta="inline" href="/contact" className="inline-link">
                   Book a 15-minute fit call
                 </Link>
                 {
