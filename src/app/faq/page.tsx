@@ -110,7 +110,7 @@ const FAQ_ITEMS: { question: string; answer: AnswerPart[] }[] = [
   {
     question: "How long until the first automation is working?",
     answer: [
-      "We start with one small task instead of a big rollout, and the honest answer is that timing depends on the task and the tools it touches, which is exactly why the first build is deliberately small: you see it working before we build the next piece. We set the timeline together when we scope it, so you're never guessing.",
+      "If it's something I've built before, a morning dashboard, a warranty registration, an estimate follow-up chase, it's usually running the next day. A custom build takes a week or more, depending on the tools it touches. Either way you get a written recap after the call, the $795 setup is invoiced when the build starts, and you see it work on one real job before it goes live.",
     ],
   },
   {

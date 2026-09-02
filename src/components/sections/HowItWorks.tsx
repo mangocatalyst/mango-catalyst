@@ -109,6 +109,36 @@ export function HowItWorks() {
 
       <ProcessStrip />
 
+      {/* After the call: the sequence the audit found stated nowhere as one
+          piece (item 10). Recap, invoice timing, and a real timeline. */}
+      <div className="mt-12 max-w-[44rem] border-l-2 border-amber pl-5 lg:max-w-[52rem]">
+        <p className="text-[0.8rem] font-semibold tracking-[0.18em] uppercase text-muted">
+          After the call
+        </p>
+        <ul className="mt-4 grid gap-3 leading-[1.65] text-body">
+          <li>
+            {
+              "You get a written recap of what we discussed: the task, what will change, and the price. Nothing happens until you say go."
+            }
+          </li>
+          <li>
+            {
+              "The $795 setup is invoiced when the build starts, not when we talk."
+            }
+          </li>
+          <li>
+            {
+              "Something I've built before, a morning dashboard, a warranty registration, an estimate chase, is usually running the next day. A custom build takes a week or more."
+            }
+          </li>
+          <li>
+            {
+              "You see it work on one real job before it goes live, and the retainer starts once it does."
+            }
+          </li>
+        </ul>
+      </div>
+
       <p className="mt-12 max-w-[44rem] text-[1.1rem] font-medium leading-[1.6] text-ink lg:max-w-[52rem] lg:text-[1.25rem]">
         {
           "You keep doing the work you're good at. The office work just stops being your problem."
